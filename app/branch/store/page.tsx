@@ -72,54 +72,79 @@ export default function BranchStore() {
     router.push("/branch/checkout");
   }
 
+  function goToOrderHistory() {
+    router.push("/branch/order_history");
+  }
+
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Store</h1>
-      {loading ? (
-        <p>Loading food items...</p>
-      ) : error ? (
-        <p className="text-red-600">{error}</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {foodItems.map((food) => (
-            <div
-              key={food.food_id}
-              className="border border-gray-300 rounded p-4 flex flex-col items-center"
-            >
-              {food.image_url ? (
-                <img
-                  src={food.image_url}
-                  alt={food.food_name}
-                  className="w-full h-40 object-cover mb-4 rounded"
-                />
-              ) : (
-                <div className="w-full h-40 bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
-                  No Image
-                </div>
-              )}
-              <h2 className="text-lg font-semibold mb-2">{food.food_name}</h2>
-              <p className="mb-4">${food.price}</p>
-              <button
-                onClick={() => addToCart(food)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              >
-                +
-              </button>
-            </div>
-          ))}
+    <div>
+      <nav className="bg-gray-800 text-white p-4 flex items-center justify-between max-w-7xl mx-auto">
+        <div className="text-xl font-bold cursor-pointer" onClick={() => router.push("/")}>
+          Logo
         </div>
-      )}
-      {cart.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded p-4 shadow-lg">
-          <p className="mb-2 font-semibold">Cart Items: {cart.reduce((acc, item) => acc + item.quantity, 0)}</p>
+        <div className="space-x-4">
           <button
-            onClick={handleCheckout}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+            className="hover:underline"
+            onClick={() => router.push("/branch/store")}
           >
-            Checkout
+            Store
+          </button>
+          <button
+            className="hover:underline"
+            onClick={goToOrderHistory}
+          >
+            Order History
           </button>
         </div>
-      )}
+      </nav>
+      <div className="p-8 max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Store</h1>
+        {loading ? (
+          <p>Loading food items...</p>
+        ) : error ? (
+          <p className="text-red-600">{error}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {foodItems.map((food) => (
+              <div
+                key={food.food_id}
+                className="border border-gray-300 rounded p-4 flex flex-col items-center"
+              >
+                {food.image_url ? (
+                  <img
+                    src={food.image_url}
+                    alt={food.food_name}
+                    className="w-full h-40 object-cover mb-4 rounded"
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
+                    No Image
+                  </div>
+                )}
+                <h2 className="text-lg font-semibold mb-2">{food.food_name}</h2>
+                <p className="mb-4">${food.price}</p>
+                <button
+                  onClick={() => addToCart(food)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  +
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {cart.length > 0 && (
+          <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded p-4 shadow-lg">
+            <p className="mb-2 font-semibold">Cart Items: {cart.reduce((acc, item) => acc + item.quantity, 0)}</p>
+            <button
+              onClick={handleCheckout}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+            >
+              Checkout
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
