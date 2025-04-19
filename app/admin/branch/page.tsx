@@ -1,38 +1,38 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Branch {
-  branch_id: number;
+  user_id: number;
   full_name: string;
   email: string;
+  branch_address?: string;
+  created_at: string;
 }
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-export default function ManageBranchStores() {
+export default function AdminBranch() {
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [loadingBranches, setLoadingBranches] = useState(false);
-  const [errorBranches, setErrorBranches] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [branchForm, setBranchForm] = useState({
-    full_name: "",
-    email: "",
-    editingId: null as number | null,
-  });
+  const [formFullName, setFormFullName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formPassword, setFormPassword] = useState("");
+  const [formBranchAddress, setFormBranchAddress] = useState("");
+
+  const [editingBranchId, setEditingBranchId] = useState<number | null>(null);
+  const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState("");
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-  const pathname = usePathname();
 
   useEffect(() => {
     fetchBranches();
   }, []);
 
   async function fetchBranches() {
-    setLoadingBranches(true);
-    setErrorBranches("");
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch("http://localhost:5000/admin/branches", {
         headers: {
@@ -46,222 +46,290 @@ export default function ManageBranchStores() {
       setBranches(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setErrorBranches(err.message);
+        setError(err.message);
       } else {
-        setErrorBranches(String(err));
+        setError(String(err));
       }
     } finally {
-      setLoadingBranches(false);
+      setLoading(false);
     }
   }
 
-  function handleBranchFormChange(e: ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    setBranchForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  function resetForm() {
+    setFormFullName("");
+    setFormEmail("");
+    setFormPassword("");
+    setFormBranchAddress("");
+    setEditingBranchId(null);
+    setFormError("");
+    setFormSuccess("");
   }
 
-  async function handleBranchFormSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const { full_name, email, editingId } = branchForm;
-    if (!full_name || !email) {
-      alert("Please fill all branch store fields");
+    setFormError("");
+    setFormSuccess("");
+
+    if (!formFullName || !formEmail || (!editingBranchId && !formPassword)) {
+      setFormError("Please fill in all required fields.");
       return;
     }
-    try {
-      const method = editingId ? "PUT" : "POST";
-      const url = editingId
-        ? `http://localhost:5000/admin/branches/${editingId}`
-        : "http://localhost:5000/admin/branches";
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          full_name,
-          email,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save branch store");
+
+    if (editingBranchId) {
+      // Update branch
+      try {
+        const body: any = {
+          full_name: formFullName,
+          email: formEmail,
+          branch_address: formBranchAddress,
+        };
+        if (formPassword) {
+          // Hash password on backend, so send password as is
+          body.password_hash = formPassword;
+        } else {
+          body.password_hash = null;
+        }
+
+        const res = await fetch(`http://localhost:5000/admin/branches/${editingBranchId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.msg || "Failed to update branch");
+        }
+        const updatedBranch = await res.json();
+        setBranches((prev) =>
+          prev.map((b) => (b.user_id === editingBranchId ? { ...b, ...updatedBranch } : b))
+        );
+        setFormSuccess("Branch updated successfully.");
+        resetForm();
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setFormError(err.message);
+        } else {
+          setFormError(String(err));
+        }
       }
-      setBranchForm({
-        full_name: "",
-        email: "",
-        editingId: null,
-      });
-      fetchBranches();
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert(String(err));
+    } else {
+      // Create new branch (register)
+      try {
+        const res = await fetch("http://localhost:5000/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            full_name: formFullName,
+            email: formEmail,
+            password: formPassword,
+            role: "branch_store",
+          }),
+        });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.msg || "Failed to create branch");
+        }
+        setFormSuccess("Branch created successfully.");
+        resetForm();
+        fetchBranches();
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setFormError(err.message);
+        } else {
+          setFormError(String(err));
+        }
       }
     }
   }
 
-  function handleEditBranch(branch: Branch) {
-    setBranchForm({
-      full_name: branch.full_name,
-      email: branch.email,
-      editingId: branch.branch_id,
-    });
+  function handleEdit(branch: Branch) {
+    setEditingBranchId(branch.user_id);
+    setFormFullName(branch.full_name);
+    setFormEmail(branch.email);
+    setFormPassword("");
+    setFormBranchAddress(branch.branch_address || "");
+    setFormError("");
+    setFormSuccess("");
   }
 
-  async function handleDeleteBranch(branch_id: number) {
-    if (!confirm("Are you sure you want to delete this branch store?")) return;
+  async function handleDelete(branchId: number) {
+    if (!confirm("Are you sure you want to delete this branch?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/admin/branches/${branch_id}`, {
+      const res = await fetch(`http://localhost:5000/admin/branches/${branchId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (!res.ok) {
-        throw new Error("Failed to delete branch store");
+        const errData = await res.json();
+        throw new Error(errData.msg || "Failed to delete branch");
       }
-      fetchBranches();
+      setBranches((prev) => prev.filter((b) => b.user_id !== branchId));
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert(String(err));
-      }
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 
   return (
     <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
       <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4">
-        <Link
+        <a
           href="/admin/dashboard"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/dashboard" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className="px-3 py-2 rounded hover:bg-gray-200"
         >
           Orders
-        </Link>
-        <Link
+        </a>
+        <a
           href="/admin/food"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/food" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className="px-3 py-2 rounded hover:bg-gray-200"
         >
           Manage Food Items
-        </Link>
-        <Link
+        </a>
+        <a
           href="/admin/branch"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/branch" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className="px-3 py-2 rounded bg-blue-600 text-white"
         >
           Manage Branch Stores
-        </Link>
-        <Link
+        </a>
+        <a
           href="/admin/recap"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/recap" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className="px-3 py-2 rounded hover:bg-gray-200"
         >
           Recap
-        </Link>
+        </a>
       </nav>
-      <main className="flex-1 p-8 space-y-12">
-        <h2 className="text-3xl font-bold mb-4">Manage Branch Stores</h2>
-        <form onSubmit={handleBranchFormSubmit} className="mb-6 space-y-4 max-w-md">
+      <main className="flex-1">
+        <section>
+          <h2 className="text-3xl font-bold mb-4">Manage Branch Stores</h2>
+
+          <form onSubmit={handleSubmit} className="mb-6 max-w-md space-y-4">
+            <div>
+              <label htmlFor="fullName" className="block font-medium mb-1">
+                Full Name<span className="text-red-600">*</span>
+              </label>
+              <input
+                id="fullName"
+                type="text"
+                value={formFullName}
+                onChange={(e) => setFormFullName(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="block font-medium mb-1">
+                Email<span className="text-red-600">*</span>
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={formEmail}
+                onChange={(e) => setFormEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block font-medium mb-1">
+                {editingBranchId ? "New Password (leave blank to keep current)" : "Password"}
+                {!editingBranchId && <span className="text-red-600">*</span>}
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={formPassword}
+                onChange={(e) => setFormPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                {...(!editingBranchId && { required: true })}
+              />
+            </div>
+            <div>
+              <label htmlFor="branchAddress" className="block font-medium mb-1">
+                Branch Address
+              </label>
+              <input
+                id="branchAddress"
+                type="text"
+                value={formBranchAddress}
+                onChange={(e) => setFormBranchAddress(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              />
+            </div>
+            {formError && <p className="text-red-600">{formError}</p>}
+            {formSuccess && <p className="text-green-600">{formSuccess}</p>}
+            <div className="flex space-x-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                {editingBranchId ? "Update Branch" : "Add Branch"}
+              </button>
+              {editingBranchId && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+
           <div>
-            <label htmlFor="full_name" className="block font-medium mb-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="full_name"
-              name="full_name"
-              value={branchForm.full_name}
-              onChange={handleBranchFormChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block font-medium mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={branchForm.email}
-              onChange={handleBranchFormChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          >
-            {branchForm.editingId ? "Update Branch Store" : "Add Branch Store"}
-          </button>
-          {branchForm.editingId && (
-            <button
-              type="button"
-              onClick={() =>
-                setBranchForm({
-                  full_name: "",
-                  email: "",
-                  editingId: null,
-                })
-              }
-              className="ml-4 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
-            >
-              Cancel
-            </button>
-          )}
-        </form>
-        <table className="w-full border border-gray-300 rounded">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border border-gray-300 p-2">Full Name</th>
-              <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {branches.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="text-center p-4">
-                  No branch stores found.
-                </td>
-              </tr>
+            <h3 className="text-2xl font-semibold mb-4">Branch Stores List</h3>
+            {loading ? (
+              <p>Loading branches...</p>
+            ) : error ? (
+              <p className="text-red-600">{error}</p>
+            ) : branches.length === 0 ? (
+              <p>No branches found.</p>
             ) : (
-              branches.map((branch, index) => (
-                <tr key={branch.branch_id || index}>
-                  <td className="border border-gray-300 p-2">{branch.full_name}</td>
-                  <td className="border border-gray-300 p-2">{branch.email}</td>
-                  <td className="border border-gray-300 p-2 space-x-2">
-                    <button
-                      onClick={() => handleEditBranch(branch)}
-                      className="bg-yellow-400 px-2 py-1 rounded hover:bg-yellow-500"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteBranch(branch.branch_id)}
-                      className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
+              <table className="w-full border border-gray-300 rounded">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 px-2 py-1 text-left">Full Name</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left">Email</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left">Branch Address</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left">Created At</th>
+                    <th className="border border-gray-300 px-2 py-1 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {branches.map((branch) => (
+                    <tr key={branch.user_id} className="odd:bg-white even:bg-gray-50">
+                      <td className="border border-gray-300 px-2 py-1">{branch.full_name}</td>
+                      <td className="border border-gray-300 px-2 py-1">{branch.email}</td>
+                      <td className="border border-gray-300 px-2 py-1">{branch.branch_address || "N/A"}</td>
+                      <td className="border border-gray-300 px-2 py-1">{new Date(branch.created_at).toLocaleString()}</td>
+                      <td className="border border-gray-300 px-2 py-1 space-x-2">
+                        <button
+                          onClick={() => handleEdit(branch)}
+                          className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500 transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(branch.user_id)}
+                          className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
-          </tbody>
-        </table>
+          </div>
+        </section>
       </main>
     </div>
   );
