@@ -66,6 +66,27 @@ export default function BranchStore() {
     });
   }
 
+  function removeFromCart(food: FoodItem) {
+    setCart((prev) => {
+      const existing = prev.find((item) => item.food_id === food.food_id);
+      if (existing) {
+        if (existing.quantity === 1) {
+          return prev.filter((item) => item.food_id !== food.food_id);
+        } else {
+          return prev.map((item) =>
+            item.food_id === food.food_id ? { ...item, quantity: item.quantity - 1 } : item
+          );
+        }
+      }
+      return prev;
+    });
+  }
+
+  function getQuantity(food_id: number) {
+    const item = cart.find((item) => item.food_id === food_id);
+    return item ? item.quantity : 0;
+  }
+
   function handleCheckout() {
     // Save cart to localStorage or context for checkout page
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -104,31 +125,39 @@ export default function BranchStore() {
         ) : error ? (
           <p className="text-red-600">{error}</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="flex flex-col space-y-4">
             {foodItems.map((food) => (
               <div
                 key={food.food_id}
-                className="border border-gray-300 rounded p-4 flex flex-col items-center"
+                className="border border-gray-300 rounded p-4 flex items-center justify-between"
               >
-                {food.image_url ? (
-                  <img
-                    src={food.image_url}
-                    alt={food.food_name}
-                    className="w-full h-40 object-cover mb-4 rounded"
+                <div className="flex flex-col">
+                  <h2 className="text-lg font-semibold">{food.food_name}</h2>
+                  <p className="text-gray-700">${food.price}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => removeFromCart(food)}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                    aria-label={`Remove one ${food.food_name}`}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    readOnly
+                    value={getQuantity(food.food_id)}
+                    className="w-12 text-center border border-gray-300 rounded"
+                    aria-label={`Quantity of ${food.food_name}`}
                   />
-                ) : (
-                  <div className="w-full h-40 bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
-                    No Image
-                  </div>
-                )}
-                <h2 className="text-lg font-semibold mb-2">{food.food_name}</h2>
-                <p className="mb-4">${food.price}</p>
-                <button
-                  onClick={() => addToCart(food)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                >
-                  +
-                </button>
+                  <button
+                    onClick={() => addToCart(food)}
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                    aria-label={`Add one ${food.food_name}`}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             ))}
           </div>
