@@ -12,7 +12,7 @@ interface CartItem {
 
 interface BranchProfile {
   full_name: string;
-  address?: string;
+  branch_address?: string;
   email?: string;
 }
 
@@ -143,7 +143,7 @@ async function createOrder() {
             <strong>Branch Name:</strong> {branchProfile?.full_name || "N/A"}
           </p>
           <p>
-            <strong>Address:</strong> {branchProfile?.address || "N/A"}
+            <strong>Address:</strong> {branchProfile?.branch_address || "N/A"}
           </p>
           <p>
             <strong>Date:</strong> {new Date().toLocaleDateString()}

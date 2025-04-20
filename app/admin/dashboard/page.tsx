@@ -225,7 +225,7 @@ export default function AdminDashboard() {
           ) : (
             <>
               {/* Modal Overlay */}
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="fixed inset-0 bg-black/75 flex justify-center items-center z-50">
                 {/* Modal Content */}
                 <div
                   ref={printRef}
@@ -289,7 +289,7 @@ export default function AdminDashboard() {
                     id="deliveryTimeSelect"
                     value={selectedDeliveryTime}
                     onChange={(e) => setSelectedDeliveryTime(e.target.value)}
-                    className="px-3 py-2 rounded"
+                    className="px-3 py-2 rounded bg-white"
                   >
                     <option value="8am - 10am">8am - 10am</option>
                     <option value="9am - 11am">9am - 11am</option>
