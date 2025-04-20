@@ -135,7 +135,7 @@ export default function OrderHistory() {
               <tr>
                 <th colSpan={3}></th>
                 <th colSpan={uniqueDates.length} className="border border-gray-300 px-4 py-2 font-semibold">
-                  Submitted At
+                  Order Date
                 </th>
               </tr>
               <tr>
@@ -149,7 +149,7 @@ export default function OrderHistory() {
               <tr>
                 <th colSpan={3}></th>
                 <th colSpan={uniqueDates.length} className="border border-gray-300 px-4 py-2 font-semibold">
-                  Order Date
+                  Delivery Date
                 </th>
               </tr>
               <tr>
