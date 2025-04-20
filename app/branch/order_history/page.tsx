@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import apiFetch from "../../../lib/api";
 
 interface OrderItem {
   food_name: string;
@@ -20,8 +21,9 @@ export default function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [monthFilter, setMonthFilter] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const router = useRouter();
 
   useEffect(() => {
@@ -41,20 +43,20 @@ export default function OrderHistory() {
   }, [monthFilter, orders]);
 
   async function fetchOrders() {
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch("http://localhost:5000/branch/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch orders");
-      }
-      const data = await res.json();
+      const data = await apiFetch("/branch/orders");
       setOrders(data);
       setFilteredOrders(data);
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -129,6 +131,8 @@ export default function OrderHistory() {
             className="border border-gray-300 rounded px-2 py-1"
           />
         </div>
+        {loading && <p>Loading orders...</p>}
+        {error && <p className="text-red-600">Error: {error}</p>}
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-300 text-center">
             <thead>

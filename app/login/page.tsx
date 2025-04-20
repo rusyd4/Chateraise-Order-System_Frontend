@@ -2,33 +2,26 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import apiFetch from "../../lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const data = await apiFetch("/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || "Login failed");
-        return;
-      }
-
-      const data = await res.json();
       // Save token and user info in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
@@ -42,9 +35,14 @@ export default function LoginPage() {
       } else {
         setError("Unknown user role");
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("An error occurred. Please try again.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -84,9 +82,10 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
           >
-            Log In
+            {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
       </div>

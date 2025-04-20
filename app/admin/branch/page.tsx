@@ -1,6 +1,6 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
+import apiFetch from "../../../lib/api";
 
 interface Branch {
   user_id: number;
@@ -24,8 +24,6 @@ export default function AdminBranch() {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   useEffect(() => {
     fetchBranches();
   }, []);
@@ -34,15 +32,7 @@ export default function AdminBranch() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/admin/branches", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch branches");
-      }
-      const data = await res.json();
+      const data = await apiFetch("/admin/branches");
       setBranches(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -70,7 +60,7 @@ export default function AdminBranch() {
     setFormError("");
     setFormSuccess("");
 
-    if (!formFullName || !formEmail || (!editingBranchId && !formPassword)) {
+    if (!formFullName || !formEmail || !formBranchAddress || (!editingBranchId && !formPassword)) {
       setFormError("Please fill in all required fields.");
       return;
     }
@@ -90,19 +80,10 @@ export default function AdminBranch() {
           body.password_hash = null;
         }
 
-        const res = await fetch(`http://localhost:5000/admin/branches/${editingBranchId}`, {
+        const updatedBranch = await apiFetch(`/admin/branches/${editingBranchId}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify(body),
         });
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.msg || "Failed to update branch");
-        }
-        const updatedBranch = await res.json();
         setBranches((prev) =>
           prev.map((b) => (b.user_id === editingBranchId ? { ...b, ...updatedBranch } : b))
         );
@@ -118,23 +99,16 @@ export default function AdminBranch() {
     } else {
       // Create new branch (register)
       try {
-        const res = await fetch("http://localhost:5000/auth/register", {
+        await apiFetch("/auth/register", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             full_name: formFullName,
             email: formEmail,
             password: formPassword,
             role: "branch_store",
+            branch_address: formBranchAddress,
           }),
         });
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.msg || "Failed to create branch");
-        }
         setFormSuccess("Branch created successfully.");
         resetForm();
         fetchBranches();
@@ -161,16 +135,9 @@ export default function AdminBranch() {
   async function handleDelete(branchId: number) {
     if (!confirm("Are you sure you want to delete this branch?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/admin/branches/${branchId}`, {
+      await apiFetch(`/admin/branches/${branchId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.msg || "Failed to delete branch");
-      }
       setBranches((prev) => prev.filter((b) => b.user_id !== branchId));
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : String(err));

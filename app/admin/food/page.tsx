@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import React,{ useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import apiFetch from "../../../lib/api";
 
 interface FoodItem {
   food_id: number;
@@ -16,8 +17,6 @@ export default function ManageFoodItems() {
   const pathname = usePathname();
 
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [loadingFood, setLoadingFood] = useState(false);
-  const [errorFood, setErrorFood] = useState("");
 
   const [foodForm, setFoodForm] = useState({
     food_name: "",
@@ -27,36 +26,22 @@ export default function ManageFoodItems() {
     editingId: null as number | null,
   });
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-  useEffect(() => {
-    fetchFoodItems();
-  }, []);
-
-  async function fetchFoodItems() {
-    setLoadingFood(true);
-    setErrorFood("");
+  const fetchFoodItems = React.useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:5000/admin/food-items", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch food items");
-      }
-      const data = await res.json();
+      const data = await apiFetch("/admin/food-items");
       setFoodItems(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setErrorFood(err.message);
+        alert(err.message);
       } else {
-        setErrorFood(String(err));
+        alert(String(err));
       }
-    } finally {
-      setLoadingFood(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchFoodItems();
+  }, [fetchFoodItems]);
 
   function handleFoodFormChange(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) {
     const { name, value, type } = e.target;
@@ -79,15 +64,9 @@ export default function ManageFoodItems() {
     }
     try {
       const method = editingId ? "PUT" : "POST";
-      const url = editingId
-        ? `http://localhost:5000/admin/food-items/${editingId}`
-        : "http://localhost:5000/admin/food-items";
-      const res = await fetch(url, {
+      const url = editingId ? `/admin/food-items/${editingId}` : "/admin/food-items";
+      await apiFetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           food_name,
           description,
@@ -95,9 +74,6 @@ export default function ManageFoodItems() {
           is_available,
         }),
       });
-      if (!res.ok) {
-        throw new Error("Failed to save food item");
-      }
       setFoodForm({
         food_name: "",
         description: "",
@@ -128,15 +104,9 @@ export default function ManageFoodItems() {
   async function handleDeleteFood(food_id: number) {
     if (!confirm("Are you sure you want to delete this food item?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/admin/food-items/${food_id}`, {
+      await apiFetch(`/admin/food-items/${food_id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
-      if (!res.ok) {
-        throw new Error("Failed to delete food item");
-      }
       fetchFoodItems();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -311,3 +281,4 @@ export default function ManageFoodItems() {
       </main>
     </div>
   );
+}

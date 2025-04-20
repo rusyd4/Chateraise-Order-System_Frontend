@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import apiFetch from "../../../lib/api";
 
 interface CartItem {
   food_id: number;
@@ -22,8 +23,6 @@ export default function CheckoutPage() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
@@ -34,15 +33,7 @@ export default function CheckoutPage() {
 
   async function fetchBranchProfile() {
     try {
-      const res = await fetch("http://localhost:5000/branch/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch branch profile");
-      }
-      const data = await res.json();
+      const data = await apiFetch("/branch/profile");
       setBranchProfile(data);
     } catch (err: unknown) {
       console.error(err);
@@ -56,28 +47,16 @@ export default function CheckoutPage() {
     }, 0);
   }
 
-async function createOrder() {
-    if (!token) {
-      console.error("No auth token found");
-      return;
-    }
+  async function createOrder() {
     try {
       const date = new Date();
       date.setDate(date.getDate() + 2);
       const order_date = date.toISOString();
       const items = cart.map(({ food_id, quantity }) => ({ food_id, quantity }));
-      const res = await fetch("http://localhost:5000/branch/orders", {
+      const data = await apiFetch("/branch/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ order_date, items }),
       });
-      if (!res.ok) {
-        throw new Error("Failed to create order");
-      }
-      const data = await res.json();
       console.log("Order created:", data);
       setShowOrderDetails(true);
       // Optionally clear cart or show success message here
@@ -87,9 +66,11 @@ async function createOrder() {
     }
   }
 
-  function handleConfirmOrder() {
+function handleConfirmOrder() {
+  if (window.confirm("Are you sure you want to confirm the order?")) {
     createOrder();
   }
+}
 
   function handlePrint() {
     if (printRef.current) {
@@ -135,6 +116,16 @@ async function createOrder() {
           >
             Confirm Order
           </button>
+          <button
+            onClick={() => {
+              // Return to store with cart saved
+              localStorage.setItem("cart", JSON.stringify(cart));
+              window.location.href = "/branch/store";
+            }}
+            className="ml-4 bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition"
+          >
+            Return to Store
+          </button>
         </>
       ) : (
         <div ref={printRef} className="bg-white p-6 border border-gray-300 rounded shadow">
@@ -172,6 +163,16 @@ async function createOrder() {
             className="mt-6 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
           >
             Print / Save as PDF
+          </button>
+          <button
+            onClick={() => {
+              // Return to store with cart reset
+              localStorage.removeItem("cart");
+              window.location.href = "/branch/store";
+            }}
+            className="ml-4 mt-6 bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition"
+          >
+            Return to Store
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import apiFetch from "../../../lib/api";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,7 +27,6 @@ export default function AdminRecap() {
   const [filter, setFilter] = useState<FilterOption>("today");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   const pathname = usePathname();
 
@@ -38,15 +38,7 @@ export default function AdminRecap() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/admin/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch orders");
-      }
-      const data: Order[] = await res.json();
+      const data: Order[] = await apiFetch("/admin/orders");
       setOrders(data);
     } catch (err: unknown) {
       if (err instanceof Error) {

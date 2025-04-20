@@ -1,7 +1,7 @@
-
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import apiFetch from "../../../lib/api";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -36,8 +36,6 @@ export default function AdminDashboard() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState("8am - 10am");
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,15 +46,7 @@ export default function AdminDashboard() {
     setLoadingOrders(true);
     setErrorOrders("");
     try {
-      const res = await fetch("http://localhost:5000/admin/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch orders");
-      }
-      const data = await res.json();
+      const data = await apiFetch("/admin/orders");
       setOrders(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -80,15 +70,7 @@ export default function AdminDashboard() {
       const queryParams = new URLSearchParams();
       if (selectedBranch) queryParams.append("branch_name", selectedBranch);
       if (selectedDate) queryParams.append("order_date", selectedDate);
-      const res = await fetch(`http://localhost:5000/admin/orders/filter?${queryParams.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch filtered orders");
-      }
-      const data = await res.json();
+      const data = await apiFetch(`/admin/orders/filter?${queryParams.toString()}`);
       setFilteredOrders(data);
       setShowOrderDetails(true);
     } catch (err: unknown) {
@@ -317,3 +299,4 @@ export default function AdminDashboard() {
       </main>
     </div>
   );
+}

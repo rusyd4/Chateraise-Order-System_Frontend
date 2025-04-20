@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import apiFetch from "../../../lib/api";
 
 interface FoodItem {
   food_id: number;
@@ -22,8 +23,6 @@ export default function BranchStore() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   useEffect(() => {
     fetchFoodItems();
   }, []);
@@ -32,15 +31,7 @@ export default function BranchStore() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/branch/food-items", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to fetch food items");
-      }
-      const data = await res.json();
+      const data = await apiFetch("/branch/food-items");
       setFoodItems(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
