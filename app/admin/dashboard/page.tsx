@@ -56,7 +56,6 @@ export default function AdminDashboard() {
   const [errorFilteredOrders, setErrorFilteredOrders] = useState("");
 
   const [showOrderDetails, setShowOrderDetails] = useState(false);
-  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState("8am - 10am");
 
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -381,7 +380,7 @@ export default function AdminDashboard() {
                             <strong>Submission Time:</strong> {order.order_date}
                           </p>
                           <p>
-                            <strong>Delivery Time:</strong> {selectedDeliveryTime}
+                            <strong>Delivery Time:</strong> {order.delivery_time}
                           </p>
                           <p>
                             <strong>Branch Address:</strong> {order.branch_address || "N/A"}
@@ -410,23 +409,7 @@ export default function AdminDashboard() {
                     </>
                   )}
                 </div>
-                {/* Delivery Time Selector and Buttons */}
                 <div className="ml-4 flex flex-col space-y-4">
-                  <label htmlFor="deliveryTimeSelect" className="font-medium mb-1 text-white">
-                    Select Delivery Time
-                  </label>
-                  <select
-                    id="deliveryTimeSelect"
-                    value={selectedDeliveryTime}
-                    onChange={(e) => setSelectedDeliveryTime(e.target.value)}
-                    className="px-3 py-2 rounded bg-white"
-                  >
-                    <option value="8am - 10am">8am - 10am</option>
-                    <option value="9am - 11am">9am - 11am</option>
-                    <option value="10am - 12pm">10am - 12pm</option>
-                    <option value="1pm - 3pm">1pm - 3pm</option>
-                    <option value="3pm - 5pm">3pm - 5pm</option>
-                  </select>
                   <button
                     onClick={handleSaveAsPDF}
                     className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
