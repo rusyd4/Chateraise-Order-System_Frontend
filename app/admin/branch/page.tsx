@@ -9,6 +9,7 @@ interface Branch {
   full_name: string;
   email: string;
   branch_address?: string;
+  delivery_time?: string;
   created_at: string;
 }
 
@@ -23,6 +24,7 @@ export default function AdminBranch() {
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
   const [formBranchAddress, setFormBranchAddress] = useState("");
+  const [formDeliveryTime, setFormDeliveryTime] = useState("");
 
   const [editingBranchId, setEditingBranchId] = useState<number | null>(null);
   const [formError, setFormError] = useState("");
@@ -59,6 +61,7 @@ export default function AdminBranch() {
     setFormEmail("");
     setFormPassword("");
     setFormBranchAddress("");
+    setFormDeliveryTime("");
     setEditingBranchId(null);
     setFormError("");
     setFormSuccess("");
@@ -81,6 +84,7 @@ export default function AdminBranch() {
           full_name: formFullName,
           email: formEmail,
           branch_address: formBranchAddress,
+          delivery_time: formDeliveryTime,
         };
         if (formPassword) {
           // Hash password on backend, so send password as is
@@ -116,6 +120,7 @@ export default function AdminBranch() {
             password: formPassword,
             role: "branch_store",
             branch_address: formBranchAddress,
+            delivery_time: formDeliveryTime,
           }),
         });
         setFormSuccess("Branch created successfully.");
@@ -137,6 +142,7 @@ export default function AdminBranch() {
     setFormEmail(branch.email);
     setFormPassword("");
     setFormBranchAddress(branch.branch_address || "");
+    setFormDeliveryTime(branch.delivery_time || "");
     setFormError("");
     setFormSuccess("");
   }
@@ -268,6 +274,19 @@ export default function AdminBranch() {
                   className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                 />
               </div>
+              <div className="w-full min-w-0">
+                <label htmlFor="deliveryTime" className="block font-medium mb-1">
+                  Delivery Time
+                </label>
+                <input
+                  id="deliveryTime"
+                  type="text"
+                  value={formDeliveryTime}
+                  onChange={(e) => setFormDeliveryTime(e.target.value)}
+                  placeholder="Enter delivery time"
+                  className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                />
+              </div>
             </div>
             {formError && <p className="text-red-600">{formError}</p>}
             {formSuccess && <p className="text-green-600">{formSuccess}</p>}
@@ -302,10 +321,10 @@ export default function AdminBranch() {
               <table className="w-full border border-gray-300 rounded">
                 <thead className="bg-[#6D0000] text-white">
                   <tr>
-                  <th className="border border-[#6D0000] px-2 py-1 text-left">Branch Name</th>
+                    <th className="border border-[#6D0000] px-2 py-1 text-left">Branch Name</th>
                     <th className="border border-[#6D0000] px-2 py-1 text-left">Email</th>
                     <th className="border border-[#6D0000] px-2 py-1 text-left">Branch Address</th>
-                    <th className="border border-[#6D0000] px-2 py-1 text-left">Created At</th>
+                    <th className="border border-[#6D0000] px-2 py-1 text-left">Delivery Time</th>
                     <th className="border border-[#6D0000] px-2 py-1 text-left">Actions</th>
                   </tr>
                 </thead>
@@ -315,7 +334,7 @@ export default function AdminBranch() {
                       <td className="border border-gray-300 px-2 py-1">{branch.full_name}</td>
                       <td className="border border-gray-300 px-2 py-1">{branch.email}</td>
                       <td className="border border-gray-300 px-2 py-1">{branch.branch_address || "N/A"}</td>
-                      <td className="border border-gray-300 px-2 py-1">{new Date(branch.created_at).toLocaleString()}</td>
+                      <td className="border border-gray-300 px-2 py-1">{branch.delivery_time || "N/A"}</td>
                       <td className="border border-gray-300 px-2 py-1 space-x-2">
                         <button
                           onClick={() => handleEdit(branch)}
