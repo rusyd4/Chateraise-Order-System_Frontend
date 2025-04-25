@@ -28,6 +28,7 @@ import {
 
 export default function AdminDashboard() {
   interface OrderItem {
+    food_id: number;
     food_name: string;
     quantity: number;
   }
@@ -365,47 +366,147 @@ export default function AdminDashboard() {
                     <p>No orders to display.</p>
                   ) : (
                     <>
-                      {filteredOrders.map((order: Order, index: number) => (
-                        <div key={order.order_id || index} className="mb-6 border-b border-gray-300 pb-4">
-                          <p>
-                            <strong>Order ID:</strong> {order.order_id}
-                          </p>
-                          <p>
-                            <strong>Branch Name:</strong> {order.branch_name}
-                          </p>
-                          <p>
-                            <strong>Order Date:</strong> {order.delivery_date}
-                          </p>
-                          <p>
-                            <strong>Submission Time:</strong> {order.order_date}
-                          </p>
-                          <p>
-                            <strong>Delivery Time:</strong> {order.delivery_time}
-                          </p>
-                          <p>
-                            <strong>Branch Address:</strong> {order.branch_address || "N/A"}
-                          </p>
-                          <div className="mt-2">
-                            <strong>Items:</strong>
-                            <table className="w-full mt-1 border border-[#6D0000] rounded">
+                      {filteredOrders.map((order: Order, index: number) => {
+                        // Format dates
+                        const orderDateFormatted = new Date(order.order_date).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: '2-digit',
+                        });
+                        const deliveryDateObj = new Date(order.delivery_date);
+                        const deliveryDateFormatted = deliveryDateObj.toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                        });
+                        const deliveryDay = deliveryDateObj.toLocaleDateString('en-US', { weekday: 'short' });
+
+                        return (
+                          <div key={order.order_id || index} className="mb-6 border-b border-gray-300 pb-4">
+                            {/* Header Section */}
+                            <div className="flex justify-between items-center mb-4">
+                              <div className="flex items-center space-x-2">
+                                <img
+                                  src="/Chateraiselogo.png"
+                                  alt="Chateraise Logo"
+                                  width={60}
+                                  height={60}
+                                  className="object-contain"
+                                />
+                                <span className="text-xl font-bold">CHÂTERAISÉ CIM</span>
+                              </div>
+                              <table className="text-sm border border-gray-300 rounded w-auto">
+                                <tbody>
+                                  <tr>
+                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Order Date</td>
+                                    <td className="border border-gray-300 px-2 py-1">{orderDateFormatted}</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Jam Datang</td>
+                                    <td className="border border-gray-300 px-2 py-1">--:--</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Jam Selesai</td>
+                                    <td className="border border-gray-300 px-2 py-1">--:--</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Suhu Truck</td>
+                                    <td className="border border-gray-300 px-2 py-1">-- °C</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Document Title */}
+                            <h1 className="text-center text-4xl font-extrabold mb-6">DELIVERY ORDER</h1>
+
+                            {/* Customer and Delivery Information */}
+                            <div className="mb-6 grid grid-cols-2 gap-x-8">
+                              <div className="space-y-1 font-semibold">
+                                <p>Customer Name</p>
+                                <p>Delivery Date</p>
+                                <p>Delivery Time</p>
+                                <p>Delivery Address</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p>{order.branch_name}</p>
+                                <p>{`${deliveryDateFormatted} (${deliveryDay})`}</p>
+                                <p>{order.delivery_time || "--"}</p>
+                                <p>{order.branch_address || "--"}</p>
+                              </div>
+                            </div>
+
+                            {/* Product Table */}
+                            <table className="w-full border border-[#6D0000] rounded mb-6 text-sm">
                               <thead>
                                 <tr className="bg-[#6D0000] text-white">
-                                  <th className="border border-[#6D0000] px-2 py-1 text-left">Food Name</th>
-                                  <th className="border border-[#6D0000] px-2 py-1 text-left">Quantity</th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Case Mark</th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Product name</th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Q'ty</th>
+                                  <th className="border border-[#6D0000] px-2 py-1" colSpan={3}>
+                                    Damage Report (Qty)
+                                  </th>
+                                </tr>
+                                <tr className="bg-[#6D0000] text-white">
+                                  <th className="border border-[#6D0000] px-2 py-1"></th>
+                                  <th className="border border-[#6D0000] px-2 py-1"></th>
+                                  <th className="border border-[#6D0000] px-2 py-1"></th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Melt Cream</th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Broken</th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Other</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {order.items.map((item, idx) => (
                                   <tr key={idx} className="odd:bg-white even:bg-gray-50">
+                                    <td className="border border-gray-300 px-2 py-1">A5000{item.food_id}</td>
                                     <td className="border border-gray-300 px-2 py-1">{item.food_name}</td>
-                                    <td className="border border-gray-300 px-2 py-1">{item.quantity}</td>
+                                    <td className="border border-gray-300 px-2 py-1">{item.quantity} carton</td>
+                                    <td className="border border-gray-300 px-2 py-1"></td>
+                                    <td className="border border-gray-300 px-2 py-1"></td>
+                                    <td className="border border-gray-300 px-2 py-1"></td>
                                   </tr>
                                 ))}
                               </tbody>
                             </table>
+
+                            {/* Notes Section */}
+                            <div className="flex justify-between">
+                              <div className="w-1/2">
+                                <h3 className="font-semibold mb-2">Catatan (Notes)</h3>
+                                <ul className="list-disc list-inside text-sm space-y-1">
+                                  <li>Upper carton from pudding must be returned.</li>
+                                  <li>Count again upon receipt.</li>
+                                  <li>Complaints after leaving the store/factory will not be accepted.</li>
+                                  <li>
+                                    If there are damaged products, a report (BAP) and photo must be written and sent
+                                    immediately via email.
+                                  </li>
+                                </ul>
+                              </div>
+
+                              {/* Signature/Confirmation Table */}
+                              <div className="w-1/2 pl-4">
+                                <table className="w-full border border-gray-300 text-sm">
+                                  <thead>
+                                    <tr>
+                                      <th className="border border-gray-300 px-2 py-1">Received by</th>
+                                      <th className="border border-gray-300 px-2 py-1">Delivered by</th>
+                                      <th className="border border-gray-300 px-2 py-1">Prepared by</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr>
+                                      <td className="border border-gray-300 px-2 py-12"></td>
+                                      <td className="border border-gray-300 px-2 py-12"></td>
+                                      <td className="border border-gray-300 px-2 py-12"></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </>
                   )}
                 </div>
