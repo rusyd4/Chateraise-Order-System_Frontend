@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import apiFetch from "../../../lib/api";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Calendar } from "../../../components/ui/calendar";
 
 interface OrderItem {
   food_name: string;
@@ -20,19 +21,21 @@ interface Order {
   items: OrderItem[];
 }
 
-type FilterOption = "today" | "last7days" | "last30days";
-
 export default function AdminRecap() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [filter, setFilter] = useState<FilterOption>("today");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [appliedDateRange, setAppliedDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+
   const pathname = usePathname();
+
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     fetchOrders();
-  }, [filter]);
+  }, []);
 
   async function fetchOrders() {
     setLoading(true);
@@ -51,33 +54,25 @@ export default function AdminRecap() {
     }
   }
 
-  // Filter orders based on selected filter option
-  function filterOrdersByDate(orders: Order[]): Order[] {
-    const now = new Date();
+  // Filter orders based on selected date range
+  function filterOrdersByDateRange(orders: Order[]): Order[] {
+    if (!appliedDateRange.from || !appliedDateRange.to) {
+      return orders;
+    }
+    const fromDate = new Date(appliedDateRange.from);
+    fromDate.setHours(0, 0, 0, 0);
+    const toDate = new Date(appliedDateRange.to);
+    toDate.setHours(23, 59, 59, 999);
+
     return orders.filter((order) => {
       const orderDate = new Date(order.order_date);
-      if (filter === "today") {
-        return (
-          orderDate.getFullYear() === now.getFullYear() &&
-          orderDate.getMonth() === now.getMonth() &&
-          orderDate.getDate() === now.getDate()
-        );
-      } else if (filter === "last7days") {
-        const sevenDaysAgo = new Date(now);
-        sevenDaysAgo.setDate(now.getDate() - 7);
-        return orderDate >= sevenDaysAgo && orderDate <= now;
-      } else if (filter === "last30days") {
-        const thirtyDaysAgo = new Date(now);
-        thirtyDaysAgo.setDate(now.getDate() - 30);
-        return orderDate >= thirtyDaysAgo && orderDate <= now;
-      }
-      return true;
+      return orderDate >= fromDate && orderDate <= toDate;
     });
   }
 
   // Aggregate data: item names on left, store names on top, quantities in cells, plus total per item
   function aggregateData(orders: Order[]) {
-    const filteredOrders = filterOrdersByDate(orders);
+    const filteredOrders = filterOrdersByDateRange(orders);
 
     // Get unique store names
     const storeNames = Array.from(new Set(filteredOrders.map((order) => order.branch_name)));
@@ -112,56 +107,100 @@ export default function AdminRecap() {
   return (
     <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
       <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4">
+        <div className="mb-4">
+          <img
+            src="/Chateraiselogo.png"
+            alt="Chateraise Logo"
+            width={200}
+            height={70}
+            className="object-contain"
+          />
+        </div>
         <Link
           href="/admin/dashboard"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/dashboard" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/dashboard"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
           Orders
         </Link>
         <Link
           href="/admin/food"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/food" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/food"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
-          Manage Food Items
+          Manage Products
         </Link>
         <Link
           href="/admin/branch"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/branch" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/branch"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
           Manage Branch Stores
         </Link>
         <Link
           href="/admin/recap"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/recap" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/recap"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
           Recap
         </Link>
       </nav>
-      <main className="flex-1">
+      <main className="flex-1 p-8 space-y-6">
         <h1 className="text-3xl font-bold mb-6">Recap of Orders</h1>
 
         <div className="mb-6">
-          <label htmlFor="filter" className="mr-4 font-medium">
-            Filter by:
-          </label>
-          <select
-            id="filter"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as FilterOption)}
-            className="border border-gray-300 rounded px-3 py-2"
+          <button
+            onClick={() => setShowCalendar(!showCalendar)}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
           >
-            <option value="today">Today</option>
-            <option value="last7days">Last 7 Days</option>
-            <option value="last30days">Last 30 Days</option>
-          </select>
+            {showCalendar ? "Done" : "Select Date Range"}
+          </button>
+          {showCalendar && (
+            <div className="mt-4">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={(range) => {
+                  if (range && "from" in range && "to" in range) {
+                    setDateRange({ from: range.from, to: range.to });
+                  } else {
+                    setDateRange({ from: undefined, to: undefined });
+                  }
+                }}
+                numberOfMonths={2}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6 flex space-x-4">
+          <button
+            onClick={() => setAppliedDateRange(dateRange)}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Apply
+          </button>
+          <button
+            onClick={() => {
+              setDateRange({ from: undefined, to: undefined });
+              setAppliedDateRange({ from: undefined, to: undefined });
+            }}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Reset
+          </button>
         </div>
 
         {loading ? (
@@ -174,26 +213,26 @@ export default function AdminRecap() {
           <div className="overflow-auto border border-gray-300 rounded">
             <table className="min-w-full border-collapse border border-gray-300">
               <thead>
-                <tr className="bg-gray-100">
+                <tr className="bg-[#6D0000] text-white">
                   <th className="border border-gray-300 px-4 py-2 text-left">Item Name</th>
-                  <th className="border border-gray-300 px-4 py-2 text-right">Total</th>
                   {storeNames.map((store) => (
                     <th key={store} className="border border-gray-300 px-4 py-2 text-right">
                       {store}
                     </th>
                   ))}
+                  <th className="border border-gray-300 px-4 py-2 text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map(({ itemName, storeQuantities, total }) => (
                   <tr key={itemName} className="hover:bg-gray-50">
                     <td className="border border-gray-300 px-4 py-2">{itemName}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-right font-semibold">{total}</td>
                     {storeNames.map((store) => (
                       <td key={store} className="border border-gray-300 px-4 py-2 text-right">
                         {storeQuantities[store] || 0}
                       </td>
                     ))}
+                    <td className="border border-gray-300 px-4 py-2 text-right font-semibold">{total}</td>
                   </tr>
                 ))}
               </tbody>

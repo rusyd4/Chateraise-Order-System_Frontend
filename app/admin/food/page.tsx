@@ -4,6 +4,7 @@ import React,{ useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import apiFetch from "../../../lib/api";
+import Image from "next/image";
 
 interface FoodItem {
   food_id: number;
@@ -120,34 +121,51 @@ export default function ManageFoodItems() {
   return (
     <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
       <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4">
+        <div className="mb-4">
+          <Image
+            src="/Chateraiselogo.png"
+            alt="Chateraise Logo"
+            width={200}
+            height={70}
+            priority
+          />
+        </div>
         <Link
           href="/admin/dashboard"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/dashboard" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/dashboard"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
           Orders
         </Link>
         <Link
           href="/admin/food"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/food" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/food"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
-          Manage Food Items
+          Manage Products
         </Link>
         <Link
           href="/admin/branch"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/branch" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/branch"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
           Manage Branch Stores
         </Link>
         <Link
           href="/admin/recap"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/recap" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/recap"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
           }`}
         >
           Recap
@@ -158,15 +176,16 @@ export default function ManageFoodItems() {
         <form onSubmit={handleFoodFormSubmit} className="mb-6 space-y-4 max-w-md">
           <div>
             <label htmlFor="food_name" className="block font-medium mb-1">
-              Food Name
+              Product Name
             </label>
             <input
               type="text"
               id="food_name"
               name="food_name"
+              placeholder="Enter Product Name"
               value={foodForm.food_name}
               onChange={handleFoodFormChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
               required
             />
           </div>
@@ -177,9 +196,10 @@ export default function ManageFoodItems() {
             <textarea
               id="description"
               name="description"
+              placeholder="Add a Description"
               value={foodForm.description}
               onChange={handleFoodFormChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
               required
             />
           </div>
@@ -191,9 +211,10 @@ export default function ManageFoodItems() {
               type="number"
               id="price"
               name="price"
+              placeholder="Enter The Price (Rp)"
               value={foodForm.price}
               onChange={handleFoodFormChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
               step="0.01"
               min="0"
               required
@@ -206,12 +227,13 @@ export default function ManageFoodItems() {
               name="is_available"
               checked={foodForm.is_available}
               onChange={handleFoodFormChange}
+              className="accent-[#6D0000] transition transform hover:scale-110 active:translate-y-0.5 cursor-pointer"
             />
-            <label htmlFor="is_available">Available</label>
+            <label htmlFor="is_available" className="text-[#6D0000] font-semibold">Available</label>
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
           >
             {foodForm.editingId ? "Update Food Item" : "Add Food Item"}
           </button>
@@ -234,13 +256,13 @@ export default function ManageFoodItems() {
           )}
         </form>
         <table className="w-full border border-gray-300 rounded">
-          <thead className="bg-gray-100">
+          <thead className="bg-[#6D0000] text-white">
             <tr>
-              <th className="border border-gray-300 p-2">Food Name</th>
-              <th className="border border-gray-300 p-2">Description</th>
-              <th className="border border-gray-300 p-2">Price</th>
-              <th className="border border-gray-300 p-2">Available</th>
-              <th className="border border-gray-300 p-2">Actions</th>
+              <th className="border border-[#6D0000] p-2">Food Name</th>
+              <th className="border border-[#6D0000] p-2">Description</th>
+              <th className="border border-[#6D0000] p-2">Price</th>
+              <th className="border border-[#6D0000] p-2">Available</th>
+              <th className="border border-[#6D0000] p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -255,20 +277,22 @@ export default function ManageFoodItems() {
                 <tr key={item.food_id || index}>
                   <td className="border border-gray-300 p-2">{item.food_name}</td>
                   <td className="border border-gray-300 p-2">{item.description}</td>
-                  <td className="border border-gray-300 p-2">{item.price}</td>
+                  <td className="border border-gray-300 p-2">
+                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.price)}
+                  </td>
                   <td className="border border-gray-300 p-2">
                     {item.is_available ? "Yes" : "No"}
                   </td>
                   <td className="border border-gray-300 p-2 space-x-2">
                     <button
                       onClick={() => handleEditFood(item)}
-                      className="bg-yellow-400 px-2 py-1 rounded hover:bg-yellow-500"
+                      className="bg-yellow-400 px-2 py-1 rounded transition transform hover:bg-yellow-500 hover:scale-105 active:translate-y-0.5"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteFood(item.food_id)}
-                      className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                      className="bg-red-600 text-white px-2 py-1 rounded transition transform hover:bg-red-700 hover:scale-105 active:translate-y-0.5"
                     >
                       Delete
                     </button>

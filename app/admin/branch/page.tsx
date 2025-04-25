@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import apiFetch from "../../../lib/api";
 
 interface Branch {
@@ -11,6 +13,8 @@ interface Branch {
 }
 
 export default function AdminBranch() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,8 +29,13 @@ export default function AdminBranch() {
   const [formSuccess, setFormSuccess] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
     fetchBranches();
-  }, []);
+  }, [router]);
 
   async function fetchBranches() {
     setLoading(true);
@@ -147,94 +156,125 @@ export default function AdminBranch() {
   return (
     <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
       <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4">
-        <a
+        <div className="mb-4">
+          <img
+            src="/Chateraiselogo.png"
+            alt="Chateraise Logo"
+            width={200}
+            height={70}
+            className="object-contain"
+          />
+        </div>
+        <Link
           href="/admin/dashboard"
-          className="px-3 py-2 rounded hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/dashboard"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
+          }`}
         >
           Orders
-        </a>
-        <a
+        </Link>
+        <Link
           href="/admin/food"
-          className="px-3 py-2 rounded hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/food"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
+          }`}
         >
-          Manage Food Items
-        </a>
-        <a
+          Manage Products
+        </Link>
+        <Link
           href="/admin/branch"
-          className="px-3 py-2 rounded bg-blue-600 text-white"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/branch"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
+          }`}
         >
           Manage Branch Stores
-        </a>
-        <a
+        </Link>
+        <Link
           href="/admin/recap"
-          className="px-3 py-2 rounded hover:bg-gray-200"
+          className={`px-3 py-2 rounded transition transform ${
+            pathname === "/admin/recap"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105"
+          }`}
         >
           Recap
-        </a>
+        </Link>
       </nav>
-      <main className="flex-1">
+      <main className="flex-1 p-0 space-y-12">
         <section>
           <h2 className="text-3xl font-bold mb-4">Manage Branch Stores</h2>
 
-          <form onSubmit={handleSubmit} className="mb-6 max-w-md space-y-4">
-            <div>
-              <label htmlFor="fullName" className="block font-medium mb-1">
-                Full Name<span className="text-red-600">*</span>
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                value={formFullName}
-                onChange={(e) => setFormFullName(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block font-medium mb-1">
-                Email<span className="text-red-600">*</span>
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={formEmail}
-                onChange={(e) => setFormEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block font-medium mb-1">
-                {editingBranchId ? "New Password (leave blank to keep current)" : "Password"}
-                {!editingBranchId && <span className="text-red-600">*</span>}
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={formPassword}
-                onChange={(e) => setFormPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-                {...(!editingBranchId && { required: true })}
-              />
-            </div>
-            <div>
-              <label htmlFor="branchAddress" className="block font-medium mb-1">
-                Branch Address
-              </label>
-              <input
-                id="branchAddress"
-                type="text"
-                value={formBranchAddress}
-                onChange={(e) => setFormBranchAddress(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              />
+          <form onSubmit={handleSubmit} className="mb-6 w-full space-y-4">
+            <div className="grid gap-4 min-w-0" style={{ gridTemplateColumns: "1fr 1fr" }}>
+              <div className="w-full min-w-0">
+                <label htmlFor="branchName" className="block font-medium mb-1">
+                  Branch Name<span className="text-red-600">*</span>
+                </label>
+                <input
+                  id="branchName"
+                  type="text"
+                  value={formFullName}
+                  onChange={(e) => setFormFullName(e.target.value)}
+                  placeholder="Enter branch name"
+                  className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                  required
+                />
+              </div>
+              <div className="w-full min-w-0">
+                <label htmlFor="email" className="block font-medium mb-1">
+                  Email<span className="text-red-600">*</span>
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  placeholder="Enter email address"
+                  className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                  required
+                />
+              </div>
+              <div className="w-full min-w-0">
+                <label htmlFor="password" className="block font-medium mb-1">
+                  {editingBranchId ? "New Password (leave blank to keep current)" : "Password"}
+                  {!editingBranchId && <span className="text-red-600">*</span>}
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={formPassword}
+                  onChange={(e) => setFormPassword(e.target.value)}
+                  placeholder={editingBranchId ? "Enter new password (optional)" : "Enter password"}
+                  className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                  {...(!editingBranchId && { required: true })}
+                />
+              </div>
+              <div className="w-full min-w-0">
+                <label htmlFor="branchAddress" className="block font-medium mb-1">
+                  Branch Address
+                </label>
+                <input
+                  id="branchAddress"
+                  type="text"
+                  value={formBranchAddress}
+                  onChange={(e) => setFormBranchAddress(e.target.value)}
+                  placeholder="Enter branch address"
+                  className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                />
+              </div>
             </div>
             {formError && <p className="text-red-600">{formError}</p>}
             {formSuccess && <p className="text-green-600">{formSuccess}</p>}
             <div className="flex space-x-4">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000]"
               >
                 {editingBranchId ? "Update Branch" : "Add Branch"}
               </button>
@@ -260,13 +300,13 @@ export default function AdminBranch() {
               <p>No branches found.</p>
             ) : (
               <table className="w-full border border-gray-300 rounded">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-2 py-1 text-left">Full Name</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">Email</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">Branch Address</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">Created At</th>
-                    <th className="border border-gray-300 px-2 py-1 text-left">Actions</th>
+                <thead className="bg-[#6D0000] text-white">
+                  <tr>
+                  <th className="border border-[#6D0000] px-2 py-1 text-left">Branch Name</th>
+                    <th className="border border-[#6D0000] px-2 py-1 text-left">Email</th>
+                    <th className="border border-[#6D0000] px-2 py-1 text-left">Branch Address</th>
+                    <th className="border border-[#6D0000] px-2 py-1 text-left">Created At</th>
+                    <th className="border border-[#6D0000] px-2 py-1 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>

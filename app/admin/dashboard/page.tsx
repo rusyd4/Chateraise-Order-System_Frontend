@@ -42,12 +42,21 @@ export default function AdminDashboard() {
     fetchOrders();
   }, []);
 
+  function isOrderWithinLastWeek(orderDateStr: string): boolean {
+    const orderDate = new Date(orderDateStr);
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    return orderDate >= sevenDaysAgo && orderDate <= now;
+  }
+
   async function fetchOrders() {
     setLoadingOrders(true);
     setErrorOrders("");
     try {
       const data = await apiFetch("/admin/orders");
-      setOrders(data);
+      // Filter orders to only those from the last week
+      const recentOrders = data.filter((order: Order) => isOrderWithinLastWeek(order.order_date));
+      setOrders(recentOrders);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorOrders(err.message);
@@ -70,7 +79,7 @@ export default function AdminDashboard() {
       const queryParams = new URLSearchParams();
       if (selectedBranch) queryParams.append("branch_name", selectedBranch);
       if (selectedDate) queryParams.append("order_date", selectedDate);
-      const data = await apiFetch(`/admin/orders/filter?${queryParams.toString()}`);
+      const data = await apiFetch("/admin/orders/filter?" + queryParams.toString());
       setFilteredOrders(data);
       setShowOrderDetails(true);
     } catch (err: unknown) {
@@ -90,22 +99,16 @@ export default function AdminDashboard() {
     const printContents = printRef.current.innerHTML;
     const newWindow = window.open("", "_blank", "width=800,height=600");
     if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>Order Details</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              table { width: 100%; border-collapse: collapse; }
-              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-              th { background-color: #f0f0f0; }
-            </style>
-          </head>
-          <body>
-            ${printContents}
-          </body>
-        </html>
-      `);
+      newWindow.document.write(
+        '<html><head><title>Order Details</title><style>' +
+        'body { font-family: Arial, sans-serif; padding: 20px; }' +
+        'table { width: 100%; border-collapse: collapse; }' +
+        'th, td { border: 1px solid #6D0000; padding: 8px; text-align: left; }' +
+        'th { background-color: #f0f0f0; }' +
+        '</style></head><body>' +
+        printContents +
+        '</body></html>'
+      );
       newWindow.document.close();
       newWindow.focus();
       newWindow.print();
@@ -119,40 +122,61 @@ export default function AdminDashboard() {
   return (
     <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
       <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4">
+        <div className="mb-4">
+          <img
+            src="/Chateraiselogo.png"
+            alt="Chateraise Logo"
+            width={200}
+            height={70}
+            className="object-contain"
+          />
+        </div>
         <Link
           href="/admin/dashboard"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/dashboard" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className={
+            "px-3 py-2 rounded transition transform " +
+            (pathname === "/admin/dashboard"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+          }
         >
           Orders
         </Link>
         <Link
           href="/admin/food"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/food" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className={
+            "px-3 py-2 rounded transition transform " +
+            (pathname === "/admin/food"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+          }
         >
-          Manage Food Items
+          Manage Products
         </Link>
         <Link
           href="/admin/branch"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/branch" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className={
+            "px-3 py-2 rounded transition transform " +
+            (pathname === "/admin/branch"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+          }
         >
           Manage Branch Stores
         </Link>
         <Link
           href="/admin/recap"
-          className={`px-3 py-2 rounded ${
-            pathname === "/admin/recap" ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-          }`}
+          className={
+            "px-3 py-2 rounded transition transform " +
+            (pathname === "/admin/recap"
+              ? "bg-[#6D0000] text-white"
+              : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+          }
         >
           Recap
         </Link>
       </nav>
-      <main className="flex-1">
+      <main className="flex-1 p-0 space-y-12">
         <section>
           <h2 className="text-3xl font-bold mb-4">Track Branch Store Orders</h2>
           {!showOrderDetails ? (
@@ -166,7 +190,7 @@ export default function AdminDashboard() {
                     id="branchSelect"
                     value={selectedBranch}
                     onChange={(e) => setSelectedBranch(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2"
+                    className="border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                   >
                     <option value="">-- All Branches --</option>
                     {orders.length > 0 &&
@@ -186,12 +210,12 @@ export default function AdminDashboard() {
                     id="orderDate"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2"
+                    className="border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                   />
                 </div>
                 <button
                   onClick={fetchFilteredOrders}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                  className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                 >
                   View Orders
                 </button>
@@ -200,9 +224,49 @@ export default function AdminDashboard() {
                 <p>Loading filtered orders...</p>
               ) : errorFilteredOrders ? (
                 <p className="text-red-600">{errorFilteredOrders}</p>
-              ) : filteredOrders.length === 0 ? (
+              ) : filteredOrders.length === 0 && (selectedBranch || selectedDate) ? (
                 <p>No filtered orders found.</p>
               ) : null}
+              {/* Show all orders before filtering */}
+              {loadingOrders ? (
+                <p>Loading orders...</p>
+              ) : errorOrders ? (
+                <p className="text-red-600">{errorOrders}</p>
+              ) : orders.length === 0 ? (
+                <p>No orders found.</p>
+              ) : (
+                <div className="mt-6 border border-gray-300 rounded p-4 max-h-[60vh] overflow-y-auto">
+                  <h3 className="text-xl font-semibold mb-4">Past 7 Days Orders</h3>
+                  {orders.map((order) => (
+                    <div key={order.order_id} className="mb-4 border-b border-gray-300 pb-2">
+                      <p><strong>Order ID:</strong> {order.order_id}</p>
+                      <p><strong>Branch Name:</strong> {order.branch_name}</p>
+                      <p><strong>Order Date:</strong> {order.order_date}</p>
+                      <p><strong>Submission Time:</strong> {order.submitted_at}</p>
+                      <p><strong>Branch Address:</strong> {order.branch_address || "N/A"}</p>
+                      <div className="mt-2">
+                        <strong>Items:</strong>
+                        <table className="w-full mt-1 border border-[#6D0000] rounded">
+                          <thead>
+                            <tr className="bg-[#6D0000] text-white">
+                              <th className="border border-[#6D0000] px-2 py-1 text-left">Food Name</th>
+                              <th className="border border-[#6D0000] px-2 py-1 text-left">Quantity</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {order.items.map((item, idx) => (
+                              <tr key={idx} className="odd:bg-white even:bg-gray-50">
+                                <td className="border border-gray-300 px-2 py-1">{item.food_name}</td>
+                                <td className="border border-gray-300 px-2 py-1">{item.quantity}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -240,11 +304,11 @@ export default function AdminDashboard() {
                           </p>
                           <div className="mt-2">
                             <strong>Items:</strong>
-                            <table className="w-full mt-1 border border-gray-300 rounded">
+                            <table className="w-full mt-1 border border-[#6D0000] rounded">
                               <thead>
-                                <tr className="bg-gray-100">
-                                  <th className="border border-gray-300 px-2 py-1 text-left">Food Name</th>
-                                  <th className="border border-gray-300 px-2 py-1 text-left">Quantity</th>
+                                <tr className="bg-[#6D0000] text-white">
+                                  <th className="border border-[#6D0000] px-2 py-1 text-left">Food Name</th>
+                                  <th className="border border-[#6D0000] px-2 py-1 text-left">Quantity</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -281,7 +345,7 @@ export default function AdminDashboard() {
                   </select>
                   <button
                     onClick={handleSaveAsPDF}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                   >
                     Save as PDF
                   </button>
