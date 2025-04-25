@@ -20,6 +20,7 @@ export default function ManageFoodItems() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
 
   const [foodForm, setFoodForm] = useState({
+    food_id: "",
     food_name: "",
     description: "",
     price: "",
@@ -58,8 +59,8 @@ export default function ManageFoodItems() {
 
   async function handleFoodFormSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const { food_name, description, price, is_available, editingId } = foodForm;
-    if (!food_name || !description || !price) {
+    const { food_id, food_name, description, price, is_available, editingId } = foodForm;
+    if (!food_id || !food_name || !description || !price) {
       alert("Please fill all food item fields");
       return;
     }
@@ -69,6 +70,7 @@ export default function ManageFoodItems() {
       await apiFetch(url, {
         method,
         body: JSON.stringify({
+          food_id: parseInt(food_id, 10),
           food_name,
           description,
           price: parseFloat(price),
@@ -76,6 +78,7 @@ export default function ManageFoodItems() {
         }),
       });
       setFoodForm({
+        food_id: "",
         food_name: "",
         description: "",
         price: "",
@@ -94,6 +97,7 @@ export default function ManageFoodItems() {
 
   function handleEditFood(item: FoodItem) {
     setFoodForm({
+      food_id: item.food_id.toString(),
       food_name: item.food_name,
       description: item.description,
       price: item.price.toString(),
@@ -175,6 +179,21 @@ export default function ManageFoodItems() {
         <h2 className="text-3xl font-bold mb-4">Manage Food Items</h2>
         <form onSubmit={handleFoodFormSubmit} className="mb-6 space-y-4 max-w-md">
           <div>
+            <label htmlFor="food_id" className="block font-medium mb-1">
+              Food ID
+            </label>
+            <input
+              type="number"
+              id="food_id"
+              name="food_id"
+              placeholder="Enter Food ID"
+              value={foodForm.food_id}
+              onChange={handleFoodFormChange}
+              className="w-full border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+              required
+            />
+          </div>
+          <div>
             <label htmlFor="food_name" className="block font-medium mb-1">
               Product Name
             </label>
@@ -242,6 +261,7 @@ export default function ManageFoodItems() {
               type="button"
               onClick={() =>
                 setFoodForm({
+                  food_id: "",
                   food_name: "",
                   description: "",
                   price: "",
@@ -258,6 +278,7 @@ export default function ManageFoodItems() {
         <table className="w-full border border-gray-300 rounded">
           <thead className="bg-[#6D0000] text-white">
             <tr>
+              <th className="border border-[#6D0000] p-2">Food ID</th>
               <th className="border border-[#6D0000] p-2">Food Name</th>
               <th className="border border-[#6D0000] p-2">Description</th>
               <th className="border border-[#6D0000] p-2">Price</th>
@@ -268,13 +289,14 @@ export default function ManageFoodItems() {
           <tbody>
             {foodItems.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center p-4">
+                <td colSpan={6} className="text-center p-4">
                   No food items found.
                 </td>
               </tr>
             ) : (
               foodItems.map((item, index) => (
                 <tr key={item.food_id || index}>
+                  <td className="border border-gray-300 p-2">{item.food_id}</td>
                   <td className="border border-gray-300 p-2">{item.food_name}</td>
                   <td className="border border-gray-300 p-2">{item.description}</td>
                   <td className="border border-gray-300 p-2">
