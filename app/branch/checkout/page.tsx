@@ -51,11 +51,11 @@ export default function CheckoutPage() {
     try {
       const date = new Date();
       date.setDate(date.getDate() + 2);
-      const order_date = date.toISOString();
+      const delivery_date = date.toISOString();
       const items = cart.map(({ food_id, quantity }) => ({ food_id, quantity }));
       const data = await apiFetch("/branch/orders", {
         method: "POST",
-        body: JSON.stringify({ order_date, items }),
+        body: JSON.stringify({ delivery_date, items }),
       });
       console.log("Order created:", data);
       setShowOrderDetails(true);

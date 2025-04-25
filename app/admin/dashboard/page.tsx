@@ -1,9 +1,30 @@
-"use client";
+'use client'
 
 import { useEffect, useState, useRef } from "react";
 import apiFetch from "../../../lib/api";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+
+import * as React from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function AdminDashboard() {
   interface OrderItem {
@@ -14,8 +35,8 @@ export default function AdminDashboard() {
   interface Order {
     order_id: number;
     branch_name: string;
+    delivery_date: string;
     order_date: string;
-    submitted_at: string;
     delivery_time?: string;
     branch_address?: string;
     items: OrderItem[];
@@ -28,7 +49,8 @@ export default function AdminDashboard() {
 
   // New states for filtered orders and filters
   const [selectedBranch, setSelectedBranch] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDeliveryDate, setSelectedDeliveryDate] = useState<Date | undefined>(undefined);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loadingFilteredOrders, setLoadingFilteredOrders] = useState(false);
   const [errorFilteredOrders, setErrorFilteredOrders] = useState("");
@@ -55,7 +77,7 @@ export default function AdminDashboard() {
     try {
       const data = await apiFetch("/admin/orders");
       // Filter orders to only those from the last week
-      const recentOrders = data.filter((order: Order) => isOrderWithinLastWeek(order.order_date));
+      const recentOrders = data.filter((order: Order) => isOrderWithinLastWeek(order.delivery_date));
       setOrders(recentOrders);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -78,7 +100,7 @@ export default function AdminDashboard() {
     try {
       const queryParams = new URLSearchParams();
       if (selectedBranch) queryParams.append("branch_name", selectedBranch);
-      if (selectedDate) queryParams.append("order_date", selectedDate);
+      if (selectedDate) queryParams.append("delivery_date", format(selectedDate, "yyyy-MM-dd"));
       const data = await apiFetch("/admin/orders/filter?" + queryParams.toString());
       setFilteredOrders(data);
       setShowOrderDetails(true);
@@ -186,32 +208,94 @@ export default function AdminDashboard() {
                   <label htmlFor="branchSelect" className="block font-medium mb-1">
                     Select Branch
                   </label>
-                  <select
-                    id="branchSelect"
-                    value={selectedBranch}
-                    onChange={(e) => setSelectedBranch(e.target.value)}
-                    className="border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-                  >
-                    <option value="">-- All Branches --</option>
-                    {orders.length > 0 &&
-                      Array.from(new Set(orders.map((order) => order.branch_name))).map((branchName) => (
-                        <option key={branchName} value={branchName}>
-                          {branchName}
-                        </option>
-                      ))}
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" id="branchSelect">
+                        {selectedBranch || "-- All Branches --"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuRadioGroup
+                        value={selectedBranch}
+                        onValueChange={(value) => setSelectedBranch(value)}
+                      >
+                        <DropdownMenuRadioItem value="">
+                          -- All Branches --
+                        </DropdownMenuRadioItem>
+                        {orders.length > 0 &&
+                          Array.from(new Set(orders.map((order) => order.branch_name))).map((branchName) => (
+                            <DropdownMenuRadioItem key={branchName} value={branchName}>
+                              {branchName}
+                            </DropdownMenuRadioItem>
+                          ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div>
                   <label htmlFor="orderDate" className="block font-medium mb-1">
                     Select Order Date
                   </label>
-                  <input
-                    type="date"
-                    id="orderDate"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                        id="orderDate"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          setSelectedDate(date);
+                          if (date) {
+                            const deliveryDate = new Date(date);
+                            deliveryDate.setDate(deliveryDate.getDate() + 2);
+                            setSelectedDeliveryDate(deliveryDate);
+                          } else {
+                            setSelectedDeliveryDate(undefined);
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <label htmlFor="deliveryDate" className="block font-medium mb-1">
+                    Select Delivery Date
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] justify-start text-left font-normal",
+                          !selectedDeliveryDate && "text-muted-foreground"
+                        )}
+                        id="deliveryDate"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDeliveryDate}
+                        onSelect={setSelectedDeliveryDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <button
                   onClick={fetchFilteredOrders}
@@ -241,8 +325,8 @@ export default function AdminDashboard() {
                     <div key={order.order_id} className="mb-4 border-b border-gray-300 pb-2">
                       <p><strong>Order ID:</strong> {order.order_id}</p>
                       <p><strong>Branch Name:</strong> {order.branch_name}</p>
-                      <p><strong>Order Date:</strong> {order.order_date}</p>
-                      <p><strong>Submission Time:</strong> {order.submitted_at}</p>
+                      <p><strong>Order Date:</strong> {order.delivery_date}</p>
+                      <p><strong>Submission Time:</strong> {order.order_date}</p>
                       <p><strong>Branch Address:</strong> {order.branch_address || "N/A"}</p>
                       <div className="mt-2">
                         <strong>Items:</strong>
@@ -291,10 +375,10 @@ export default function AdminDashboard() {
                             <strong>Branch Name:</strong> {order.branch_name}
                           </p>
                           <p>
-                            <strong>Order Date:</strong> {order.order_date}
+                            <strong>Order Date:</strong> {order.delivery_date}
                           </p>
                           <p>
-                            <strong>Submission Time:</strong> {order.submitted_at}
+                            <strong>Submission Time:</strong> {order.order_date}
                           </p>
                           <p>
                             <strong>Delivery Time:</strong> {selectedDeliveryTime}

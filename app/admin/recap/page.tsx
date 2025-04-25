@@ -16,8 +16,8 @@ interface OrderItem {
 interface Order {
   order_id: number;
   branch_name: string;
+  delivery_date: string;
   order_date: string;
-  submitted_at: string;
   items: OrderItem[];
 }
 
@@ -65,7 +65,7 @@ export default function AdminRecap() {
     toDate.setHours(23, 59, 59, 999);
 
     return orders.filter((order) => {
-      const orderDate = new Date(order.order_date);
+      const orderDate = new Date(order.delivery_date);
       return orderDate >= fromDate && orderDate <= toDate;
     });
   }

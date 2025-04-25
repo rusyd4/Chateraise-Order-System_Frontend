@@ -12,8 +12,8 @@ interface OrderItem {
 
 interface Order {
   order_id: number;
+  delivery_date: string;
   order_date: string;
-  submitted_at: string;
   items: OrderItem[];
 }
 
@@ -33,7 +33,7 @@ export default function OrderHistory() {
   useEffect(() => {
     if (monthFilter) {
       const filtered = orders.filter((order) => {
-        const orderMonth = new Date(order.submitted_at).toISOString().slice(0, 7);
+        const orderMonth = new Date(order.order_date).toISOString().slice(0, 7);
         return orderMonth === monthFilter;
       });
       setFilteredOrders(filtered);
@@ -64,9 +64,9 @@ export default function OrderHistory() {
     setMonthFilter(e.target.value);
   }
 
-  // Extract unique submitted_at dates sorted ascending
+  // Extract unique order_date dates sorted ascending
   const uniqueDates = Array.from(
-    new Set(filteredOrders.map((order) => new Date(order.submitted_at).toISOString().slice(0, 10)))
+    new Set(filteredOrders.map((order) => new Date(order.order_date).toISOString().slice(0, 10)))
   ).sort();
 
   // Extract unique food items with price
@@ -80,7 +80,7 @@ export default function OrderHistory() {
   const foodMap: { [foodName: string]: FoodAggregate } = {};
 
   filteredOrders.forEach((order) => {
-    const orderDate = new Date(order.submitted_at).toISOString().slice(0, 10);
+    const orderDate = new Date(order.order_date).toISOString().slice(0, 10);
     order.items.forEach((item) => {
       if (!foodMap[item.food_name]) {
         foodMap[item.food_name] = {
