@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useEffect, useState, useRef } from "react";
@@ -26,6 +27,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas-pro";
 
 export default function AdminDashboard() {
   interface OrderItem {
@@ -116,27 +120,25 @@ export default function AdminDashboard() {
     }
   }
 
-  function handleSaveAsPDF() {
-    if (!printRef.current) return;
-
-    const printContents = printRef.current.innerHTML;
-    const newWindow = window.open("", "_blank", "width=800,height=600");
-    if (newWindow) {
-      newWindow.document.write(
-        '<html><head><title>Order Details</title><style>' +
-        'body { font-family: Arial, sans-serif; padding: 20px; }' +
-        'table { width: 100%; border-collapse: collapse; }' +
-        'th, td { border: 1px solid #6D0000; padding: 8px; text-align: left; }' +
-        'th { background-color: #f0f0f0; }' +
-        '</style></head><body>' +
-        printContents +
-        '</body></html>'
-      );
-      newWindow.document.close();
-      newWindow.focus();
-      newWindow.print();
-      // Optionally close the window after printing
-      // newWindow.close();
+  async function handleSaveAsPDF() {
+    if (!printRef.current) {
+      alert("Nothing to print");
+      return;
+    }
+    const element = printRef.current;
+    try {
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: [canvas.width, canvas.height],
+      });
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save("orders.pdf");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF");
     }
   }
 
@@ -302,13 +304,13 @@ export default function AdminDashboard() {
           ) : (
             <>
               {/* Modal Overlay */}
-              <div className="fixed inset-0 bg-black/75 flex justify-center items-center z-50">
+              <div className="fixed inset-0 bg-black/75 flex justify-center items-center z-50 overflow-y-auto">
                 {/* Modal Content */}
                 <div
                   ref={printRef}
-                  className="bg-white p-6 border border-gray-300 rounded shadow max-w-3xl w-full max-h-[80vh] overflow-y-auto"
+                  className="bg-white p-8 border border-gray-300 rounded shadow"
+                  style={{ height: '95vh', width: 'calc(95vh / 1.414)' }}
                 >
-                  <h2 className="text-3xl font-bold mb-4">Order Details</h2>
                   {filteredOrders.length === 0 ? (
                     <p>No orders to display.</p>
                   ) : (
@@ -329,34 +331,33 @@ export default function AdminDashboard() {
 
                         return (
                           <div key={order.order_id || index} className="mb-6 border-b border-gray-300 pb-4">
-                            {/* Header Section */}
+                            {/* Header Section */} 
                             <div className="flex justify-between items-center mb-4">
                               <div className="flex items-center space-x-2">
                                 <img
                                   src="/Chateraiselogo.png"
                                   alt="Chateraise Logo"
-                                  width={60}
-                                  height={60}
+                                  width={120}
+                                  height={120}
                                   className="object-contain"
                                 />
                               </div>
-                              <table className="text-sm border border-gray-300 rounded w-auto">
+                              <table className="text-sm border border-black rounded w-auto">
                                 <tbody>
                                   <tr>
-                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Order Date</td>
-                                    <td className="border border-gray-300 px-2 py-1">{orderDateFormatted}</td>
+                                    <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1 font-semibold">Order Date</td>
+                                    <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1"></td>
+                                    <td className="text-[10px] border border-t-white border-b-black border-x-white x-2 py-1">{orderDateFormatted}</td>
+                                    <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1"></td>
+                                  </tr> 
+                                  <tr>
+                                    <td className="text-[10px] border border-black px-2 py-1 font-semibold">Jam Datang</td>
+                                    <td className="text-[10px] border border-black px-6 py-1"></td>
+                                    <td className="text-[10px] border border-black px-2 py-1 font-semibold">Jam Selesai</td>
+                                    <td className="text-[10px] border border-black px-6 py-1"></td>
                                   </tr>
                                   <tr>
-                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Jam Datang</td>
-                                    <td className="border border-gray-300 px-2 py-1">--:--</td>
-                                  </tr>
-                                  <tr>
-                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Jam Selesai</td>
-                                    <td className="border border-gray-300 px-2 py-1">--:--</td>
-                                  </tr>
-                                  <tr>
-                                    <td className="border border-gray-300 px-2 py-1 font-semibold">Suhu Truck</td>
-                                    <td className="border border-gray-300 px-2 py-1">-- °C</td>
+                                    <td className="text-[10px] border border-black px-2 py-1 font-semibold">Suhu Truck</td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -366,14 +367,14 @@ export default function AdminDashboard() {
                             <h1 className="text-center text-4xl font-extrabold mb-6">DELIVERY ORDER</h1>
 
                             {/* Customer and Delivery Information */}
-                            <div className="mb-6 grid grid-cols-2 gap-x-8">
-                              <div className="space-y-1 font-semibold">
-                                <p>Customer Name</p>
-                                <p>Delivery Date</p>
-                                <p>Delivery Time</p>
-                                <p>Delivery Address</p>
-                              </div>
+                            <div className="mb-6 grid grid-cols-3 gap-x-8">
                               <div className="space-y-1">
+                                <p>Customer Name  :</p>
+                                <p>Delivery Date  :</p>
+                                <p>Delivery Time  :</p>
+                                <p>Delivery Address :</p>
+                              </div>
+                              <div className="space-y-1 font-bold">
                                 <p>{order.branch_name}</p>
                                 <p>{`${deliveryDateFormatted} (${deliveryDay})`}</p>
                                 <p>{order.delivery_time || "--"}</p>
@@ -382,35 +383,35 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Product Table */}
-                            <table className="w-full border border-[#6D0000] rounded mb-6 text-sm">
+                            <table className="w-full border border-black rounded mb-6 text-sm">
                               <thead>
-                                <tr className="bg-[#6D0000] text-white">
-                                  <th className="border border-[#6D0000] px-2 py-1">Case Mark</th>
-                                  <th className="border border-[#6D0000] px-2 py-1">Product name</th>
-                                  <th className="border border-[#6D0000] px-2 py-1">Qty</th>
-                                  <th className="border border-[#6D0000] px-2 py-1" colSpan={3}>
+                                <tr>
+                                  <th className="border border-t-white border-b-black border-x-white px-2 py-1"></th>
+                                  <th className="border border-t-white border-b-black border-x-white px-2 py-1"></th>
+                                  <th className="border border-t-white border-b-black border-l-white border-r-black px-2 py-1"></th>
+                                  <th className="border border-black px-2 py-1" colSpan={3}>
                                     Damage Report (Qty)
                                   </th>
                                 </tr>
-                                <tr className="bg-[#6D0000] text-white">
-                                  <th className="border border-[#6D0000] px-2 py-1"></th>
-                                  <th className="border border-[#6D0000] px-2 py-1"></th>
-                                  <th className="border border-[#6D0000] px-2 py-1"></th>
-                                  <th className="border border-[#6D0000] px-2 py-1">Melt Cream</th>
-                                  <th className="border border-[#6D0000] px-2 py-1">Broken</th>
-                                  <th className="border border-[#6D0000] px-2 py-1">Other</th>
+                                <tr>
+                                  <th className="border border-black px-2 py-1">Case Mark</th>
+                                  <th className="border border-black px-2 py-1">Product</th>
+                                  <th className="border border-black px-2 py-1">Qty</th>
+                                  <th className="border border-black px-2 py-1">Melt Cream</th>
+                                  <th className="border border-black px-2 py-1">Broken</th>
+                                  <th className="border border-black px-2 py-1">Other</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {order.items.map((item, idx) => (
                                   <tr key={idx} className="odd:bg-white even:bg-gray-50">
-                                    <td className="border border-gray-300 px-2 py-1">A5000{item.food_id}</td>
-                                    <td className="border border-gray-300 px-2 py-1">{item.food_name}</td>
-                                    <td className="border border-gray-300 px-2 py-1">{item.quantity} carton</td>
-                                    <td className="border border-gray-300 px-2 py-1"></td>
-                                    <td className="border border-gray-300 px-2 py-1"></td>
-                                    <td className="border border-gray-300 px-2 py-1"></td>
-                                  </tr>
+                                    <td className="border border-black px-2 py-1">{item.food_id}</td>
+                                    <td className="border border-black px-2 py-1">{item.food_name}</td>
+                                    <td className="border border-black px-2 py-1">{item.quantity} carton</td>
+                                    <td className="border border-black px-2 py-1"></td>
+                                    <td className="border border-black px-2 py-1"></td>
+                                    <td className="border border-black px-2 py-1"></td>
+                                    </tr>
                                 ))}
                               </tbody>
                             </table>
@@ -418,33 +419,34 @@ export default function AdminDashboard() {
                             {/* Notes Section */}
                             <div className="flex justify-between">
                               <div className="w-1/2">
-                                <h3 className="font-semibold mb-2">Catatan (Notes)</h3>
-                                <ul className="list-disc list-inside text-sm space-y-1">
-                                  <li>Upper carton from pudding must be returned.</li>
-                                  <li>Count again upon receipt.</li>
-                                  <li>Complaints after leaving the store/factory will not be accepted.</li>
-                                  <li>
-                                    If there are damaged products, a report (BAP) and photo must be written and sent
-                                    immediately via email.
-                                  </li>
+                                <h3 className="font-semibold mb-2">Catatan</h3>
+                                <ul className="list-disc list-inside text-[10px] space-y-1">
+                                  <p className="font-bold underline">
+                                    1. Upper Carton dari pudding wajib dikembalikan
+                                  </p>
+                                  <p>2. Hitung ulang saat penerimaan</p>
+                                  <p>3. Komplain setelah meninggalkan toko/pabrik tidak diterima</p>
+                                  <p>
+                                    4. Jika ada produk rusak wajib menuliskan BAP & foto. Kirim segera melalui email
+                                  </p>
                                 </ul>
                               </div>
 
                               {/* Signature/Confirmation Table */}
                               <div className="w-1/2 pl-4">
-                                <table className="w-full border border-gray-300 text-sm">
+                                <table className="w-full border border-black text-[12px]">
                                   <thead>
                                     <tr>
-                                      <th className="border border-gray-300 px-2 py-1">Received by</th>
-                                      <th className="border border-gray-300 px-2 py-1">Delivered by</th>
-                                      <th className="border border-gray-300 px-2 py-1">Prepared by</th>
+                                      <th className="border border-black py-1">Received by</th>
+                                      <th className="border border-black py-1">Delivered by</th>
+                                      <th className="border border-black py-1">Prepared by</th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     <tr>
-                                      <td className="border border-gray-300 px-2 py-12"></td>
-                                      <td className="border border-gray-300 px-2 py-12"></td>
-                                      <td className="border border-gray-300 px-2 py-12"></td>
+                                      <td className="border border-black px-8 py-8"></td>
+                                      <td className="border border-black px-8 py-8"></td>
+                                      <td className="border border-black px-8 py-8"></td>
                                     </tr>
                                   </tbody>
                                 </table>
