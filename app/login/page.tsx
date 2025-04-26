@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import apiFetch from "../../lib/api";
 
 export default function LoginPage() {
@@ -47,15 +48,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white p-8 rounded shadow">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div className="relative min-h-screen flex items-center justify-center bg-[var(--background)]">
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-contain"
+        style={{ backgroundImage: "url('/DSCF2264.jpg')", backgroundSize: "120%" }}
+      />
+      <div className="absolute inset-0 bg-gray-200 opacity-20" />
+      <div className="relative max-w-md w-full bg-[var(--card)] p-8 rounded-xl shadow-[0_1px_30px_rgba(109,0,0,0.3)]">
+        <div className="flex justify-center mb-6 transition transform hover:scale-105 hover:shadow-lg cursor-pointer">
+          <Image
+            src="/Chateraiselogo.png"
+            alt="Chateraise Logo"
+            width={200}
+            height={70}
+            priority
+          />
+        </div>
+        <h1 className="text-2xl font-bold mb-3 text-center text-[var(--primary)]">Login</h1>
         {error && (
-          <div className="mb-4 text-red-600 text-center font-semibold">{error}</div>
+          <div className="mb-4 text-[var(--destructive)] text-center font-semibold">{error}</div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block mb-1 font-medium">
+            <label htmlFor="email" className="block mb-1 font-medium text-[var(--foreground)]">
               Email
             </label>
             <input
@@ -64,11 +79,11 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border)] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:shadow-md transition-shadow"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block mb-1 font-medium">
+            <label htmlFor="password" className="block mb-1 font-medium text-[var(--foreground)]">
               Password
             </label>
             <input
@@ -77,13 +92,13 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--border)] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:shadow-md transition-shadow"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-[var(--primary)] text-[var(--primary-foreground)] py-2 rounded hover:bg-[var(--accent)] transition transform hover:scale-105 hover:shadow-lg disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
