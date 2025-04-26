@@ -6,9 +6,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Calendar } from "../../../components/ui/calendar";
+import * as XLSX from "xlsx";
 import Navbar from "../Navbar";
 
 interface OrderItem {
+  food_id: number;
   food_name: string;
   quantity: number;
   price?: number;
@@ -22,8 +24,14 @@ interface Order {
   items: OrderItem[];
 }
 
+interface FoodItem {
+  food_id: number;
+  food_name: string;
+}
+
 export default function AdminRecap() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,6 +44,7 @@ export default function AdminRecap() {
 
   useEffect(() => {
     fetchOrders();
+    fetchFoodItems();
   }, []);
 
   async function fetchOrders() {
@@ -52,6 +61,19 @@ export default function AdminRecap() {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchFoodItems() {
+    try {
+      const data: FoodItem[] = await apiFetch("/admin/food-items");
+      setFoodItems(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     }
   }
 
@@ -78,26 +100,32 @@ export default function AdminRecap() {
     // Get unique store names
     const storeNames = Array.from(new Set(filteredOrders.map((order) => order.branch_name)));
 
-    // Map of item name to map of store name to quantity
-    const itemStoreMap: Record<string, Record<string, number>> = {};
+    // Create a map from food_name to food_id for quick lookup
+    const foodNameToIdMap: Record<string, number> = {};
+    foodItems.forEach((food) => {
+      foodNameToIdMap[food.food_name] = food.food_id;
+    });
+
+    // Map of item name to map of store name to quantity and food_id
+    const itemStoreMap: Record<string, { storeQuantities: Record<string, number>; food_id: number }> = {};
 
     filteredOrders.forEach((order) => {
       order.items.forEach((item) => {
         if (!itemStoreMap[item.food_name]) {
-          itemStoreMap[item.food_name] = {};
+          itemStoreMap[item.food_name] = { storeQuantities: {}, food_id: foodNameToIdMap[item.food_name] || 0 };
         }
-        if (!itemStoreMap[item.food_name][order.branch_name]) {
-          itemStoreMap[item.food_name][order.branch_name] = 0;
+        if (!itemStoreMap[item.food_name].storeQuantities[order.branch_name]) {
+          itemStoreMap[item.food_name].storeQuantities[order.branch_name] = 0;
         }
-        itemStoreMap[item.food_name][order.branch_name] += item.quantity;
+        itemStoreMap[item.food_name].storeQuantities[order.branch_name] += item.quantity;
       });
     });
 
     // Calculate total per item
     const items = Object.keys(itemStoreMap).map((itemName) => {
-      const storeQuantities = itemStoreMap[itemName];
+      const { storeQuantities, food_id } = itemStoreMap[itemName];
       const total = Object.values(storeQuantities).reduce((acc, val) => acc + val, 0);
-      return { itemName, storeQuantities, total };
+      return { itemName, storeQuantities, total, food_id };
     });
 
     return { storeNames, items };
@@ -152,12 +180,52 @@ export default function AdminRecap() {
           >
             Reset
           </button>
+          <button
+            onClick={() => {
+              // Export to Excel function
+              const exportData = () => {
+                // Prepare data for worksheet
+                const wsData = [];
+
+                // Header row
+                const headerRow = ["Food ID", "Item Name", "Total", ...storeNames];
+                wsData.push(headerRow);
+
+                // Data rows
+                items.forEach(({ itemName, storeQuantities, total, food_id }) => {
+                  const row = [
+                    food_id,
+                    itemName,
+                    total,
+                    ...storeNames.map((store) => storeQuantities[store] || 0),
+                  ];
+                  wsData.push(row);
+                });
+
+                // Create worksheet and workbook
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Recap");
+
+                // Export to file
+                XLSX.writeFile(wb, "recap_orders.xlsx");
+              };
+
+              exportData();
+            }}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Export to Excel
+          </button>
         </div>
 
         {loading ? (
           <p>Loading orders...</p>
         ) : error ? (
           <p className="text-red-600">{error}</p>
+        ) : !appliedDateRange.from || !appliedDateRange.to ? (
+          // Hide table when date picker is not applied yet
+          null
         ) : items.length === 0 ? (
           <p>No orders found for the selected period.</p>
         ) : (
@@ -165,25 +233,27 @@ export default function AdminRecap() {
             <table className="min-w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-[#6D0000] text-white">
+                  <th className="border border-gray-300 px-4 py-2 text-left">Food ID</th>
                   <th className="border border-gray-300 px-4 py-2 text-left">Item Name</th>
+                  <th className="border border-gray-300 px-4 py-2 text-right">Total</th>
                   {storeNames.map((store) => (
                     <th key={store} className="border border-gray-300 px-4 py-2 text-right">
                       {store}
                     </th>
                   ))}
-                  <th className="border border-gray-300 px-4 py-2 text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
-                {items.map(({ itemName, storeQuantities, total }) => (
+                {items.map(({ itemName, storeQuantities, total, food_id }) => (
                   <tr key={itemName} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-4 py-2">{food_id}</td>
                     <td className="border border-gray-300 px-4 py-2">{itemName}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-right font-semibold">{total}</td>
                     {storeNames.map((store) => (
                       <td key={store} className="border border-gray-300 px-4 py-2 text-right">
                         {storeQuantities[store] || 0}
                       </td>
                     ))}
-                    <td className="border border-gray-300 px-4 py-2 text-right font-semibold">{total}</td>
                   </tr>
                 ))}
               </tbody>
