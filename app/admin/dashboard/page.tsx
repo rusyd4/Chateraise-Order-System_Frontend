@@ -387,7 +387,7 @@ export default function AdminDashboard() {
                                 <tr className="bg-[#6D0000] text-white">
                                   <th className="border border-[#6D0000] px-2 py-1">Case Mark</th>
                                   <th className="border border-[#6D0000] px-2 py-1">Product name</th>
-                                  <th className="border border-[#6D0000] px-2 py-1">Q'ty</th>
+                                  <th className="border border-[#6D0000] px-2 py-1">Qty</th>
                                   <th className="border border-[#6D0000] px-2 py-1" colSpan={3}>
                                     Damage Report (Qty)
                                   </th>

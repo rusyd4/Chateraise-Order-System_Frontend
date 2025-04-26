@@ -27,7 +27,7 @@ ENV NODE_ENV production
 COPY package.json package-lock.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 # Copy built files and public folder from builder
 COPY --from=builder /app/.next ./.next
