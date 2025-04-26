@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear auth token from localStorage
+    localStorage.removeItem("authToken");
+    router.push("/login");
+  };
 
   return (
-    <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4">
+    <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4 h-full">
       <div className="mb-4">
         <img
           src="/Chateraiselogo.png"
@@ -61,6 +68,14 @@ export default function Navbar() {
       >
         Recap
       </Link>
+      <div className="mt-auto">
+        <button
+          onClick={handleLogout}
+          className="w-full text-left px-3 py-2 rounded transition transform bg-red-600 text-white hover:bg-red-700 hover:scale-105"
+        >
+          Logout
+        </button>
+      </div>
     </nav>
   );
 }
