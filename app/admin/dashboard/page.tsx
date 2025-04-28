@@ -63,12 +63,81 @@ export default function AdminDashboard() {
   const [errorFilteredOrders, setErrorFilteredOrders] = useState("");
 
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Helper function to get today's date string in yyyy-MM-dd format
+  function getTodayDateString(): string {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  }
+
+  // Calculate counts of orders by status for today and last 7 days
+  function calculateOrderStatusCounts() {
+    const todayStr = getTodayDateString();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    let pendingToday = 0;
+    let onProgressToday = 0;
+    let finishedToday = 0;
+
+    let pendingLast7Days = 0;
+    let onProgressLast7Days = 0;
+    let finishedLast7Days = 0;
+
+    orders.forEach((order) => {
+      const deliveryDate = new Date(order.delivery_date);
+      const deliveryDateStr = order.delivery_date;
+
+      // Check if order is for today
+      const isToday = deliveryDateStr === todayStr;
+
+      // Check if order is within last 7 days
+      const isWithinLast7Days = deliveryDate >= sevenDaysAgo && deliveryDate <= new Date();
+
+      // Define status based on delivery date relative to today
+      // Pending: delivery_date is today or in the future (>= today)
+      // On progress: delivery_date is today
+      // Finished: delivery_date is in the past (< today)
+      if (isToday) {
+        onProgressToday++;
+      }
+      if (deliveryDateStr >= todayStr) {
+        pendingToday++;
+      }
+      if (deliveryDateStr < todayStr) {
+        finishedToday++;
+      }
+
+      if (isWithinLast7Days) {
+        if (deliveryDateStr >= todayStr) {
+          pendingLast7Days++;
+        }
+        if (isToday) {
+          onProgressLast7Days++;
+        }
+        if (deliveryDateStr < todayStr) {
+          finishedLast7Days++;
+        }
+      }
+    });
+
+    return {
+      pendingToday,
+      onProgressToday,
+      finishedToday,
+      pendingLast7Days,
+      onProgressLast7Days,
+      finishedLast7Days,
+    };
+  }
 
   useEffect(() => {
     fetchOrders();
   }, []);
+
 
   function isOrderWithinLastWeek(orderDateStr: string): boolean {
     const orderDate = new Date(orderDateStr);
@@ -143,6 +212,20 @@ export default function AdminDashboard() {
     }
   }
 
+  function filterOrdersByStatus(status: string) {
+    const todayStr = getTodayDateString();
+    let filtered: Order[] = [];
+    if (status === "Pending") {
+      filtered = orders.filter((order) => order.delivery_date >= todayStr);
+    } else if (status === "On Progress") {
+      filtered = orders.filter((order) => order.delivery_date === todayStr);
+    } else if (status === "Finished") {
+      filtered = orders.filter((order) => order.delivery_date < todayStr);
+    }
+    setFilteredOrders(filtered);
+    setShowOrderDetails(true);
+  }
+
   const pathname = usePathname();
 
   return (
@@ -151,6 +234,10 @@ export default function AdminDashboard() {
       <main className="flex-1 p-0 space-y-12">
         <section>
           <h2 className="text-3xl font-bold mb-4">Track Branch Store Orders</h2>
+
+          {/* Widgets for order statuses */}
+          {/* Removed today widgets, only last 7 days widgets will be shown below filters */}
+
           {!showOrderDetails ? (
             <>
               <div className="mb-4 flex space-x-4 items-end">
@@ -247,6 +334,54 @@ export default function AdminDashboard() {
               ) : filteredOrders.length === 0 && (selectedBranch || selectedDate) ? (
                 <p>No filtered orders found.</p>
               ) : null}
+
+              {/* Widgets for last 7 days order statuses */}
+              <h3 className="text-xl font-semibold mb-4">Last 7 Days Order</h3>
+              <div className="grid grid-cols-3 gap-6 mt-2">
+                {(() => {
+                  const {
+                    pendingLast7Days,
+                    onProgressLast7Days,
+                    finishedLast7Days,
+                  } = calculateOrderStatusCounts();
+
+                  return (
+                    <>
+              <div
+                className="bg-white rounded-lg shadow p-6 text-center cursor-pointer transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 hover:-translate-y-1"
+                onClick={() => {
+                  setSelectedStatus("Pending");
+                  filterOrdersByStatus("Pending");
+                }}
+              >
+                <h3 className="text-lg font-semibold mb-2">Pending</h3>
+                <p className="text-3xl font-bold">{pendingLast7Days}</p>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow p-6 text-center cursor-pointer transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 hover:-translate-y-1"
+                onClick={() => {
+                  setSelectedStatus("On Progress");
+                  filterOrdersByStatus("On Progress");
+                }}
+              >
+                <h3 className="text-lg font-semibold mb-2">On Progress</h3>
+                <p className="text-3xl font-bold">{onProgressLast7Days}</p>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow p-6 text-center cursor-pointer transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 hover:-translate-y-1"
+                onClick={() => {
+                  setSelectedStatus("Finished");
+                  filterOrdersByStatus("Finished");
+                }}
+              >
+                <h3 className="text-lg font-semibold mb-2">Finished</h3>
+                <p className="text-3xl font-bold">{finishedLast7Days}</p>
+              </div>
+                    </>
+                  );
+                })()}
+              </div>
+
               {/* Show all orders before filtering */}
               {loadingOrders ? (
                 <p>Loading orders...</p>
@@ -328,10 +463,10 @@ export default function AdminDashboard() {
                               </table>
                             </div>
 
-                            {/* Document Title */}
+                            {/* Document Title */} 
                             <h1 className="text-center text-4xl font-extrabold mb-6">DELIVERY ORDER</h1>
 
-                            {/* Customer and Delivery Information */}
+                            {/* Customer and Delivery Information */} 
                             <div className="mb-6 grid grid-cols-3 gap-x-8">
                               <div className="space-y-1">
                                 <p>Customer Name  :</p>
@@ -347,7 +482,7 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            {/* Product Table */}
+                            {/* Product Table */} 
                             <table className="w-full border border-black rounded mb-6 text-sm">
                               <thead>
                                 <tr>
@@ -381,7 +516,7 @@ export default function AdminDashboard() {
                               </tbody>
                             </table>
 
-                            {/* Notes Section */}
+                            {/* Notes Section */} 
                             <div className="flex justify-between">
                               <div className="w-1/2">
                                 <h3 className="font-semibold mb-2">Catatan</h3>
