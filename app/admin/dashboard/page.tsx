@@ -46,6 +46,7 @@ export default function AdminDashboard() {
     delivery_time?: string;
     branch_address?: string;
     items: OrderItem[];
+    qrCodeImageUrl?: string;
   }
 
   const [orders, setOrders] = useState<Order[]>([]);
@@ -333,7 +334,7 @@ export default function AdminDashboard() {
                           <div key={order.order_id || index} className="mb-6 border-b border-gray-300 pb-4">
                             {/* Header Section */} 
                             <div className="flex justify-between items-center mb-4">
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-4">
                                 <img
                                   src="/Chateraiselogo.png"
                                   alt="Chateraise Logo"
@@ -341,23 +342,32 @@ export default function AdminDashboard() {
                                   height={120}
                                   className="object-contain"
                                 />
+                                {order.qrCodeImageUrl && (
+                                  <img
+                                    src={order.qrCodeImageUrl}
+                                    alt="Order QR Code"
+                                    width={80}
+                                    height={80}
+                                    className="object-contain border border-gray-300 rounded"
+                                  />
+                                )}
                               </div>
                               <table className="text-sm border border-black rounded w-auto">
                                 <tbody>
                                   <tr>
-                                    <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1 font-semibold">Order Date</td>
+                                    <td className="text-[10px] border border-t-white border-b-black border-x-white p-1 font-semibold">Order Date</td>
                                     <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1"></td>
                                     <td className="text-[10px] border border-t-white border-b-black border-x-white x-2 py-1">{orderDateFormatted}</td>
                                     <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1"></td>
                                   </tr> 
                                   <tr>
-                                    <td className="text-[10px] border border-black px-2 py-1 font-semibold">Jam Datang</td>
+                                    <td className="text-[10px] border border-black p-1 font-semibold">Jam Datang</td>
                                     <td className="text-[10px] border border-black px-6 py-1"></td>
-                                    <td className="text-[10px] border border-black px-2 py-1 font-semibold">Jam Selesai</td>
+                                    <td className="text-[10px] border border-black p-1 font-semibold">Jam Selesai</td>
                                     <td className="text-[10px] border border-black px-6 py-1"></td>
                                   </tr>
                                   <tr>
-                                    <td className="text-[10px] border border-black px-2 py-1 font-semibold">Suhu Truck</td>
+                                    <td className="text-[10px] border border-black p-1 font-semibold">Suhu Truck</td>
                                   </tr>
                                 </tbody>
                               </table>
