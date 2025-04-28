@@ -1,10 +1,10 @@
-
 'use client'
 
 import { useEffect, useState, useRef } from "react";
 import apiFetch from "../../../lib/api";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import OrderDetailsModal from "./OrderDetailsModal";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -73,87 +73,17 @@ export default function AdminDashboard() {
     return today.toISOString().split("T")[0];
   }
 
-  // Calculate counts of orders by status for today and last 7 days
-  function calculateOrderStatusCounts() {
-    const todayStr = getTodayDateString();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    let pendingToday = 0;
-    let onProgressToday = 0;
-    let finishedToday = 0;
-
-    let pendingLast7Days = 0;
-    let onProgressLast7Days = 0;
-    let finishedLast7Days = 0;
-
-    orders.forEach((order) => {
-      const deliveryDate = new Date(order.delivery_date);
-      const deliveryDateStr = order.delivery_date;
-
-      // Check if order is for today
-      const isToday = deliveryDateStr === todayStr;
-
-      // Check if order is within last 7 days
-      const isWithinLast7Days = deliveryDate >= sevenDaysAgo && deliveryDate <= new Date();
-
-      // Define status based on delivery date relative to today
-      // Pending: delivery_date is today or in the future (>= today)
-      // On progress: delivery_date is today
-      // Finished: delivery_date is in the past (< today)
-      if (isToday) {
-        onProgressToday++;
-      }
-      if (deliveryDateStr >= todayStr) {
-        pendingToday++;
-      }
-      if (deliveryDateStr < todayStr) {
-        finishedToday++;
-      }
-
-      if (isWithinLast7Days) {
-        if (deliveryDateStr >= todayStr) {
-          pendingLast7Days++;
-        }
-        if (isToday) {
-          onProgressLast7Days++;
-        }
-        if (deliveryDateStr < todayStr) {
-          finishedLast7Days++;
-        }
-      }
-    });
-
-    return {
-      pendingToday,
-      onProgressToday,
-      finishedToday,
-      pendingLast7Days,
-      onProgressLast7Days,
-      finishedLast7Days,
-    };
-  }
-
   useEffect(() => {
-    fetchOrders();
+    fetchPendingOrders();
   }, []);
 
 
-  function isOrderWithinLastWeek(orderDateStr: string): boolean {
-    const orderDate = new Date(orderDateStr);
-    const now = new Date();
-    const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
-    return orderDate >= sevenDaysAgo && orderDate <= now;
-  }
-
-  async function fetchOrders() {
+  async function fetchPendingOrders() {
     setLoadingOrders(true);
     setErrorOrders("");
     try {
-      const data = await apiFetch("/admin/orders");
-      // Filter orders to only those from the last week
-      const recentOrders = data.filter((order: Order) => isOrderWithinLastWeek(order.delivery_date));
-      setOrders(recentOrders);
+      const data = await apiFetch("/admin/orders/pending");
+      setOrders(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorOrders(err.message);
@@ -166,8 +96,8 @@ export default function AdminDashboard() {
   }
 
   async function fetchFilteredOrders() {
-    if (!selectedBranch && !selectedDate) {
-      alert("Please select at least one filter: branch or date");
+    if (!selectedBranch && !selectedDate && !selectedDeliveryDate) {
+      alert("Please select at least one filter: branch, order date, or delivery date");
       return;
     }
     setLoadingFilteredOrders(true);
@@ -175,7 +105,8 @@ export default function AdminDashboard() {
     try {
       const queryParams = new URLSearchParams();
       if (selectedBranch) queryParams.append("branch_name", selectedBranch);
-      if (selectedDate) queryParams.append("delivery_date", format(selectedDate, "yyyy-MM-dd"));
+      if (selectedDate) queryParams.append("order_date", format(selectedDate, "yyyy-MM-dd"));
+      if (selectedDeliveryDate) queryParams.append("delivery_date", format(selectedDeliveryDate, "yyyy-MM-dd"));
       const data = await apiFetch("/admin/orders/filter?" + queryParams.toString());
       setFilteredOrders(data);
       setShowOrderDetails(true);
@@ -190,13 +121,31 @@ export default function AdminDashboard() {
     }
   }
 
+
   async function handleSaveAsPDF() {
     if (!printRef.current) {
       alert("Nothing to print");
       return;
     }
-    const element = printRef.current;
+    if (filteredOrders.length === 0) {
+      alert("No orders to update");
+      return;
+    }
     try {
+      // Update order status to 'In-progress' for each filtered order
+      for (const order of filteredOrders) {
+        try {
+          await apiFetch(`/admin/orders/${order.order_id}/status/in-progress`, {
+            method: "PUT",
+          });
+        } catch (error) {
+          console.error(`Failed to update order ${order.order_id} status:`, error);
+          // Optionally, you can alert or handle the error differently
+        }
+      }
+
+      // Proceed with PDF generation
+      const element = printRef.current;
       const canvas = await html2canvas(element, { scale: 2 });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
@@ -210,20 +159,6 @@ export default function AdminDashboard() {
       console.error("Error generating PDF:", error);
       alert("Failed to generate PDF");
     }
-  }
-
-  function filterOrdersByStatus(status: string) {
-    const todayStr = getTodayDateString();
-    let filtered: Order[] = [];
-    if (status === "Pending") {
-      filtered = orders.filter((order) => order.delivery_date >= todayStr);
-    } else if (status === "On Progress") {
-      filtered = orders.filter((order) => order.delivery_date === todayStr);
-    } else if (status === "Finished") {
-      filtered = orders.filter((order) => order.delivery_date < todayStr);
-    }
-    setFilteredOrders(filtered);
-    setShowOrderDetails(true);
   }
 
   const pathname = usePathname();
@@ -248,7 +183,7 @@ export default function AdminDashboard() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" id="branchSelect">
-                        {selectedBranch || "-- All Branches --"}
+                        {selectedBranch || "-- Select Branches --"}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
@@ -256,9 +191,6 @@ export default function AdminDashboard() {
                         value={selectedBranch}
                         onValueChange={(value) => setSelectedBranch(value)}
                       >
-                        <DropdownMenuRadioItem value="">
-                          -- All Branches --
-                        </DropdownMenuRadioItem>
                         {orders.length > 0 &&
                           Array.from(new Set(orders.map((order) => order.branch_name))).map((branchName) => (
                             <DropdownMenuRadioItem key={branchName} value={branchName}>
@@ -307,18 +239,39 @@ export default function AdminDashboard() {
                   </Popover>
                 </div>
                 <div>
-                <label htmlFor="deliveryDate" className="block font-medium mb-1">
+                  <label htmlFor="deliveryDate" className="block font-medium mb-1">
                     Delivery Date
-                </label>
-                <div
-                  id="deliveryDate"
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal border border-gray-300 rounded px-3 py-1 text-sm leading-6",
-                    !selectedDeliveryDate && "text-muted-foreground"
-                  )}
-                >
-                  {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : "No delivery date"}
-                </div>
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] justify-start text-left font-normal",
+                          !selectedDeliveryDate && "text-muted-foreground"
+                        )}
+                        id="deliveryDate"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDeliveryDate}
+                      onSelect={(date) => {
+                        setSelectedDeliveryDate(date);
+                        if (date) {
+                          const orderDate = new Date(date);
+                          orderDate.setDate(orderDate.getDate() - 2);
+                          setSelectedDate(orderDate);
+                        }
+                      }}
+                      initialFocus
+                    />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <button
                   onClick={fetchFilteredOrders}
@@ -335,52 +288,7 @@ export default function AdminDashboard() {
                 <p>No filtered orders found.</p>
               ) : null}
 
-              {/* Widgets for last 7 days order statuses */}
-              <h3 className="text-xl font-semibold mb-4">Last 7 Days Order</h3>
-              <div className="grid grid-cols-3 gap-6 mt-2">
-                {(() => {
-                  const {
-                    pendingLast7Days,
-                    onProgressLast7Days,
-                    finishedLast7Days,
-                  } = calculateOrderStatusCounts();
-
-                  return (
-                    <>
-              <div
-                className="bg-white rounded-lg shadow p-6 text-center cursor-pointer transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 hover:-translate-y-1"
-                onClick={() => {
-                  setSelectedStatus("Pending");
-                  filterOrdersByStatus("Pending");
-                }}
-              >
-                <h3 className="text-lg font-semibold mb-2">Pending</h3>
-                <p className="text-3xl font-bold">{pendingLast7Days}</p>
-              </div>
-              <div
-                className="bg-white rounded-lg shadow p-6 text-center cursor-pointer transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 hover:-translate-y-1"
-                onClick={() => {
-                  setSelectedStatus("On Progress");
-                  filterOrdersByStatus("On Progress");
-                }}
-              >
-                <h3 className="text-lg font-semibold mb-2">On Progress</h3>
-                <p className="text-3xl font-bold">{onProgressLast7Days}</p>
-              </div>
-              <div
-                className="bg-white rounded-lg shadow p-6 text-center cursor-pointer transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 hover:-translate-y-1"
-                onClick={() => {
-                  setSelectedStatus("Finished");
-                  filterOrdersByStatus("Finished");
-                }}
-              >
-                <h3 className="text-lg font-semibold mb-2">Finished</h3>
-                <p className="text-3xl font-bold">{finishedLast7Days}</p>
-              </div>
-                    </>
-                  );
-                })()}
-              </div>
+              {/* Removed last 7 days order statuses widgets */}
 
               {/* Show all orders before filtering */}
               {loadingOrders ? (
@@ -394,185 +302,13 @@ export default function AdminDashboard() {
             </>
           ) : (
             <>
-              {/* Modal Overlay */}
-              <div className="fixed inset-0 bg-black/75 flex justify-center items-center z-50 overflow-y-auto">
-                {/* Modal Content */}
-                <div
-                  ref={printRef}
-                  className="bg-white p-8 border border-gray-300 rounded shadow"
-                  style={{ height: '95vh', width: 'calc(95vh / 1.414)' }}
-                >
-                  {filteredOrders.length === 0 ? (
-                    <p>No orders to display.</p>
-                  ) : (
-                    <>
-                      {filteredOrders.map((order: Order, index: number) => {
-                        // Format dates
-                        const orderDateFormatted = new Date(order.order_date).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: '2-digit',
-                        });
-                        const deliveryDateObj = new Date(order.delivery_date);
-                        const deliveryDateFormatted = deliveryDateObj.toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                        });
-                        const deliveryDay = deliveryDateObj.toLocaleDateString('en-US', { weekday: 'short' });
 
-                        return (
-                          <div key={order.order_id || index} className="mb-6 border-b border-gray-300 pb-4">
-                            {/* Header Section */} 
-                            <div className="flex justify-between items-center mb-4">
-                              <div className="flex items-center space-x-4">
-                                <img
-                                  src="/Chateraiselogo.png"
-                                  alt="Chateraise Logo"
-                                  width={120}
-                                  height={120}
-                                  className="object-contain"
-                                />
-                                {order.qrCodeImageUrl && (
-                                  <img
-                                    src={order.qrCodeImageUrl}
-                                    alt="Order QR Code"
-                                    width={80}
-                                    height={80}
-                                    className="object-contain border border-gray-300 rounded"
-                                  />
-                                )}
-                              </div>
-                              <table className="text-sm border border-black rounded w-auto">
-                                <tbody>
-                                  <tr>
-                                    <td className="text-[10px] border border-t-white border-b-black border-x-white p-1 font-semibold">Order Date</td>
-                                    <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1"></td>
-                                    <td className="text-[10px] border border-t-white border-b-black border-x-white x-2 py-1">{orderDateFormatted}</td>
-                                    <td className="text-[10px] border border-t-white border-b-black border-x-white px-2 py-1"></td>
-                                  </tr> 
-                                  <tr>
-                                    <td className="text-[10px] border border-black p-1 font-semibold">Jam Datang</td>
-                                    <td className="text-[10px] border border-black px-6 py-1"></td>
-                                    <td className="text-[10px] border border-black p-1 font-semibold">Jam Selesai</td>
-                                    <td className="text-[10px] border border-black px-6 py-1"></td>
-                                  </tr>
-                                  <tr>
-                                    <td className="text-[10px] border border-black p-1 font-semibold">Suhu Truck</td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-
-                            {/* Document Title */} 
-                            <h1 className="text-center text-4xl font-extrabold mb-6">DELIVERY ORDER</h1>
-
-                            {/* Customer and Delivery Information */} 
-                            <div className="mb-6 grid grid-cols-3 gap-x-8">
-                              <div className="space-y-1">
-                                <p>Customer Name  :</p>
-                                <p>Delivery Date  :</p>
-                                <p>Delivery Time  :</p>
-                                <p>Delivery Address :</p>
-                              </div>
-                              <div className="space-y-1 font-bold">
-                                <p>{order.branch_name}</p>
-                                <p>{`${deliveryDateFormatted} (${deliveryDay})`}</p>
-                                <p>{order.delivery_time || "--"}</p>
-                                <p>{order.branch_address || "--"}</p>
-                              </div>
-                            </div>
-
-                            {/* Product Table */} 
-                            <table className="w-full border border-black rounded mb-6 text-sm">
-                              <thead>
-                                <tr>
-                                  <th className="border border-t-white border-b-black border-x-white px-2 py-1"></th>
-                                  <th className="border border-t-white border-b-black border-x-white px-2 py-1"></th>
-                                  <th className="border border-t-white border-b-black border-l-white border-r-black px-2 py-1"></th>
-                                  <th className="border border-black px-2 py-1" colSpan={3}>
-                                    Damage Report (Qty)
-                                  </th>
-                                </tr>
-                                <tr>
-                                  <th className="border border-black px-2 py-1">Case Mark</th>
-                                  <th className="border border-black px-2 py-1">Product</th>
-                                  <th className="border border-black px-2 py-1">Qty</th>
-                                  <th className="border border-black px-2 py-1">Melt Cream</th>
-                                  <th className="border border-black px-2 py-1">Broken</th>
-                                  <th className="border border-black px-2 py-1">Other</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {order.items.map((item, idx) => (
-                                  <tr key={idx} className="odd:bg-white even:bg-gray-50">
-                                    <td className="border border-black px-2 py-1">{item.food_id}</td>
-                                    <td className="border border-black px-2 py-1">{item.food_name}</td>
-                                    <td className="border border-black px-2 py-1">{item.quantity} carton</td>
-                                    <td className="border border-black px-2 py-1"></td>
-                                    <td className="border border-black px-2 py-1"></td>
-                                    <td className="border border-black px-2 py-1"></td>
-                                    </tr>
-                                ))}
-                              </tbody>
-                            </table>
-
-                            {/* Notes Section */} 
-                            <div className="flex justify-between">
-                              <div className="w-1/2">
-                                <h3 className="font-semibold mb-2">Catatan</h3>
-                                <ul className="list-disc list-inside text-[10px] space-y-1">
-                                  <p className="font-bold underline">
-                                    1. Upper Carton dari pudding wajib dikembalikan
-                                  </p>
-                                  <p>2. Hitung ulang saat penerimaan</p>
-                                  <p>3. Komplain setelah meninggalkan toko/pabrik tidak diterima</p>
-                                  <p>
-                                    4. Jika ada produk rusak wajib menuliskan BAP & foto. Kirim segera melalui email
-                                  </p>
-                                </ul>
-                              </div>
-
-                              {/* Signature/Confirmation Table */}
-                              <div className="w-1/2 pl-4">
-                                <table className="w-full border border-black text-[12px]">
-                                  <thead>
-                                    <tr>
-                                      <th className="border border-black py-1">Received by</th>
-                                      <th className="border border-black py-1">Delivered by</th>
-                                      <th className="border border-black py-1">Prepared by</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                      <td className="border border-black px-8 py-8"></td>
-                                      <td className="border border-black px-8 py-8"></td>
-                                      <td className="border border-black px-8 py-8"></td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
-                <div className="ml-4 flex flex-col space-y-4">
-                  <button
-                    onClick={handleSaveAsPDF}
-                    className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-                  >
-                    Save as PDF
-                  </button>
-                  <button
-                    onClick={() => setShowOrderDetails(false)}
-                    className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
-                  >
-                    Back to Filters
-                  </button>
-                </div>
-              </div>
+          <OrderDetailsModal
+            filteredOrders={filteredOrders}
+            printRef={printRef as React.RefObject<HTMLDivElement>}
+            handleSaveAsPDF={handleSaveAsPDF}
+            onClose={() => setShowOrderDetails(false)}
+          />
             </>
           )}
         </section>
