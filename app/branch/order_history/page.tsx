@@ -3,6 +3,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
+import BranchNavbar from "../../../components/BranchNavbar";
+
+interface OrderItem {
+  food_name: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  order_id: number;
+  delivery_date: string;
+  order_date: string;
+  items: OrderItem[];
+}
+
 
 interface OrderItem {
   food_name: string;
@@ -107,51 +122,7 @@ export default function OrderHistory() {
 
   return (
     <>
-      <nav className="bg-[#6D0000] text-white p-4 flex items-center justify-between max-w-7xl mx-auto rounded-b-2xl">
-        <div className="cursor-pointer" onClick={() => router.push("/")}>
-          <img src="/image-removebg-preview.png" alt="Logo" className="h-12" />
-        </div>
-        <div className="space-x-4">
-          <button
-            className={
-              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-              (pathname === "/branch/store"
-                ? "bg-white text-[#6D0000] shadow-md scale-105"
-                : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
-            }
-            onClick={() => router.push("/branch/store")}
-            onMouseEnter={() => setStoreHover(true)}
-            onMouseLeave={() => setStoreHover(false)}
-          >
-            <span className="inline-flex items-center space-x-2">
-              <span>Store</span>
-              <img
-                src={pathname === "/branch/store" || storeHover ? "/Shopping_Bag_02_red.svg" : "/Shopping_Bag_02_white.svg"}
-                alt="Store Icon"
-                className="h-5 w-5"
-              />
-            </span>
-          </button>
-          <button
-            className={
-              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-              "bg-white text-[#6D0000] shadow-md scale-105"
-            }
-            onClick={goToOrderHistory}
-            onMouseEnter={() => setOrderHistoryHover(true)}
-            onMouseLeave={() => setOrderHistoryHover(false)}
-          >
-            <span className="inline-flex items-center space-x-2">
-              <span>Order History</span>
-              <img
-                src="/OrderHistory_Red.svg"
-                alt="Order History Icon"
-                className="h-5 w-5"
-              />
-            </span>
-          </button>
-        </div>
-      </nav>
+      <BranchNavbar />
       <div className="p-8 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Order History</h1>
         <div className="mb-4">

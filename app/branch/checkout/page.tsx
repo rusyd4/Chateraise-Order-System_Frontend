@@ -18,13 +18,14 @@ interface BranchProfile {
   email?: string;
 }
 
+import BranchNavbar from "../../../components/BranchNavbar";
+
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [branchProfile, setBranchProfile] = useState<BranchProfile | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
@@ -84,54 +85,14 @@ export default function CheckoutPage() {
     }
   }
 
-  function goToStore() {
-    router.push("/branch/store");
-  }
+function goToStore() {
+  router.push("/branch/store");
+}
 
   if (cart.length === 0) {
     return (
       <div>
-        <nav className="bg-[#6D0000] text-white p-4 flex items-center justify-between max-w-7xl mx-auto rounded-b-2xl">
-          <div className="cursor-pointer" onClick={() => router.push("/")}>
-            <img src="/image-removebg-preview.png" alt="Logo" className="h-12" />
-          </div>
-          <div className="space-x-4">
-            <button
-              className={
-                "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-                (pathname === "/branch/store"
-                  ? "bg-white text-[#6D0000] shadow-md scale-105"
-                  : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
-              }
-              onClick={goToStore}
-            >
-              <span className="inline-flex items-center space-x-2">
-                <span>Store</span>
-                <img
-                  src={pathname === "/branch/store" ? "/Shopping_Bag_02_red.svg" : "/Shopping_Bag_02_white.svg"}
-                  alt="Store Icon"
-                  className="h-5 w-5"
-                />
-              </span>
-            </button>
-            <button
-              className={
-                "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-                "bg-white text-[#6D0000] shadow-md scale-105"
-              }
-              disabled
-            >
-              <span className="inline-flex items-center space-x-2">
-                <span>Order History</span>
-                <img
-                  src="/OrderHistory_Red.svg"
-                  alt="Order History Icon"
-                  className="h-5 w-5"
-                />
-              </span>
-            </button>
-          </div>
-        </nav>
+        <BranchNavbar />
         <div className="p-8 max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold mb-4">Checkout</h1>
           <p>Your cart is empty.</p>
@@ -142,47 +103,7 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <nav className="bg-[#6D0000] text-white p-4 flex items-center justify-between max-w-7xl mx-auto rounded-b-2xl">
-        <div className="cursor-pointer" onClick={() => router.push("/")}>
-          <img src="/image-removebg-preview.png" alt="Logo" className="h-12" />
-        </div>
-        <div className="space-x-4">
-          <button
-            className={
-              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-              (pathname === "/branch/store"
-                ? "bg-white text-[#6D0000] shadow-md scale-105"
-                : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
-            }
-            onClick={goToStore}
-          >
-            <span className="inline-flex items-center space-x-2">
-              <span>Store</span>
-              <img
-                src={pathname === "/branch/store" ? "/Shopping_Bag_02_red.svg" : "/Shopping_Bag_02_white.svg"}
-                alt="Store Icon"
-                className="h-5 w-5"
-              />
-            </span>
-          </button>
-          <button
-            className={
-              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-              "bg-white text-[#6D0000] shadow-md scale-105"
-            }
-            disabled
-          >
-            <span className="inline-flex items-center space-x-2">
-              <span>Order History</span>
-              <img
-                src="/OrderHistory_Red.svg"
-                alt="Order History Icon"
-                className="h-5 w-5"
-              />
-            </span>
-          </button>
-        </div>
-      </nav>
+      <BranchNavbar />
       <div className="p-8 max-w-7xl mx-auto">
         {!showOrderDetails ? (
           <>
