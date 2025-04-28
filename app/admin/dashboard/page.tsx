@@ -220,41 +220,18 @@ export default function AdminDashboard() {
                   </Popover>
                 </div>
                 <div>
-                  <label htmlFor="deliveryDate" className="block font-medium mb-1">
-                    Select Delivery Date
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] justify-start text-left font-normal",
-                          !selectedDeliveryDate && "text-muted-foreground"
-                        )}
-                        id="deliveryDate"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDeliveryDate}
-                      onSelect={(date) => {
-                        setSelectedDeliveryDate(date);
-                        if (date) {
-                          const orderDate = new Date(date);
-                          orderDate.setDate(orderDate.getDate() - 2);
-                          setSelectedDate(orderDate);
-                        } else {
-                          setSelectedDate(undefined);
-                        }
-                      }}
-                      initialFocus
-                    />
-                    </PopoverContent>
-                  </Popover>
+                <label htmlFor="deliveryDate" className="block font-medium mb-1">
+                    Delivery Date
+                </label>
+                <div
+                  id="deliveryDate"
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal border border-gray-300 rounded px-3 py-1 text-sm leading-6",
+                    !selectedDeliveryDate && "text-muted-foreground"
+                  )}
+                >
+                  {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : "No delivery date"}
+                </div>
                 </div>
                 <button
                   onClick={fetchFilteredOrders}
@@ -277,39 +254,8 @@ export default function AdminDashboard() {
                 <p className="text-red-600">{errorOrders}</p>
               ) : orders.length === 0 ? (
                 <p>No orders found.</p>
-              ) : (
-                <div className="mt-6 border border-gray-300 rounded p-4 max-h-[60vh] overflow-y-auto">
-                  <h3 className="text-xl font-semibold mb-4">Past 7 Days Orders</h3>
-                  {orders.map((order) => (
-                    <div key={order.order_id} className="mb-4 border-b border-gray-300 pb-2">
-                      <p><strong>Order ID:</strong> {order.order_id}</p>
-                      <p><strong>Branch Name:</strong> {order.branch_name}</p>
-                      <p><strong>Order Date:</strong> {order.delivery_date}</p>
-                      <p><strong>Submission Time:</strong> {order.order_date}</p>
-                      <p><strong>Branch Address:</strong> {order.branch_address || "N/A"}</p>
-                      <div className="mt-2">
-                        <strong>Items:</strong>
-                        <table className="w-full mt-1 border border-[#6D0000] rounded">
-                          <thead>
-                            <tr className="bg-[#6D0000] text-white">
-                              <th className="border border-[#6D0000] px-2 py-1 text-left">Food Name</th>
-                              <th className="border border-[#6D0000] px-2 py-1 text-left">Quantity</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {order.items.map((item, idx) => (
-                              <tr key={idx} className="odd:bg-white even:bg-gray-50">
-                                <td className="border border-gray-300 px-2 py-1">{item.food_name}</td>
-                                <td className="border border-gray-300 px-2 py-1">{item.quantity}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              ) : null
+              }
             </>
           ) : (
             <>

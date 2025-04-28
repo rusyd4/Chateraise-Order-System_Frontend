@@ -188,7 +188,7 @@ export default function ManageFoodItems() {
     <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
       <Navbar />
       <main className="flex-1 p-0 space-y-12">
-        <h2 className="text-3xl font-bold mb-4">Manage Food Items</h2>
+        <h2 className="text-3xl font-bold mb-4">Manage Products</h2>
         <button
           onClick={handleAddFood}
           className="mb-6 bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
@@ -197,17 +197,10 @@ export default function ManageFoodItems() {
         </button>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-md w-full p-6">
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
-              aria-label="Close modal"
-            >
-              &#x2715;
-            </button>
             <form onSubmit={handleFoodFormSubmit} className="space-y-4">
               <div>
                 <label htmlFor="food_id" className="block font-medium mb-1">
-                  Food ID
+                  Product ID
                 </label>
                 <input
                   type="text"
@@ -283,6 +276,7 @@ export default function ManageFoodItems() {
               >
                 {foodForm.editingId ? "Update Food Item" : "Add Product"}
               </button>
+              {/*
               {foodForm.editingId && (
                 <button
                   type="button"
@@ -292,6 +286,7 @@ export default function ManageFoodItems() {
                   Cancel
                 </button>
               )}
+              */}
             </form>
           </DialogContent>
         </Dialog>
@@ -315,8 +310,8 @@ export default function ManageFoodItems() {
         <table className="w-full border border-gray-300 rounded">
           <thead className="bg-[#6D0000] text-white">
             <tr>
-              <th className="border border-[#6D0000] p-2 text-left">Food ID</th>
-              <th className="border border-[#6D0000] p-2 text-left">Food Name</th>
+            <th className="border border-[#6D0000] p-2 text-left">Product ID</th>
+            <th className="border border-[#6D0000] p-2 text-left">Product Name</th>
               <th className="border border-[#6D0000] p-2 text-left">Description</th>
               <th className="border border-[#6D0000] p-2 text-left">Price</th>
               <th className="border border-[#6D0000] p-2 text-left">Available</th>

@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
+    console.log("handleSubmit triggered");
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -55,7 +56,7 @@ export default function LoginPage() {
       />
       <div className="absolute inset-0 bg-gray-200 opacity-20" />
       <div className="relative max-w-md w-full bg-[var(--card)] p-8 rounded-xl shadow-[0_1px_30px_rgba(109,0,0,0.3)]">
-        <div className="flex justify-center mb-6 transition transform hover:scale-105 hover:shadow-lg cursor-pointer">
+        <div className="flex justify-center mb-6 transition transform hover:scale-105 cursor-pointer">
           <Image
             src="/Chateraiselogo.png"
             alt="Chateraise Logo"
@@ -79,7 +80,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-[var(--border)] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:shadow-md transition-shadow"
+              className="w-full border border-[var(--border)] rounded px-3 py-2 cursor-pointer hover:border-[#6D0000] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:shadow-md transition duration-300 ease-in-out"
             />
           </div>
           <div>
@@ -92,13 +93,13 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-[var(--border)] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:shadow-md transition-shadow"
+              className="w-full border border-[var(--border)] rounded px-3 py-2 cursor-pointer hover:border-[#6D0000] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:shadow-md transition duration-300 ease-in-out"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[var(--primary)] text-[var(--primary-foreground)] py-2 rounded hover:bg-[var(--accent)] transition transform hover:scale-105 hover:shadow-lg disabled:opacity-50"
+            className="w-full bg-[#6D0000] text-[var(--primary-foreground)] py-2 rounded transition transform hover:scale-105 hover:shadow-lg disabled:opacity-50 cursor-pointer"
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
