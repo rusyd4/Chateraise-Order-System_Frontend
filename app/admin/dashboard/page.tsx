@@ -238,12 +238,21 @@ export default function AdminDashboard() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDeliveryDate}
-                        onSelect={setSelectedDeliveryDate}
-                        initialFocus
-                      />
+                    <Calendar
+                      mode="single"
+                      selected={selectedDeliveryDate}
+                      onSelect={(date) => {
+                        setSelectedDeliveryDate(date);
+                        if (date) {
+                          const orderDate = new Date(date);
+                          orderDate.setDate(orderDate.getDate() - 2);
+                          setSelectedDate(orderDate);
+                        } else {
+                          setSelectedDate(undefined);
+                        }
+                      }}
+                      initialFocus
+                    />
                     </PopoverContent>
                   </Popover>
                 </div>
