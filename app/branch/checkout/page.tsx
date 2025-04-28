@@ -47,6 +47,15 @@ export default function CheckoutPage() {
     }, 0);
   }
 
+  function formatRupiah(amount: number) {
+    return (
+      "Rp " +
+      amount
+        .toFixed(0)
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    );
+  }
+
   async function createOrder() {
     try {
       const date = new Date();
@@ -99,16 +108,15 @@ function handleConfirmOrder() {
                   {item.food_name} x {item.quantity}
                 </span>
                 <span>
-                  $
                   {typeof item.price === "number"
-                    ? (item.price * item.quantity).toFixed(2)
-                    : (parseFloat(item.price) * item.quantity).toFixed(2)}
+                    ? formatRupiah(item.price * item.quantity)
+                    : formatRupiah(parseFloat(item.price) * item.quantity)}
                 </span>
               </li>
             ))}
           </ul>
           <p className="mb-6 font-semibold">
-            Total: ${calculateTotal().toFixed(2)}
+            Total: {formatRupiah(calculateTotal())}
           </p>
           <button
             onClick={handleConfirmOrder}
@@ -147,16 +155,15 @@ function handleConfirmOrder() {
                   {item.food_name} x {item.quantity}
                 </span>
                 <span>
-                  $
                   {typeof item.price === "number"
-                    ? (item.price * item.quantity).toFixed(2)
-                    : (parseFloat(item.price) * item.quantity).toFixed(2)}
+                    ? formatRupiah(item.price * item.quantity)
+                    : formatRupiah(parseFloat(item.price) * item.quantity)}
                 </span>
               </li>
             ))}
           </ul>
           <p className="font-semibold">
-            Total Price: ${calculateTotal().toFixed(2)}
+            Total Price: {formatRupiah(calculateTotal())}
           </p>
           <button
             onClick={handlePrint}

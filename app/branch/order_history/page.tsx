@@ -23,8 +23,11 @@ export default function OrderHistory() {
   const [monthFilter, setMonthFilter] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [orderHistoryHover, setOrderHistoryHover] = useState(false);
+  const [storeHover, setStoreHover] = useState(false);
 
   const router = useRouter();
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
 
   useEffect(() => {
     fetchOrders();
@@ -104,16 +107,48 @@ export default function OrderHistory() {
 
   return (
     <>
-      <nav className="bg-gray-800 text-white p-4 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="text-xl font-bold cursor-pointer" onClick={() => router.push("/")}>
-          Logo
+      <nav className="bg-[#6D0000] text-white p-4 flex items-center justify-between max-w-7xl mx-auto rounded-b-2xl">
+        <div className="cursor-pointer" onClick={() => router.push("/")}>
+          <img src="/image-removebg-preview.png" alt="Logo" className="h-12" />
         </div>
         <div className="space-x-4">
-          <button className="hover:underline" onClick={() => router.push("/branch/store")}>
-            Store
+          <button
+            className={
+              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
+              (pathname === "/branch/store"
+                ? "bg-white text-[#6D0000] shadow-md scale-105"
+                : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
+            }
+            onClick={() => router.push("/branch/store")}
+            onMouseEnter={() => setStoreHover(true)}
+            onMouseLeave={() => setStoreHover(false)}
+          >
+            <span className="inline-flex items-center space-x-2">
+              <span>Store</span>
+              <img
+                src={pathname === "/branch/store" || storeHover ? "/Shopping_Bag_02_red.svg" : "/Shopping_Bag_02_white.svg"}
+                alt="Store Icon"
+                className="h-5 w-5"
+              />
+            </span>
           </button>
-          <button className="hover:underline" onClick={goToOrderHistory}>
-            Order History
+          <button
+            className={
+              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
+              "bg-white text-[#6D0000] shadow-md scale-105"
+            }
+            onClick={goToOrderHistory}
+            onMouseEnter={() => setOrderHistoryHover(true)}
+            onMouseLeave={() => setOrderHistoryHover(false)}
+          >
+            <span className="inline-flex items-center space-x-2">
+              <span>Order History</span>
+              <img
+                src="/OrderHistory_Red.svg"
+                alt="Order History Icon"
+                className="h-5 w-5"
+              />
+            </span>
           </button>
         </div>
       </nav>
@@ -134,37 +169,37 @@ export default function OrderHistory() {
         {loading && <p>Loading orders...</p>}
         {error && <p className="text-red-600">Error: {error}</p>}
         <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300 text-center">
-            <thead>
-              <tr>
+          <table className="min-w-full border border-black text-center rounded-lg overflow-hidden">
+            <thead className="bg-[#6D0000] text-white">
+              <tr className="border-b border-white">
                 <th colSpan={3}></th>
-                <th colSpan={uniqueDates.length} className="border border-gray-300 px-4 py-2 font-semibold">
+                <th colSpan={uniqueDates.length} className="border border-white px-4 py-2 font-semibold">
                   Order Date
                 </th>
               </tr>
-              <tr>
+              <tr className="border-b border-white">
                 <th colSpan={3}></th>
                 {uniqueDates.map((date) => (
-                  <th key={date} className="border border-gray-300 px-4 py-2">
+                  <th key={date} className="border border-white px-4 py-2">
                     {new Date(date).toLocaleDateString(undefined, { day: "2-digit", month: "short" })}
                   </th>
                 ))}
               </tr>
-              <tr>
+              <tr className="border-b border-white">
                 <th colSpan={3}></th>
-                <th colSpan={uniqueDates.length} className="border border-gray-300 px-4 py-2 font-semibold">
+                <th colSpan={uniqueDates.length} className="border border-white px-4 py-2 font-semibold">
                   Delivery Date
                 </th>
               </tr>
-              <tr>
-                <th className="border border-gray-300 px-4 py-2 font-semibold">Food Items</th>
-                <th className="border border-gray-300 px-4 py-2 font-semibold">Price</th>
-                <th className="border border-gray-300 px-4 py-2 font-semibold">Total Quantity</th>
+              <tr className="border-b border-white">
+                <th className="border border-white px-4 py-2 font-semibold">Food Items</th>
+                <th className="border border-white px-4 py-2 font-semibold">Price</th>
+                <th className="border border-white px-4 py-2 font-semibold">Total Quantity</th>
                 {uniqueDates.map((date) => {
                   const orderDate = new Date(date);
                   orderDate.setDate(orderDate.getDate() + 2);
                   return (
-                    <th key={"qty-" + date} className="border border-gray-300 px-4 py-2 font-semibold">
+                    <th key={"qty-" + date} className="border border-white px-4 py-2 font-semibold">
                       {orderDate.toLocaleDateString(undefined, { day: "2-digit", month: "short" })}
                     </th>
                   );
@@ -180,12 +215,12 @@ export default function OrderHistory() {
                 </tr>
               ) : (
                 foodAggregates.map((food) => (
-                  <tr key={food.food_name} className="border-t border-gray-300">
-                    <td className="border border-gray-300 px-4 py-2 text-left">{food.food_name}</td>
-                    <td className="border border-gray-300 px-4 py-2">${food.price.toFixed(2)}</td>
-                    <td className="border border-gray-300 px-4 py-2">{food.totalQty}</td>
+                  <tr key={food.food_name} className="border-t border-[#6D0000] hover:bg-[#f9e6e6] transition-colors duration-200">
+                    <td className="border border-[#6D0000] px-4 py-2 text-left">{food.food_name}</td>
+                    <td className="border border-[#6D0000] px-4 py-2">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(food.price)}</td>
+                    <td className="border border-[#6D0000] px-4 py-2">{food.totalQty}</td>
                     {uniqueDates.map((date) => (
-                      <td key={date} className="border border-gray-300 px-4 py-2">
+                      <td key={date} className="border border-[#6D0000] px-4 py-2">
                         {food.qtyByDate[date] || 0}
                       </td>
                     ))}

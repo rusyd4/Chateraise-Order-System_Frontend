@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import apiFetch from "../../../lib/api";
 
 interface FoodItem {
@@ -21,7 +22,16 @@ export default function BranchStore() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const router = useRouter();
+  const pathname = usePathname();
+
+  const [orderHistoryHover, setOrderHistoryHover] = useState(false);
+
+  function formatRupiah(price: number): string {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price);
+  }
 
   useEffect(() => {
     fetchFoodItems();
@@ -88,24 +98,69 @@ export default function BranchStore() {
     router.push("/branch/order_history");
   }
 
+
   return (
     <div>
-      <nav className="bg-gray-800 text-white p-4 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="text-xl font-bold cursor-pointer" onClick={() => router.push("/")}>
-          Logo
+      <nav className="bg-[#6D0000] text-white p-4 flex items-center max-w-7xl mx-auto rounded-b-2xl">
+        <div className="cursor-pointer" onClick={() => router.push("/")}>
+          <img src="/image-removebg-preview.png" alt="Logo" className="h-12" />
         </div>
-        <div className="space-x-4">
+        <div className="flex-grow flex justify-center mx-4">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              placeholder="Search"
+              className={`w-full rounded-full border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:border-transparent transition-colors duration-200 ${
+                searchTerm ? "bg-white text-[#6D0000]" : "hover:bg-white hover:text-[#6D0000]"
+              }`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none group-hover:text-[#6D0000]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-[#6D0000] transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
           <button
-            className="hover:underline"
+            className={
+              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
+              (pathname === "/branch/store"
+                ? "bg-white text-[#6D0000] shadow-md scale-105"
+                : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
+            }
             onClick={() => router.push("/branch/store")}
           >
-            Store
+            <span className="inline-flex items-center space-x-2">
+              <span>Store</span>
+              <img
+                src={pathname === "/branch/store" ? "/Shopping_Bag_02_red.svg" : "/Shopping_Bag_02_white.svg"}
+                alt="Store Icon"
+                className="h-5 w-5"
+              />
+            </span>
           </button>
           <button
-            className="hover:underline"
+            className={
+              "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
+              (pathname === "/branch/order_history"
+                ? "bg-white text-[#6D0000] shadow-md scale-105"
+                : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
+            }
             onClick={goToOrderHistory}
+            onMouseEnter={() => setOrderHistoryHover(true)}
+            onMouseLeave={() => setOrderHistoryHover(false)}
           >
-            Order History
+            <span className="inline-flex items-center space-x-2">
+              <span>Order History</span>
+              <img
+                src={pathname === "/branch/order_history" || orderHistoryHover ? "/OrderHistory_Red.svg" : "/OrderHistory_White.svg"}
+                alt="Order History Icon"
+                className="h-5 w-5"
+              />
+            </span>
           </button>
         </div>
       </nav>
@@ -116,49 +171,66 @@ export default function BranchStore() {
         ) : error ? (
           <p className="text-red-600">{error}</p>
         ) : (
-          <div className="flex flex-col space-y-4">
-            {foodItems.map((food) => (
-              <div
-                key={food.food_id}
-                className="border border-gray-300 rounded p-4 flex items-center justify-between"
-              >
-                <div className="flex flex-col">
-                  <h2 className="text-lg font-semibold">{food.food_name}</h2>
-                  <p className="text-gray-700">${food.price}</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => removeFromCart(food)}
-                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                    aria-label={`Remove one ${food.food_name}`}
+          <div className="grid grid-cols-6 gap-6">
+            {foodItems
+              .filter((food) => {
+                const name = food.food_name.toLowerCase();
+                const term = searchTerm.toLowerCase();
+                // Simple fuzzy search: check if all characters in term appear in order in name
+                let ti = 0;
+                for (let ni = 0; ni < name.length && ti < term.length; ni++) {
+                  if (name[ni] === term[ti]) {
+                    ti++;
+                  }
+                }
+                return ti === term.length;
+              })
+              .map((food) => (
+                <div key={food.food_id} className="flex flex-col items-center">
+                  <div
+                    className="border border-gray-300 rounded-lg p-6 flex flex-col justify-center aspect-square w-full shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg cursor-pointer"
                   >
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    readOnly
-                    value={getQuantity(food.food_id)}
-                    className="w-12 text-center border border-gray-300 rounded"
-                    aria-label={`Quantity of ${food.food_name}`}
-                  />
-                  <button
-                    onClick={() => addToCart(food)}
-                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
-                    aria-label={`Add one ${food.food_name}`}
-                  >
-                    +
-                  </button>
+                    <h2 className="text-lg font-semibold mb-2 text-center">{food.food_name}</h2>
+                  </div>
+                  <div className="flex flex-col items-center mt-2 justify-center w-full space-y-2">
+                    <p className="text-gray-700 mx-auto">{formatRupiah(food.price)}</p>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => removeFromCart(food)}
+                        className="bg-[#6D0000] text-white px-3 py-1 rounded hover:bg-[#7a0000] focus:outline-none focus:ring-2 focus:ring-[#7a0000] transition-transform duration-200 transform hover:scale-105 active:translate-y-0.5"
+                        aria-label={`Remove one ${food.food_name}`}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="text"
+                        readOnly
+                        value={getQuantity(food.food_id)}
+                        className="w-12 text-center border border-gray-300 rounded"
+                        aria-label={`Quantity of ${food.food_name}`}
+                      />
+                      <button
+                        onClick={() => addToCart(food)}
+                        className="bg-[#6D0000] text-white px-3 py-1 rounded hover:bg-[#7a0000] focus:outline-none focus:ring-2 focus:ring-[#7a0000] transition-transform duration-200 transform hover:scale-105 active:translate-y-0.5"
+                        aria-label={`Add one ${food.food_name}`}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
         {cart.length > 0 && (
           <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded p-4 shadow-lg">
-            <p className="mb-2 font-semibold">Cart Items: {cart.reduce((acc, item) => acc + item.quantity, 0)}</p>
+            <div className="mb-2 font-semibold flex items-center justify-center space-x-2 w-max mx-auto">
+              <img src="/Shopping_Cart_01.svg" alt="Cart Items" className="h-6 w-6" />
+              <span>{cart.reduce((acc, item) => acc + item.quantity, 0)}</span>
+            </div>
             <button
               onClick={handleCheckout}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+              className="bg-[#6D0000] text-white px-4 py-2 rounded hover:bg-[#7a0000] focus:outline-none focus:ring-2 focus:ring-[#7a0000] transition-transform duration-200 transform hover:scale-105 active:translate-y-0.5"
             >
               Checkout
             </button>
