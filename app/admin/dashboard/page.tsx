@@ -18,7 +18,7 @@ import {
 import * as React from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import Navbar from "../Navbar";
+import Navbar from "../../components/AdminNavbar";
 
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";

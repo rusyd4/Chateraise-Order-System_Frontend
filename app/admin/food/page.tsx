@@ -3,7 +3,7 @@
 import React,{ useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { usePathname } from "next/navigation";
 import apiFetch from "../../../lib/api";
-import Navbar from "../Navbar";
+import Navbar from "../../components/AdminNavbar";
 import { Edit, Trash2 } from "lucide-react";
 import {
   Dialog,

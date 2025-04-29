@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Calendar } from "../../../components/ui/calendar";
 import * as XLSX from "xlsx";
-import Navbar from "../Navbar";
+import Navbar from "../../components/AdminNavbar";
 
 interface OrderItem {
   food_id: number;

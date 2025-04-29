@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import apiFetch from "../../../lib/api";
-import Navbar from "../Navbar";
+import Navbar from "../../components/AdminNavbar";
 import { Edit, Trash2 } from "lucide-react";
 import {
   Dialog,

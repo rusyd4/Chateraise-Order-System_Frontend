@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
-import BranchNavbar from "../../../components/BranchNavbar";
+import BranchNavbar from "../../components/BranchNavbar";
 
 interface OrderItem {
   food_name: string;

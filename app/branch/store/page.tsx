@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import apiFetch from "../../../lib/api";
-import BranchNavbar from "../../../components/BranchNavbar";
+import BranchNavbar from "../../components/BranchNavbar";
 
 interface FoodItem {
   food_id: number;

@@ -18,7 +18,7 @@ interface BranchProfile {
   email?: string;
 }
 
-import BranchNavbar from "../../../components/BranchNavbar";
+import BranchNavbar from "../../components/BranchNavbar";
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
