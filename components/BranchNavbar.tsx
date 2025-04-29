@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Camera } from "lucide-react";
 import QrScanner from "qr-scanner";
@@ -7,14 +7,14 @@ import QrScanner from "qr-scanner";
 export default function BranchNavbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [orderHistoryHover, setOrderHistoryHover] = useState(false);
-  const [storeHover, setStoreHover] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false);
-  const [cameraHover, setCameraHover] = useState(false);
-  const [stream, setStream] = useState(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const qrScannerRef = useRef(null); // Reference for qr-scanner
+  const [orderHistoryHover, setOrderHistoryHover] = useState<boolean>(false);
+  const [storeHover, setStoreHover] = useState<boolean>(false);
+  const [scannerOpen, setScannerOpen] = useState<boolean>(false);
+  const [cameraHover, setCameraHover] = useState<boolean>(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const qrScannerRef = useRef<QrScanner | null>(null); // Reference for qr-scanner
 
   function goToStore() {
     router.push("/branch/store");
@@ -40,14 +40,16 @@ export default function BranchNavbar() {
     }
   }
 
-  function handleFileUpload(e) {
-    const file = e.target.files[0];
+  function handleFileUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(event) {
+      const result = event.target?.result;
+      if (!result) return;
       // Manually decode the QR code using qr-scanner
-      QrScanner.scanImage(event.target.result).then(result => {
+      QrScanner.scanImage(result as string).then(result => {
         if (result) {
           const orderId = result;
           router.push(`/branch/orders/${orderId}`);
@@ -58,7 +60,7 @@ export default function BranchNavbar() {
         console.error("QR Code scanning error:", error);
       });
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsDataURL(file);
   }
 
   // Start camera when scannerOpen is true
@@ -90,6 +92,10 @@ export default function BranchNavbar() {
       }
       startCamera();
     } else {
+      if (qrScannerRef.current) {
+        qrScannerRef.current.stop();
+        qrScannerRef.current = null;
+      }
       stopCamera();
     }
 
@@ -97,6 +103,7 @@ export default function BranchNavbar() {
     return () => {
       if (qrScannerRef.current) {
         qrScannerRef.current.stop();
+        qrScannerRef.current = null;
       }
       stopCamera();
     };
