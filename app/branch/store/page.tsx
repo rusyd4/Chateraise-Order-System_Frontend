@@ -159,6 +159,7 @@ export default function BranchStore() {
                     className="border border-gray-300 rounded-lg p-6 flex flex-col justify-center aspect-square w-full shadow-md transition-transform duration-200 hover:scale-105 hover:shadow-lg cursor-pointer"
                   >
                     <h2 className="text-lg font-semibold mb-2 text-center">{food.food_name}</h2>
+                    <p className="text-sm text-gray-500 text-center">ID: {food.food_id}</p>
                   </div>
                   <div className="flex flex-col items-center mt-2 justify-center w-full space-y-2">
                     <p className="text-gray-700 mx-auto">{formatRupiah(food.price)}</p>
