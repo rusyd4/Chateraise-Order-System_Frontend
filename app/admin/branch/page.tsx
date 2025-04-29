@@ -1,19 +1,40 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
-import Navbar from "../../components/AdminNavbar";
-import { Edit, Trash2 } from "lucide-react";
+import AdminNavbar from "../../components/AdminNavbar";
+import { 
+  Edit, 
+  Trash2, 
+  Plus, 
+  Store, 
+  AlertCircle, 
+  Search, 
+  RotateCcw, 
+  Mail, 
+  Clock, 
+  MapPin,
+  User,
+  Lock
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
-} from "../../../components/ui/dialog";
-
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -23,9 +44,40 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from "../../../components/ui/alert-dialog";
-
-import { toast } from "sonner";
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Branch {
   user_id: number;
@@ -38,27 +90,29 @@ interface Branch {
 
 export default function AdminBranch() {
   const router = useRouter();
-  const pathname = usePathname();
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Form state
   const [formFullName, setFormFullName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
   const [formBranchAddress, setFormBranchAddress] = useState("");
   const [formDeliveryTime, setFormDeliveryTime] = useState("");
-
   const [editingBranchId, setEditingBranchId] = useState<number | null>(null);
   const [formError, setFormError] = useState("");
-  const [formSuccess, setFormSuccess] = useState("");
 
+  // UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // New state for alert dialog
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [branchIdToDelete, setBranchIdToDelete] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
+  // Authentication check
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -68,17 +122,35 @@ export default function AdminBranch() {
     fetchBranches();
   }, [router]);
 
+  // Filter branches when search changes
+  useEffect(() => {
+    if (branches.length > 0) {
+      const filtered = branches.filter(
+        (branch) =>
+          branch.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          branch.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (branch.branch_address && branch.branch_address.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredBranches(filtered);
+      setCurrentPage(1); // Reset to first page on new search
+    }
+  }, [searchQuery, branches]);
+
+  // Data fetching with error handling
   async function fetchBranches() {
     setLoading(true);
     setError("");
     try {
       const data = await apiFetch("/admin/branches");
       setBranches(data);
+      setFilteredBranches(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
+        toast.error(`Failed to fetch branches: ${err.message}`);
       } else {
-        setError(String(err));
+        setError("An unexpected error occurred");
+        toast.error("Failed to fetch branches");
       }
     } finally {
       setLoading(false);
@@ -93,7 +165,6 @@ export default function AdminBranch() {
     setFormDeliveryTime("");
     setEditingBranchId(null);
     setFormError("");
-    setFormSuccess("");
   }
 
   function openAddModal() {
@@ -101,20 +172,49 @@ export default function AdminBranch() {
     setIsModalOpen(true);
   }
 
+  // Form validation
+  function validateForm() {
+    if (!formFullName.trim()) {
+      setFormError("Branch name is required");
+      return false;
+    }
+    
+    if (!formEmail.trim()) {
+      setFormError("Email address is required");
+      return false;
+    }
+    
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formEmail)) {
+      setFormError("Please enter a valid email address");
+      return false;
+    }
+    
+    if (!editingBranchId && !formPassword) {
+      setFormError("Password is required for new branches");
+      return false;
+    }
+    
+    if (!formBranchAddress.trim()) {
+      setFormError("Branch address is required");
+      return false;
+    }
+    
+    return true;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError("");
-    setFormSuccess("");
 
-    if (!formFullName || !formEmail || !formBranchAddress || (!editingBranchId && !formPassword)) {
-      setFormError("Please fill in all required fields.");
-      toast.error("Please fill in all required fields.");
+    if (!validateForm()) {
       return;
     }
 
-    if (editingBranchId) {
-      // Update branch
-      try {
+    try {
+      if (editingBranchId) {
+        // Update branch
         const body: any = {
           full_name: formFullName,
           email: formEmail,
@@ -122,35 +222,23 @@ export default function AdminBranch() {
           delivery_time: formDeliveryTime,
         };
         if (formPassword) {
-          // Hash password on backend, so send password as is
           body.password_hash = formPassword;
-        } else {
-          body.password_hash = null;
         }
 
         const updatedBranch = await apiFetch(`/admin/branches/${editingBranchId}`, {
           method: "PUT",
           body: JSON.stringify(body),
         });
+        
         setBranches((prev) =>
           prev.map((b) => (b.user_id === editingBranchId ? { ...b, ...updatedBranch } : b))
         );
-        toast.success("Branch updated successfully.");
-        setFormSuccess("Branch updated successfully.");
+        
+        toast.success("Branch updated successfully");
         resetForm();
         setIsModalOpen(false);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setFormError(err.message);
-          toast.error(err.message);
-        } else {
-          setFormError(String(err));
-          toast.error(String(err));
-        }
-      }
-    } else {
-      // Create new branch (register)
-      try {
+      } else {
+        // Create new branch
         await apiFetch("/auth/register", {
           method: "POST",
           body: JSON.stringify({
@@ -162,20 +250,16 @@ export default function AdminBranch() {
             delivery_time: formDeliveryTime,
           }),
         });
-        toast.success("Branch created successfully.");
-        setFormSuccess("Branch created successfully.");
+        
+        toast.success("Branch created successfully");
         resetForm();
         fetchBranches();
         setIsModalOpen(false);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setFormError(err.message);
-          toast.error(err.message);
-        } else {
-          setFormError(String(err));
-          toast.error(String(err));
-        }
       }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setFormError(message);
+      toast.error(`Failed: ${message}`);
     }
   }
 
@@ -186,215 +270,438 @@ export default function AdminBranch() {
     setFormPassword("");
     setFormBranchAddress(branch.branch_address || "");
     setFormDeliveryTime(branch.delivery_time || "");
-    setFormError("");
-    setFormSuccess("");
     setIsModalOpen(true);
   }
 
-  // Updated delete handler to open alert dialog
   function handleDelete(branchId: number) {
     setBranchIdToDelete(branchId);
     setIsAlertOpen(true);
   }
 
-  // Confirm delete function called on alert dialog confirm
   async function confirmDelete() {
     if (branchIdToDelete === null) return;
+    
     try {
       await apiFetch(`/admin/branches/${branchIdToDelete}`, {
         method: "DELETE",
       });
+      
       setBranches((prev) => prev.filter((b) => b.user_id !== branchIdToDelete));
-      toast.success("Branch deleted successfully.");
+      setFilteredBranches((prev) => prev.filter((b) => b.user_id !== branchIdToDelete));
+      
+      toast.success("Branch deleted successfully");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      alert(message);
-      toast.error(message);
+      toast.error(`Failed to delete: ${message}`);
     } finally {
       setIsAlertOpen(false);
       setBranchIdToDelete(null);
     }
   }
 
+  // Pagination
+  const paginatedBranches = filteredBranches.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
+  const totalPages = Math.ceil(filteredBranches.length / itemsPerPage);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Date formatter
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date);
+  };
+
   return (
-    <div className="flex max-w-7xl mx-auto min-h-screen p-8 space-x-8">
-      <Navbar />
-      <main className="flex-1 p-0 space-y-12">
-        <section>
-          <h2 className="text-3xl font-bold mb-4">Manage Branch Stores</h2>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      <AdminNavbar />
+      <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                Branch Management
+              </h1>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
+                Add, edit, and manage your branch locations
+              </p>
+            </div>
+          </div>
 
-          <button
-            onClick={openAddModal}
-            className="mb-6 bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000]"
-          >
-            Add Branch
-          </button>
+          <Card className="mb-6">
+            <CardContent className="">
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Store size={18} />
+                  <div>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Total Branches</span>
+                    <span className="text-xl font-semibold ml-2">
+                      {loading ? <Skeleton className="inline-block h-6 w-12" /> : branches.length}
+                    </span>
+                  </div>
+                </div>
+                <Button onClick={openAddModal} size="sm" className="gap-2">
+                  <Plus size={16} />
+                  Add Branch
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <CardTitle>Branch Stores</CardTitle>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <Input
+                    type="search"
+                    placeholder="Search branches..."
+                    className="pl-9 w-full sm:w-64"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : error ? (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={fetchBranches} 
+                    className="mt-2"
+                  >
+                    Retry
+                  </Button>
+                </Alert>
+              ) : filteredBranches.length === 0 ? (
+                <div className="text-center py-10 space-y-4">
+                  <Store className="mx-auto h-12 w-12 text-gray-400" />
+                  {searchQuery ? (
+                    <>
+                      <p className="text-lg font-medium">No results found</p>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        No branches match your search "{searchQuery}"
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setSearchQuery("")}
+                      >
+                        Clear Search
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg font-medium">No branches found</p>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Get started by adding your first branch
+                      </p>
+                      <Button onClick={openAddModal}>
+                        Add Your First Branch
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-md border overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-gray-100 dark:bg-gray-800">
+                        <TableRow>
+                          <TableHead>Branch Name</TableHead>
+                          <TableHead className="hidden md:table-cell">Email</TableHead>
+                          <TableHead className="hidden md:table-cell">Address</TableHead>
+                          <TableHead className="hidden lg:table-cell">Delivery Time</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {paginatedBranches.map((branch) => (
+                          <TableRow key={branch.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <TableCell className="font-medium">
+                              <div className="flex flex-col">
+                                <span>{branch.full_name}</span>
+                                <span className="text-sm text-gray-500 md:hidden mt-1">
+                                  {branch.email}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <span className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-gray-400" />
+                                {branch.email}
+                              </span>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {branch.branch_address ? (
+                                <span className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-gray-400" />
+                                  {branch.branch_address}
+                                </span>
+                              ) : (
+                                <Badge variant="outline" className="text-gray-500">
+                                  Not specified
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell">
+                              {branch.delivery_time ? (
+                                <span className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-gray-400" />
+                                  {branch.delivery_time}
+                                </span>
+                              ) : (
+                                <Badge variant="outline" className="text-gray-500">
+                                  Not specified
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => handleEdit(branch)}
+                                  title="Edit"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => handleDelete(branch.user_id)}
+                                  title="Delete"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {totalPages > 1 && (
+                    <Pagination className="mt-6">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                          />
+                        </PaginationItem>
+                        
+                        {[...Array(totalPages)].map((_, i) => {
+                          const pageNumber = i + 1;
+                          // Show current page, first, last, and nearby pages
+                          if (
+                            pageNumber === 1 ||
+                            pageNumber === totalPages ||
+                            (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                          ) {
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  isActive={pageNumber === currentPage}
+                                  onClick={() => handlePageChange(pageNumber)}
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          }
+                          
+                          // Show ellipsis for gaps
+                          if (
+                            (pageNumber === 2 && currentPage > 3) ||
+                            (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
+                          ) {
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            );
+                          }
+                          
+                          return null;
+                        })}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Add/Edit Branch Dialog */}
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
-                <DialogTitle>{editingBranchId ? "Edit Branch" : "Add Branch"}</DialogTitle>
+                <DialogTitle className="flex items-center gap-2">
+                  {editingBranchId ? (
+                    <>
+                      <Edit className="h-5 w-5" />
+                      Edit Branch
+                    </>
+                  ) : (
+                    <>
+                      <Store className="h-5 w-5" />
+                      Add New Branch
+                    </>
+                  )}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingBranchId
+                    ? "Update the branch details below"
+                    : "Fill in the details to create a new branch"}
+                </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="mb-6 w-full space-y-4">
-                <div className="grid gap-4 min-w-0" style={{ gridTemplateColumns: "1fr 1fr" }}>
-                  <div className="w-full min-w-0">
-                    <label htmlFor="branchName" className="block font-medium mb-1">
-                      Branch Name<span className="text-red-600">*</span>
-                    </label>
-                    <input
+              
+              <form onSubmit={handleSubmit} className="grid gap-6 py-4">
+                {formError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{formError}</AlertDescription>
+                  </Alert>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="branchName" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Branch Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
                       id="branchName"
-                      type="text"
                       value={formFullName}
                       onChange={(e) => setFormFullName(e.target.value)}
-                      placeholder="Ex: Chateraise Senayan"
-                      className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-                      required
+                      placeholder="Chateraise Senayan"
                     />
                   </div>
-                  <div className="w-full min-w-0">
-                    <label htmlFor="email" className="block font-medium mb-1">
-                      Email<span className="text-red-600">*</span>
-                    </label>
-                    <input
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
                       id="email"
                       type="email"
                       value={formEmail}
                       onChange={(e) => setFormEmail(e.target.value)}
-                      placeholder="Ex: senayan@chateraise.id"
-                      className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-                      required
+                      placeholder="senayan@chateraise.id"
                     />
                   </div>
-                  <div className="w-full min-w-0">
-                    <label htmlFor="password" className="block font-medium mb-1">
-                      {editingBranchId ? "New Password (leave blank to keep current)" : "Password"}
-                      {!editingBranchId && <span className="text-red-600">*</span>}
-                    </label>
-                    <input
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      {editingBranchId ? "New Password" : "Password"}
+                      {!editingBranchId && <span className="text-red-500">*</span>}
+                    </Label>
+                    <Input
                       id="password"
                       type="password"
                       value={formPassword}
                       onChange={(e) => setFormPassword(e.target.value)}
-                      placeholder={editingBranchId ? "Enter new password (optional)" : "Enter password"}
-                      className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-                      {...(!editingBranchId && { required: true })}
+                      placeholder={editingBranchId ? "Leave blank to keep current" : "Enter password"}
                     />
                   </div>
-                  <div className="w-full min-w-0">
-                    <label htmlFor="branchAddress" className="block font-medium mb-1">
-                      Branch Address
-                    </label>
-                    <input
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="branchAddress" className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Branch Address <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
                       id="branchAddress"
-                      type="text"
                       value={formBranchAddress}
                       onChange={(e) => setFormBranchAddress(e.target.value)}
                       placeholder="Enter branch address"
-                      className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                     />
                   </div>
-                  <div className="w-full min-w-0">
-                    <label htmlFor="deliveryTime" className="block font-medium mb-1">
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="deliveryTime" className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
                       Delivery Time
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="deliveryTime"
-                      type="text"
                       value={formDeliveryTime}
                       onChange={(e) => setFormDeliveryTime(e.target.value)}
-                      placeholder="Ex: 8am - 10am"
-                      className="w-full min-w-0 border border-[#6D0000] rounded px-3 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                      placeholder="8am - 10am"
                     />
                   </div>
                 </div>
-                {formError && <p className="text-red-600">{formError}</p>}
-                {formSuccess && <p className="text-green-600">{formSuccess}</p>}
-                <div className="flex space-x-4">
-                  <button
-                    type="submit"
-                    className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000]"
-                  >
-                    {editingBranchId ? "Update Branch" : "Add Branch"}
-                  </button>
-                  <DialogClose asChild>
-                    <button
-                      type="button"
-                      className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
-                    >
-                      Cancel
-                    </button>
-                  </DialogClose>
-                </div>
               </form>
+              
+              <DialogFooter className="gap-2 mt-4">
+                <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" onClick={handleSubmit}>
+                  {editingBranchId ? "Update Branch" : "Add Branch"}
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
 
-          {/* Alert Dialog for delete confirmation */}
+          {/* Delete Confirmation Dialog */}
           <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  Delete Branch
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete this branch? This action cannot be undone.
+                  This action cannot be undone. This will permanently delete the branch and remove all
+                  associated data from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
+              <AlertDialogFooter className="gap-2">
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+                <AlertDialogAction
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={confirmDelete}
+                >
+                  Delete
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
-          <div>
-            {loading ? (
-              <p>Loading branches...</p>
-            ) : error ? (
-              <p className="text-red-600">{error}</p>
-            ) : branches.length === 0 ? (
-              <p>No branches found.</p>
-            ) : (
-              <table className="w-full border border-gray-300 rounded">
-                <thead className="bg-[#6D0000] text-white">
-                  <tr>
-                    <th className="border border-[#6D0000] p-2 text-left">Branch Name</th>
-                    <th className="border border-[#6D0000] p-2 text-left">Email</th>
-                    <th className="border border-[#6D0000] p-2 text-left">Branch Address</th>
-                    <th className="border border-[#6D0000] p-2 text-left">Delivery Time</th>
-                    <th className="border border-[#6D0000] p-2 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {branches.map((branch) => (
-                    <tr key={branch.user_id} className="odd:bg-white even:bg-gray-50">
-                      <td className="border border-gray-300 p-2">{branch.full_name}</td>
-                      <td className="border border-gray-300 p-2">{branch.email}</td>
-                      <td className="border border-gray-300 p-2">{branch.branch_address || "N/A"}</td>
-                      <td className="border border-gray-300 p-2">{branch.delivery_time || "N/A"}</td>
-                      <td className="border border-gray-300 p-2 space-x-1">
-                      <button
-                          onClick={() => handleEdit(branch)}
-                          className="bg-yellow-400 p-1 rounded transition transform hover:bg-yellow-500 hover:scale-105 active:translate-y-0.5"
-                          aria-label="Edit food item"
-                          title="Edit"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(branch.user_id)}
-                          className="bg-red-600 text-white p-1 rounded transition transform hover:bg-red-700 hover:scale-105 active:translate-y-0.5"
-                          aria-label="Delete food item"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
+        </div>
       </main>
     </div>
   );

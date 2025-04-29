@@ -158,19 +158,10 @@ export default function BranchStore() {
                 placeholder="Search menu..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-64 bg-white"
+                className="pl-10 w-40 bg-white"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             </div>
-            
-            <Button 
-              variant="outline"
-              size="icon"
-              onClick={goToOrderHistory}
-              title="Order History"
-            >
-              <History className="h-5 w-5" />
-            </Button>
             
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
@@ -297,7 +288,7 @@ export default function BranchStore() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {filteredFoodItems.map((food) => (
-              <Card key={food.food_id} className="overflow-hidden transition-all hover:shadow-lg">
+<Card key={food.food_id} className="overflow-hidden transition-all hover:shadow-lg flex flex-col justify-between h-full">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-lg truncate" title={food.food_name}>
                     {food.food_name}
