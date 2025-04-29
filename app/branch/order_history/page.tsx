@@ -4,20 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
 import BranchNavbar from "../../components/BranchNavbar";
-
-interface OrderItem {
-  food_name: string;
-  quantity: number;
-  price: number;
-}
-
-interface Order {
-  order_id: number;
-  delivery_date: string;
-  order_date: string;
-  items: OrderItem[];
-}
-
+import { Calendar } from "@/components/ui/calendar";
+import * as XLSX from "xlsx";
 
 interface OrderItem {
   food_name: string;
@@ -35,11 +23,14 @@ interface Order {
 export default function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-  const [monthFilter, setMonthFilter] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [orderHistoryHover, setOrderHistoryHover] = useState(false);
   const [storeHover, setStoreHover] = useState(false);
+
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [appliedDateRange, setAppliedDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const router = useRouter();
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
@@ -49,16 +40,16 @@ export default function OrderHistory() {
   }, []);
 
   useEffect(() => {
-    if (monthFilter) {
+    if (appliedDateRange.from && appliedDateRange.to) {
       const filtered = orders.filter((order) => {
-        const orderMonth = new Date(order.order_date).toISOString().slice(0, 7);
-        return orderMonth === monthFilter;
+        const orderDate = new Date(order.order_date);
+        return orderDate >= appliedDateRange.from! && orderDate <= appliedDateRange.to!;
       });
       setFilteredOrders(filtered);
     } else {
       setFilteredOrders(orders);
     }
-  }, [monthFilter, orders]);
+  }, [appliedDateRange, orders]);
 
   async function fetchOrders() {
     setLoading(true);
@@ -78,9 +69,7 @@ export default function OrderHistory() {
     }
   }
 
-  function handleMonthChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setMonthFilter(e.target.value);
-  }
+  // Remove handleMonthChange and monthFilter state as they are no longer needed
 
   // Extract unique order_date dates sorted ascending
   const uniqueDates = Array.from(
@@ -120,22 +109,88 @@ export default function OrderHistory() {
     router.push("/branch/order_history");
   }
 
+  // Export to Excel function
+  function exportToExcel() {
+    const wsData = [];
+
+    // Header rows
+    wsData.push(["", "", "Order Date", ...uniqueDates]);
+    wsData.push(["", "", "", ...uniqueDates.map(date => new Date(date).toLocaleDateString(undefined, { day: "2-digit", month: "short" }))]);
+    wsData.push(["", "", "Delivery Date", ...uniqueDates.map(date => {
+      const orderDate = new Date(date);
+      orderDate.setDate(orderDate.getDate() + 2);
+      return orderDate.toLocaleDateString(undefined, { day: "2-digit", month: "short" });
+    })]);
+    wsData.push(["Food Items", "Price", "Total Quantity", ...uniqueDates]);
+
+    // Data rows
+    foodAggregates.forEach(food => {
+      const row = [
+        food.food_name,
+        new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(food.price),
+        food.totalQty,
+        ...uniqueDates.map(date => food.qtyByDate[date] || 0)
+      ];
+      wsData.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Order History");
+    XLSX.writeFile(wb, "order_history.xlsx");
+  }
+
   return (
     <>
       <BranchNavbar />
       <div className="p-8 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Order History</h1>
         <div className="mb-4">
-          <label htmlFor="monthFilter" className="mr-2 font-semibold">
-            Filter by month:
-          </label>
-          <input
-            type="month"
-            id="monthFilter"
-            value={monthFilter}
-            onChange={handleMonthChange}
-            className="border border-gray-300 rounded px-2 py-1"
-          />
+          <button
+            onClick={() => setShowCalendar(!showCalendar)}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            {showCalendar ? "Done" : "Select Date Range"}
+          </button>
+          {showCalendar && (
+            <div className="mt-4">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={(range) => {
+                  if (range && "from" in range && "to" in range) {
+                    setDateRange({ from: range.from, to: range.to });
+                  } else {
+                    setDateRange({ from: undefined, to: undefined });
+                  }
+                }}
+                numberOfMonths={2}
+              />
+            </div>
+          )}
+        </div>
+        <div className="mb-4 flex space-x-4">
+          <button
+            onClick={() => setAppliedDateRange(dateRange)}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Apply
+          </button>
+          <button
+            onClick={() => {
+              setDateRange({ from: undefined, to: undefined });
+              setAppliedDateRange({ from: undefined, to: undefined });
+            }}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Reset
+          </button>
+          <button
+            onClick={exportToExcel}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Export to Excel
+          </button>
         </div>
         {loading && <p>Loading orders...</p>}
         {error && <p className="text-red-600">Error: {error}</p>}
