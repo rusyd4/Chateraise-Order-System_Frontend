@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import apiFetch from "../../../../lib/api";
 import BranchNavbar from "../../../components/BranchNavbar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
+import { Button } from "../../../../components/ui/button";
 
 interface OrderItem {
   food_name: string;
@@ -119,52 +121,41 @@ export default function OrderDetailPage() {
               <strong>Order Status:</strong> {order.order_status}
             </p>
             <h2 className="text-2xl font-semibold mt-6 mb-4">Items</h2>
-            <table className="min-w-full border border-black text-center rounded-lg overflow-hidden">
-              <thead className="bg-[#6D0000] text-white">
-                <tr>
-                  <th className="border border-white px-4 py-2">Food Name</th>
-                  <th className="border border-white px-4 py-2">Quantity</th>
-                  <th className="border border-white px-4 py-2">Price</th>
-                  <th className="border border-white px-4 py-2">Total</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Food Name</TableHead>
+                  <TableHead className="text-center">Quantity</TableHead>
+                  <TableHead className="text-center">Price</TableHead>
+                  <TableHead className="text-center">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {order.items.map((item, index) => (
-                  <tr
-                    key={index}
-                    className="border-t border-[#6D0000] hover:bg-[#f9e6e6] transition-colors duration-200"
-                  >
-                    <td className="border border-[#6D0000] px-4 py-2 text-left">
-                      {item.food_name}
-                    </td>
-                    <td className="border border-[#6D0000] px-4 py-2">
-                      {item.quantity}
-                    </td>
-                    <td className="border border-[#6D0000] px-4 py-2">
+                  <TableRow key={index}>
+                    <TableCell className="text-left">{item.food_name}</TableCell>
+                    <TableCell className="text-center">{item.quantity}</TableCell>
+                    <TableCell className="text-center">
                       {new Intl.NumberFormat("id-ID", {
                         style: "currency",
                         currency: "IDR",
                       }).format(item.price)}
-                    </td>
-                    <td className="border border-[#6D0000] px-4 py-2">
+                    </TableCell>
+                    <TableCell className="text-center">
                       {new Intl.NumberFormat("id-ID", {
                         style: "currency",
                         currency: "IDR",
                       }).format(item.price * item.quantity)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             {order.order_status === "In-progress" && (
               <div className="mt-6">
-                <button
-                  onClick={finishOrder}
-                  disabled={finishLoading}
-                  className="bg-[#6D0000] text-white px-4 py-2 rounded hover:bg-[#7a0000] focus:outline-none focus:ring-2 focus:ring-[#7a0000] transition-colors duration-200"
-                >
+                <Button onClick={finishOrder} disabled={finishLoading} variant="destructive">
                   {finishLoading ? "Finishing..." : "Finish Order"}
-                </button>
+                </Button>
                 {finishError && <p className="text-red-600 mt-2">{finishError}</p>}
               </div>
             )}

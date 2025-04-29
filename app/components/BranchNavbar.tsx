@@ -1,16 +1,15 @@
 "use client";
 import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Camera } from "lucide-react";
+import { Camera, ShoppingCart, History } from "lucide-react";
 import QrScanner from "qr-scanner";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function BranchNavbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [orderHistoryHover, setOrderHistoryHover] = useState<boolean>(false);
-  const [storeHover, setStoreHover] = useState<boolean>(false);
   const [scannerOpen, setScannerOpen] = useState<boolean>(false);
-  const [cameraHover, setCameraHover] = useState<boolean>(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -110,123 +109,77 @@ export default function BranchNavbar() {
   }, [scannerOpen]);
 
   return (
-    <nav className="bg-[#6D0000] text-white p-4 flex items-center justify-between max-w-7xl mx-auto rounded-b-2xl">
+    <nav className="bg-[#6D0000] text-white p-4 flex items-center justify-between mx-auto">
       <div className="cursor-pointer" onClick={() => router.push("/")}>
         <img src="/image-removebg-preview.png" alt="Logo" className="h-12" />
       </div>
       <div className="flex space-x-4">
-        <button
-          className={
-            "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-            (scannerOpen
-              ? "bg-white text-[#6D0000] shadow-md scale-105"
-              : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
-          }
+        <Button
           onClick={toggleScanner}
-          onMouseEnter={() => setCameraHover(true)}
-          onMouseLeave={() => setCameraHover(false)}
         >
           <span className="inline-flex items-center space-x-2">
             <span>Scan QR</span>
             <Camera
               size={20}
-              color={scannerOpen || cameraHover ? "#6D0000" : "white"}
             />
           </span>
-        </button>
-        <button
-          className={
-            "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-            (pathname === "/branch/store"
-              ? "bg-white text-[#6D0000] shadow-md scale-105"
-              : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
-          }
+        </Button>
+        <Button
           onClick={goToStore}
-          onMouseEnter={() => setStoreHover(true)}
-          onMouseLeave={() => setStoreHover(false)}
         >
           <span className="inline-flex items-center space-x-2">
             <span>Store</span>
-            <img
-              src={
-                pathname === "/branch/store" || storeHover
-                  ? "/Shopping_Bag_02_red.svg"
-                  : "/Shopping_Bag_02_white.svg"
-              }
-              alt="Store Icon"
-              className="h-5 w-5"
+            <ShoppingCart
+              size={20}
             />
           </span>
-        </button>
-        <button
-          className={
-            "px-3 py-2 rounded transition-transform duration-200 transform focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:ring-offset-2 " +
-            (pathname === "/branch/order_history"
-              ? "bg-white text-[#6D0000] shadow-md scale-105"
-              : "hover:bg-white hover:text-[#6D0000] hover:scale-105")
-          }
+        </Button>
+        <Button
           onClick={goToOrderHistory}
-          onMouseEnter={() => setOrderHistoryHover(true)}
-          onMouseLeave={() => setOrderHistoryHover(false)}
         >
           <span className="inline-flex items-center space-x-2">
             <span>Order History</span>
-            <img
-              src={
-                pathname === "/branch/order_history" || orderHistoryHover
-                  ? "/OrderHistory_Red.svg"
-                  : "/OrderHistory_White.svg"
-              }
-              alt="Order History Icon"
-              className="h-5 w-5"
+            <History
+              size={20}
             />
           </span>
-        </button>
+        </Button>
       </div>
 
-      {/* QR Scanner Modal */}
-      {scannerOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              Scan QR Code
-            </h3>
-            <div className="space-y-4">
-              <div className="flex flex-col items-center gap-4">
-                <video
-                  ref={videoRef}
-                  className="w-full rounded"
-                  muted
-                  playsInline
-                />
-                <div className="text-center">
-                  <p className="text-gray-600 mb-2">Or</p>
-                  <label className="px-4 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer hover:bg-gray-300 transition-colors">
-                    Upload QR Image
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
+      <Dialog open={scannerOpen} onOpenChange={toggleScanner}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Scan QR Code</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col items-center gap-4">
+              <video
+                ref={videoRef}
+                className="w-full rounded"
+                muted
+                playsInline
+              />
+              <div className="text-center">
+                <p className="text-gray-600 mb-2">Or</p>
+                <label className="px-4 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer hover:bg-gray-300 transition-colors">
+                  Upload QR Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => {
-                  setScannerOpen(false);
-                  stopCamera();
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+          <div className="mt-6 flex justify-end">
+            <Button onClick={toggleScanner} variant="secondary">
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
