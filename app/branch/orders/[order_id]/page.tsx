@@ -15,16 +15,35 @@ interface Order {
   order_id: number;
   delivery_date: string;
   order_date: string;
+  order_status: string; // added order_status field
+  items: OrderItem[];
+}
+
+interface OrderItem {
+  food_name: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  order_id: number;
+  delivery_date: string;
+  order_date: string;
+  order_status: string; // added order_status field
   items: OrderItem[];
 }
 
 export default function OrderDetailPage() {
   const params = useParams();
   const order_id = params?.order_id;
+  const router = useRouter();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [finishLoading, setFinishLoading] = useState(false);
+  const [finishError, setFinishError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!order_id) return;
@@ -49,6 +68,33 @@ export default function OrderDetailPage() {
     fetchOrder();
   }, [order_id]);
 
+  async function finishOrder() {
+    if (!order_id) return;
+    setFinishLoading(true);
+    setFinishError(null);
+    try {
+      const response = await apiFetch(`/branch/orders/${order_id}/status/finished`, {
+        method: "PUT",
+      });
+      if (response.msg === "Order status updated to Finished") {
+        // Update order status in state
+        setOrder((prev) => prev ? { ...prev, order_status: "Finished" } : prev);
+        // Redirect to branch store page
+        router.push("/branch/store");
+      } else {
+        setFinishError(response.msg || "Failed to finish order");
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setFinishError(err.message);
+      } else {
+        setFinishError("An unknown error occurred");
+      }
+    } finally {
+      setFinishLoading(false);
+    }
+  }
+
   return (
     <>
       <BranchNavbar />
@@ -68,6 +114,9 @@ export default function OrderDetailPage() {
             <p>
               <strong>Delivery Date:</strong>{" "}
               {new Date(order.delivery_date).toLocaleString()}
+            </p>
+            <p>
+              <strong>Order Status:</strong> {order.order_status}
             </p>
             <h2 className="text-2xl font-semibold mt-6 mb-4">Items</h2>
             <table className="min-w-full border border-black text-center rounded-lg overflow-hidden">
@@ -107,6 +156,18 @@ export default function OrderDetailPage() {
                 ))}
               </tbody>
             </table>
+            {order.order_status === "In-progress" && (
+              <div className="mt-6">
+                <button
+                  onClick={finishOrder}
+                  disabled={finishLoading}
+                  className="bg-[#6D0000] text-white px-4 py-2 rounded hover:bg-[#7a0000] focus:outline-none focus:ring-2 focus:ring-[#7a0000] transition-colors duration-200"
+                >
+                  {finishLoading ? "Finishing..." : "Finish Order"}
+                </button>
+                {finishError && <p className="text-red-600 mt-2">{finishError}</p>}
+              </div>
+            )}
           </div>
         )}
         {!loading && !error && !order && <p>No order details found.</p>}
