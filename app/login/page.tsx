@@ -3,108 +3,220 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { useTheme } from "next-themes";
+import { Eye, EyeOff, MoonStar, Sun } from "lucide-react";
+import { Toaster } from "sonner";
+import { toast } from "sonner";
 import apiFetch from "../../lib/api";
+
+// Import shadcn components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+// Define form schema with validation
+const loginFormSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
+
+type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    console.log("handleSubmit triggered");
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  // Initialize form with react-hook-form and zod validation
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
+  async function onSubmit(data: LoginFormValues) {
+    setIsLoading(true);
+    
     try {
-      const data = await apiFetch("/auth/login", {
+      const response = await apiFetch("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: data.email, password: data.password }),
       });
 
       // Save token and user info in localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("full_name", data.full_name);
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("role", response.role);
+      localStorage.setItem("full_name", response.full_name);
 
-      // Redirect based on role
-      if (data.role === "admin") {
-        router.push("/admin/dashboard");
-      } else if (data.role === "branch_store") {
-        router.push("/branch/store");
-      } else {
-        setError("Unknown user role");
-      }
+      // Show success toast
+      toast.success("Login successful!", {
+        description: `Welcome back, ${response.full_name}!`,
+      });
+
+      // Redirect based on role with slight delay for toast visibility
+      setTimeout(() => {
+        if (response.role === "admin") {
+          router.push("/admin/dashboard");
+        } else if (response.role === "branch_store") {
+          router.push("/branch/store");
+        } else {
+          toast.error("Unknown user role", {
+            description: "Please contact an administrator.",
+          });
+        }
+      }, 1000);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        toast.error("Login failed", { 
+          description: err.message || "Please check your credentials and try again."
+        });
       } else {
-        setError("An error occurred. Please try again.");
+        toast.error("Login failed", { 
+          description: "An unexpected error occurred. Please try again."
+        });
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[var(--background)]">
-      <div
-        className="absolute inset-0 bg-center bg-no-repeat bg-contain"
+    <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
+      {/* Background with overlay */}
+      <div 
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-70 dark:opacity-30 transition-opacity duration-500"
         style={{ backgroundImage: "url('/DSCF2264.jpg')", backgroundSize: "120%" }}
       />
-      <div className="absolute inset-0 bg-gray-200 opacity-20" />
-      <div className="relative max-w-md w-full bg-[var(--card)] p-8 rounded-xl shadow-[0_1px_30px_rgba(109,0,0,0.3)]">
-        <div className="flex justify-center mb-6 transition transform hover:scale-105 cursor-pointer">
-          <Image
-            src="/Chateraiselogo.png"
-            alt="Chateraise Logo"
-            width={200}
-            height={70}
-            priority
-          />
-        </div>
-        <h1 className="text-2xl font-bold mb-3 text-center text-[var(--primary)]">Login</h1>
-        {error && (
-          <div className="mb-4 text-[var(--destructive)] text-center font-semibold">{error}</div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block mb-1 font-medium text-[var(--foreground)]">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-[var(--border)] rounded px-3 py-2 cursor-pointer hover:border-[#6D0000] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:shadow-md transition duration-300 ease-in-out"
+      <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
+
+      {/* Theme toggle button */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={toggleTheme} 
+              className="absolute top-4 right-4 z-10 rounded-full"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <MoonStar className="h-5 w-5" />}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Toggle {theme === 'dark' ? 'light' : 'dark'} mode</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {/* Login Card */}
+      <Card className="relative max-w-md w-full mx-4 shadow-[0_5px_30px_rgba(109,0,0,0.3)] dark:shadow-[0_5px_30px_rgba(230,0,0,0.15)] border-primary/10 backdrop-blur-sm bg-card/90">
+        <CardHeader className="space-y-2 items-center">
+          <div className="w-full flex justify-center mb-2 transition transform hover:scale-105">
+            <Image
+              src="/Chateraiselogo.png"
+              alt="Chateraise Logo"
+              width={180}
+              height={60}
+              priority
+              className="dark:brightness-[1.2] dark:contrast-[1.1]"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block mb-1 font-medium text-[var(--foreground)]">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-[var(--border)] rounded px-3 py-2 cursor-pointer hover:border-[#6D0000] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#6D0000] focus:shadow-md transition duration-300 ease-in-out"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#6D0000] text-[var(--primary-foreground)] py-2 rounded transition transform hover:scale-105 hover:shadow-lg disabled:opacity-50 cursor-pointer"
-          >
-            {loading ? "Logging in..." : "Log In"}
-          </button>
-        </form>
-      </div>
+          <CardTitle className="text-2xl font-bold text-primary">Welcome Back</CardTitle>
+          <CardDescription>Enter your credentials to access your account</CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="your.email@example.com" 
+                        type="email" 
+                        autoComplete="email"
+                        className="bg-background/50"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          placeholder="••••••••" 
+                          type={showPassword ? "text" : "password"} 
+                          autoComplete="current-password"
+                          className="pr-10 bg-background/50"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
+                          onClick={togglePasswordVisibility}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">
+                            {showPassword ? "Hide password" : "Show password"}
+                          </span>
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-[#6D0000] hover:bg-[#8A0000] text-white font-medium transition-all"
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+        
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-muted-foreground">
+            Need help? <a href="#" className="text-primary hover:underline">Contact support</a>
+          </p>
+        </CardFooter>
+      </Card>
+      
     </div>
   );
 }
