@@ -68,7 +68,7 @@ import {
 // Components
 import Navbar from "../../components/AdminNavbar";
 import OrderDetailsModal from "./OrderDetailsModal";
-import PendingOrdersModal from "./PendingOrdersModal";
+import PendingOrdersModal from "./ViewOrdersModal";
 import { cn } from "@/lib/utils";
 
 interface OrderItem {
@@ -372,9 +372,7 @@ export default function AdminDashboard() {
   // Main render
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-      <div className="w-64 h-screen fixed left-0 bg-[#6D0000] shadow-lg">
         <Navbar />
-      </div>
       
       <main className="flex-1 p-6 ml-64 space-y-8">
         {/* Header Section */}
@@ -505,7 +503,7 @@ export default function AdminDashboard() {
         
         {/* Main Content Section */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
-          <CardHeader className="px-6 py-4 bg-[#6D0000] text-white">
+          <CardHeader className="px-6 py-4 bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-t-xl">
             <div className="flex items-center justify-between group">
               <div>
                 <CardTitle className="text-lg font-semibold text-white">Order Filtering</CardTitle>
@@ -678,13 +676,6 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-        
-        {/* Orders Tables Grid */}
-        {/* Removed Pending Orders and In-Progress Orders widgets as requested */}
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {renderOrdersTable(orders, "Pending Orders")}
-          {renderOrdersTable(inProgressOrders, "In-Progress Orders")}
-        </div> */}
         
         {/* New Order Bar */}
         <div 

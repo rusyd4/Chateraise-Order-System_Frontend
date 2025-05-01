@@ -30,8 +30,8 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex md:w-64 flex-col bg-[#6D0000] h-screen shadow-lg">
+      {/* Desktop Navigation - shown on md screens and up */}
+      <nav className="hidden md:flex md:w-64 flex-col bg-[#6D0000] h-screen fixed left-0 shadow-lg">
         {/* Logo and Title at the very top */}
         <div className="p-6 flex flex-col items-center border-b border-white/10">
           <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-3">
@@ -48,7 +48,7 @@ export default function Navbar() {
               key={item.href}
               asChild
               variant="ghost"
-              className={`justify-start text-white hover:bg-[#800000] ${
+              className={`justify-start text-white hover:bg-[#800000] hover:text-white ${
                 pathname === item.href ? "bg-[#800000]" : ""
               }`}
             >
@@ -69,7 +69,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - shown on screens smaller than md */}
       <div className="md:hidden fixed top-0 w-full bg-[#6D0000] border-b border-white/10 z-50">
         <div className="flex items-center justify-between p-4">
           <DropdownMenu>
@@ -79,17 +79,29 @@ export default function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 ml-2 bg-[#6D0000] text-white border-white/10">
+              {/* Mobile menu header */}
+              <div className="px-2 py-1.5 text-sm font-medium flex items-center gap-2">
+                <Store className="h-4 w-4" />
+                <span>Admin Portal</span>
+              </div>
+              <DropdownMenu.DropdownMenuSeparator className="bg-white/10 h-[1px] my-1" />
+              
               {navItems.map((item) => (
                 <DropdownMenuItem
                   key={item.href}
                   asChild
-                  className={`${pathname === item.href ? "bg-[#800000]" : ""}`}
+                  className={`hover:bg-[#800000] focus:bg-[#800000] ${
+                    pathname === item.href ? "bg-[#800000]" : ""
+                  }`}
                 >
                   <Link href={item.href} className="w-full">
                     {item.label}
                   </Link>
                 </DropdownMenuItem>
               ))}
+              
+              <DropdownMenu.DropdownMenuSeparator className="bg-white/10 h-[1px] my-1" />
+              
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="text-destructive focus:text-destructive focus:bg-destructive/10"
@@ -100,8 +112,11 @@ export default function Navbar() {
           </DropdownMenu>
 
           {/* Mobile logo - centered */}
-          <div className="w-16 h-8 bg-white rounded flex items-center justify-center">
-            <Store className="h-6 w-6 text-[#6D0000]" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+              <Store className="h-5 w-5 text-[#6D0000]" />
+            </div>
+            <span className="text-white font-medium">Admin</span>
           </div>
 
           {/* Spacer for balance */}

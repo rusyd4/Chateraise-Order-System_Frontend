@@ -6,8 +6,7 @@ import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useTheme } from "next-themes";
-import { Eye, EyeOff, MoonStar, Sun } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
 import apiFetch from "../../lib/api";
@@ -30,7 +29,6 @@ type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -90,7 +88,6 @@ export default function LoginPage() {
   }
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
@@ -100,26 +97,6 @@ export default function LoginPage() {
         style={{ backgroundImage: "url('/DSCF2264.jpg')", backgroundSize: "120%" }}
       />
       <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
-
-      {/* Theme toggle button */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={toggleTheme} 
-              className="absolute top-4 right-4 z-10 rounded-full"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <MoonStar className="h-5 w-5" />}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Toggle {theme === 'dark' ? 'light' : 'dark'} mode</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
 
       {/* Login Card */}
       <Card className="relative max-w-md w-full mx-4 shadow-[0_5px_30px_rgba(109,0,0,0.3)] dark:shadow-[0_5px_30px_rgba(230,0,0,0.15)] border-primary/10 backdrop-blur-sm bg-card/90">

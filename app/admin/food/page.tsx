@@ -301,9 +301,7 @@ export default function ManageFoodItems() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-      <div className="w-64 h-screen fixed left-0 bg-[#6D0000] shadow-lg">
         <Navbar />
-      </div>
       <main className="flex-1 p-6 ml-64 space-y-8">
         {/* Header Section */}
         <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
@@ -357,7 +355,7 @@ export default function ManageFoodItems() {
         {/* Product Table Card */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
           <CardContent className="p-0">
-            <div className="px-6 py-4 bg-[#6D0000] text-white">
+            <div className="px-6 py-4 bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-white/90" />
