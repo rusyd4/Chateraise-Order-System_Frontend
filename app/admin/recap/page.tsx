@@ -234,9 +234,8 @@ export default function AdminRecap() {
         const cell_address = XLSX.utils.encode_cell({ r: 3, c: C }); // Header is on row 4 (0-indexed)
         if (!ws[cell_address]) continue;
         ws[cell_address].s = {
-          font: { bold: true },
+          font: { bold: true, color: { rgb: "FFFFFF" } },
           fill: { fgColor: { rgb: "6D0000" } },
-          font: { color: { rgb: "FFFFFF" } }
         };
       }
 

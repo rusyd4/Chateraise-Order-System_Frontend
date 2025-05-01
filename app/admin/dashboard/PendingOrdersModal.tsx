@@ -54,7 +54,7 @@ interface Order {
   order_date: string;
 }
 
-interface PendingOrdersModalProps {
+export interface PendingOrdersModalProps {
   orders: Order[];
   onClose: () => void;
   onViewOrder: (order: Order) => void;
@@ -99,7 +99,7 @@ export default function PendingOrdersModal({
         <DialogHeader className="p-6 pb-3">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
-            <Badge variant={title.includes("Pending") ? "warning" : "default"} className="ml-2">
+            <Badge variant="default" className="ml-2">
               {filteredOrders.length} Orders
             </Badge>
           </div>
@@ -201,7 +201,7 @@ export default function PendingOrdersModal({
                         <CardTitle className="text-base">
                           Order #{order.order_id}
                         </CardTitle>
-                        <Badge variant={title.includes("Pending") ? "warning" : "default"}>
+                        <Badge variant="default">
                           {title.includes("Pending") ? "Pending" : "In Progress"}
                         </Badge>
                       </div>

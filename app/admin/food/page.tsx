@@ -375,7 +375,7 @@ export default function ManageFoodItems() {
                     <>
                       <p className="text-lg font-medium">No results found</p>
                       <p className="text-gray-500 dark:text-gray-400">
-                        No products match your search "{searchQuery}"
+                        No products match your search {searchQuery}
                       </p>
                       <Button 
                         variant="outline" 

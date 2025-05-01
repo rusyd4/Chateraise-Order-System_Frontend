@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +34,11 @@ export default function Navbar() {
       <nav className="hidden md:flex md:w-56 lg:w-64 flex-col border-r bg-background h-full">
         {/* Logo at the very top */}
         <div className="p-4 border-b">
-          <img
+          <Image
             src="/Chateraiselogo.png"
             alt="Chateraise Logo"
+            width={180}
+            height={180}
             className="object-contain w-full max-w-[180px] mx-auto"
           />
         </div>
@@ -96,9 +99,11 @@ export default function Navbar() {
           </DropdownMenu>
 
           {/* Mobile logo - centered */}
-          <img
+          <Image
             src="/Chateraiselogo.png"
             alt="Chateraise Logo"
+            width={180}
+            height={32}
             className="object-contain h-8"
           />
 

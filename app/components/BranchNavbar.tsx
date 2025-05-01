@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, ChangeEvent } from "react";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { Camera, ShoppingCart, History, Upload, X } from "lucide-react";
 import QrScanner from "qr-scanner";
@@ -174,7 +175,7 @@ export default function BranchNavbar() {
       }
       stopCamera();
     };
-  }, [scannerOpen]);
+  }, [scannerOpen, router, stopCamera]);
 
   return (
     <nav className="bg-primary text-primary-foreground px-4 py-3 shadow-sm sticky top-0 z-50">
@@ -184,9 +185,11 @@ export default function BranchNavbar() {
           className="cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => router.push("/")}
         >
-          <img 
+          <Image 
             src="/image-removebg-preview.png" 
             alt="Logo" 
+            width={120}
+            height={48}
             className="h-10 md:h-12" 
           />
         </div>

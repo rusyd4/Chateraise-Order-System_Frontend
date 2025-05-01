@@ -8,7 +8,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 
 // ShadCN UI Components
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,20 +16,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../../components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
-import { Calendar } from "@/components/ui/calendar";
+} from "../../../components/ui/dropdown-menu";
+import { Calendar } from "../../../components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "../../../components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -37,13 +37,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+} from "../../../components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Skeleton } from "../../../components/ui/skeleton";
+import { ScrollArea } from "../../../components/ui/scroll-area";
+import { Separator } from "../../../components/ui/separator";
+import { Badge } from "../../../components/ui/badge";
 
 // Icons
 import { 
@@ -65,8 +65,8 @@ import {
 // Components
 import Navbar from "../../components/AdminNavbar";
 import OrderDetailsModal from "./OrderDetailsModal";
-import PendingOrdersModal from "./PendingOrdersModal";
-import { cn } from "@/lib/utils";
+import PendingOrdersModal, { PendingOrdersModalProps } from "./PendingOrdersModal";
+import { cn } from "../../../lib/utils";
 
 export default function AdminDashboard() {
   // Type definitions
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
     filtered: ""
   });
 
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
 
   // Fetch orders on component mount
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
     fetchInProgressOrders();
   };
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = (order: Parameters<PendingOrdersModalProps['onViewOrder']>[0]) => {
     const orderWithItems = {
       ...order,
       items: (order as any).items || [],
