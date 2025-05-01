@@ -327,7 +327,7 @@ export default function ManageFoodItems() {
 
         {/* Stats Card */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg mb-6">
-          <CardContent className="p-6">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-full bg-[#6D0000]/10 transition-all duration-300 hover:scale-110">

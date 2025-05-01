@@ -384,16 +384,29 @@ export default function AdminDashboard() {
               </h1>
               <p className="text-sm text-gray-500 mt-1">Manage and track all store orders</p>
             </div>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={handleRefresh}
-              title="Refresh Data"
-              className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
-              transition-all duration-300 shadow-sm hover:shadow-md"
-            >
-              <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleRefresh}
+                title="Refresh Data"
+                className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
+                transition-all duration-300 shadow-sm hover:shadow-md"
+              >
+                <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsPendingOrdersOpen(true)}
+                title="View New Orders"
+                className="relative rounded-full border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+              >
+                {orders.length} New Orders
+                <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600 animate-ping"></span>
+                <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600"></span>
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -677,25 +690,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
         
-        {/* New Order Bar */}
-        <div 
-          className="cursor-pointer bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-xl shadow-lg p-5 flex items-center justify-between mb-8 transition-all duration-300 hover:shadow-xl hover:translate-x-1 hover:-translate-y-1"
-          onClick={() => setIsPendingOrdersOpen(true)}
-          title="View Pending Orders"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-full">
-              <Clock className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg text-white">New Orders</h3>
-              <p className="text-white/80 text-sm">You have pending orders waiting to be processed</p>
-            </div>
-          </div>
-          <Badge className="bg-white text-[#6D0000] hover:bg-white/90 text-lg px-3 py-1 font-bold transition-all duration-300 hover:scale-105">
-            {orders.length}
-          </Badge>
-        </div>
         
         {/* Error Alerts Section */}
         {errors.pending && renderErrorAlert(errors.pending, () => 
