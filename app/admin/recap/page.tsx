@@ -295,9 +295,8 @@ export default function AdminRecap() {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
       <Navbar />
 
-      <main className="flex-1 p-6 ml-64 space-y-8">
-        {/* Header Section */}
-        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
+      <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
+      <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
               <div>
               <h1 className="text-2xl font-bold text-gray-900">Orders Recap</h1>
