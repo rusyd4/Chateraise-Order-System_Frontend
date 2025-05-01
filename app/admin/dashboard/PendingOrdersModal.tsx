@@ -47,14 +47,24 @@ import {
   X
 } from "lucide-react";
 
+interface OrderItem {
+  food_id: number;
+  food_name: string;
+  quantity: number;
+}
+
 interface Order {
   order_id: number;
   branch_name: string;
   delivery_date: string;
   order_date: string;
+  delivery_time?: string;
+  branch_address?: string;
+  items: OrderItem[];
+  qrCodeImageUrl?: string;
 }
 
-export interface PendingOrdersModalProps {
+interface PendingOrdersModalProps {
   orders: Order[];
   onClose: () => void;
   onViewOrder: (order: Order) => void;
@@ -99,7 +109,7 @@ export default function PendingOrdersModal({
         <DialogHeader className="p-6 pb-3">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
-            <Badge variant="default" className="ml-2">
+            <Badge variant={title.includes("Pending") ? "secondary" : "default"} className="ml-2">
               {filteredOrders.length} Orders
             </Badge>
           </div>
@@ -201,9 +211,9 @@ export default function PendingOrdersModal({
                         <CardTitle className="text-base">
                           Order #{order.order_id}
                         </CardTitle>
-                        <Badge variant="default">
-                          {title.includes("Pending") ? "Pending" : "In Progress"}
-                        </Badge>
+                          <Badge variant={title.includes("Pending") ? "secondary" : "default"}>
+                            {title.includes("Pending") ? "Pending" : "In Progress"}
+                          </Badge>
                       </div>
                       <CardDescription>
                         {order.branch_name}

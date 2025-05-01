@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu } from "lucide-react";
+import { Menu, Store } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -31,26 +31,26 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex md:w-56 lg:w-64 flex-col border-r bg-background h-full">
-        {/* Logo at the very top */}
-        <div className="p-4 border-b">
-          <Image
-            src="/Chateraiselogo.png"
-            alt="Chateraise Logo"
-            width={180}
-            height={180}
-            className="object-contain w-full max-w-[180px] mx-auto"
-          />
+      <nav className="hidden md:flex md:w-64 flex-col bg-[#6D0000] h-screen shadow-lg">
+        {/* Logo and Title at the very top */}
+        <div className="p-6 flex flex-col items-center border-b border-white/10">
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-3">
+            <Store className="h-8 w-8 text-[#6D0000]" />
+          </div>
+          <h2 className="text-white font-bold text-xl">Admin Portal</h2>
+          <p className="text-white/70 text-xs">Store Management</p>
         </div>
 
         {/* Navigation items */}
-        <div className="flex flex-col space-y-2 flex-grow p-4">
+        <div className="flex flex-col space-y-2 flex-grow p-4 overflow-y-auto">
           {navItems.map((item) => (
             <Button
               key={item.href}
               asChild
-              variant={pathname === item.href ? "default" : "ghost"}
-              className={`justify-start ${pathname === item.href ? "bg-primary" : "hover:bg-accent"}`}
+              variant="ghost"
+              className={`justify-start text-white hover:bg-[#800000] ${
+                pathname === item.href ? "bg-[#800000]" : ""
+              }`}
             >
               <Link href={item.href}>{item.label}</Link>
             </Button>
@@ -58,7 +58,7 @@ export default function Navbar() {
         </div>
 
         {/* Logout button */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-white/10">
           <Button
             onClick={handleLogout}
             variant="destructive"
@@ -70,21 +70,22 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden fixed top-0 w-full bg-background border-b z-50">
+      <div className="md:hidden fixed top-0 w-full bg-[#6D0000] border-b border-white/10 z-50">
         <div className="flex items-center justify-between p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="text-white border-white/30">
                 <Menu className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 ml-2">
+            <DropdownMenuContent className="w-56 ml-2 bg-[#6D0000] text-white border-white/10">
               {navItems.map((item) => (
-                <DropdownMenuItem key={item.href} asChild>
-                  <Link
-                    href={item.href}
-                    className={`w-full ${pathname === item.href ? "bg-accent" : ""}`}
-                  >
+                <DropdownMenuItem
+                  key={item.href}
+                  asChild
+                  className={`${pathname === item.href ? "bg-[#800000]" : ""}`}
+                >
+                  <Link href={item.href} className="w-full">
                     {item.label}
                   </Link>
                 </DropdownMenuItem>
@@ -99,13 +100,9 @@ export default function Navbar() {
           </DropdownMenu>
 
           {/* Mobile logo - centered */}
-          <Image
-            src="/Chateraiselogo.png"
-            alt="Chateraise Logo"
-            width={180}
-            height={32}
-            className="object-contain h-8"
-          />
+          <div className="w-16 h-8 bg-white rounded flex items-center justify-center">
+            <Store className="h-6 w-6 text-[#6D0000]" />
+          </div>
 
           {/* Spacer for balance */}
           <div className="w-10"></div>

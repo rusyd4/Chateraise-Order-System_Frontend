@@ -8,7 +8,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 
 // ShadCN UI Components
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,20 +16,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "../../../components/ui/dropdown-menu";
-import { Calendar } from "../../../components/ui/calendar";
+} from "@/components/ui/dropdown-menu";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../../components/ui/popover";
+} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -37,13 +37,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../../../components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import { Skeleton } from "../../../components/ui/skeleton";
-import { ScrollArea } from "../../../components/ui/scroll-area";
-import { Separator } from "../../../components/ui/separator";
-import { Badge } from "../../../components/ui/badge";
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 // Icons
 import { 
@@ -59,34 +59,36 @@ import {
   Filter, 
   Truck, 
   RefreshCw,
-  ChevronLeft
+  ChevronLeft,
+  ArrowRight,
+  BarChart3,
+  ChevronRight
 } from "lucide-react";
 
 // Components
 import Navbar from "../../components/AdminNavbar";
 import OrderDetailsModal from "./OrderDetailsModal";
-import PendingOrdersModal, { PendingOrdersModalProps } from "./PendingOrdersModal";
-import { cn } from "../../../lib/utils";
+import PendingOrdersModal from "./PendingOrdersModal";
+import { cn } from "@/lib/utils";
+
+interface OrderItem {
+  food_id: number;
+  food_name: string;
+  quantity: number;
+}
+
+interface Order {
+  order_id: number;
+  branch_name: string;
+  delivery_date: string;
+  order_date: string;
+  delivery_time?: string;
+  branch_address?: string;
+  items: OrderItem[];
+  qrCodeImageUrl?: string;
+}
 
 export default function AdminDashboard() {
-  // Type definitions
-  interface OrderItem {
-    food_id: number;
-    food_name: string;
-    quantity: number;
-  }
-
-  interface Order {
-    order_id: number;
-    branch_name: string;
-    delivery_date: string;
-    order_date: string;
-    delivery_time?: string;
-    branch_address?: string;
-    items: OrderItem[];
-    qrCodeImageUrl?: string;
-  }
-
   // State management
   const [orders, setOrders] = useState<Order[]>([]);
   const [inProgressOrders, setInProgressOrders] = useState<Order[]>([]);
@@ -237,7 +239,7 @@ export default function AdminDashboard() {
     fetchInProgressOrders();
   };
 
-  const handleViewOrder = (order: Parameters<PendingOrdersModalProps['onViewOrder']>[0]) => {
+  const handleViewOrder = (order: Order) => {
     const orderWithItems = {
       ...order,
       items: (order as any).items || [],
@@ -260,13 +262,18 @@ export default function AdminDashboard() {
     if (!message) return null;
     
     return (
-      <Alert variant="destructive" className="mt-4">
+      <Alert variant="destructive" className="mt-4 rounded-lg transition-all duration-300 hover:shadow-lg animate-pulse">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription className="flex justify-between items-center">
           <span>{message}</span>
           {onDismiss && (
-            <Button variant="ghost" size="sm" onClick={onDismiss}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onDismiss}
+              className="transition-all duration-300 hover:scale-110 hover:rotate-90"
+            >
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -277,55 +284,81 @@ export default function AdminDashboard() {
 
   const renderOrdersTable = (ordersData: Order[], title: string) => {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-xl">{title}</CardTitle>
+      <Card className="w-full overflow-hidden border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg">
+        <CardHeader className="px-6 py-4 bg-[#6D0000] text-white">
+          <div className="flex items-center justify-between group">
+            <div className="flex items-center gap-2">
+              {title === "Pending Orders" ? (
+                <Clock className="h-5 w-5 text-amber-300 transition-transform duration-300 group-hover:rotate-12" />
+              ) : (
+                <RefreshCw className="h-5 w-5 text-blue-300 transition-transform duration-500 group-hover:rotate-180" />
+              )}
+              <CardTitle className="text-lg font-semibold text-white">{title}</CardTitle>
+            </div>
+            <Badge variant="secondary" className="px-3 py-1 bg-white/20 text-white border-white/30 transition-all duration-300 group-hover:scale-105">
+              {ordersData.length} Orders
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {ordersData.length === 0 ? (
-            <p className="text-center text-muted-foreground py-6">No orders found</p>
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <Package className="h-12 w-12 mb-4 text-gray-300" />
+              <p className="text-sm font-medium">No orders found</p>
+            </div>
           ) : (
             <ScrollArea className="h-[400px]">
-              <div className="space-y-4">
+              <div className="p-6 space-y-4">
                 {ordersData.map((order) => (
-                  <Card key={order.order_id} className="mb-4">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-base">
-                          Order #{order.order_id}
-                        </CardTitle>
-                        <Badge variant="outline" className="ml-2">
-                          {title === "Pending Orders" ? (
-                            <Clock className="h-3 w-3 mr-1 text-amber-500" />
-                          ) : (
-                            <RefreshCw className="h-3 w-3 mr-1 text-blue-500" />
-                          )}
-                          {title === "Pending Orders" ? "Pending" : "In Progress"}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="py-2">
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="flex items-center">
-                          <Store className="h-4 w-4 mr-2 text-gray-500" />
-                          <span>{order.branch_name}</span>
+                  <Card key={order.order_id} className="border border-gray-100 rounded-lg hover:border-[#6D0000]/20 transition-all duration-300 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 group">
+                    <CardContent className="p-0">
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-1 transition-colors duration-300 group-hover:text-[#6D0000]">
+                              Order #{order.order_id}
+                            </h3>
+                            <p className="text-sm text-gray-500 flex items-center gap-2">
+                              <Store className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
+                              {order.branch_name}
+                            </p>
+                          </div>
+                          <Badge 
+                            variant={title === "Pending Orders" ? "secondary" : "default"}
+                            className={cn(
+                              "px-2.5 py-0.5 text-xs transition-all duration-300 group-hover:scale-105",
+                              title === "Pending Orders" 
+                                ? "bg-amber-50 text-amber-700 border-amber-200" 
+                                : "bg-blue-50 text-blue-700 border-blue-200"
+                            )}
+                          >
+                            {title === "Pending Orders" ? "Pending" : "In Progress"}
+                          </Badge>
                         </div>
-                        <div className="flex items-center">
-                          <Truck className="h-4 w-4 mr-2 text-gray-500" />
-                          <span>{format(new Date(order.delivery_date), "PP")}</span>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                              <CalendarIcon className="h-3 w-3" />
+                              <span>Order: {format(new Date(order.order_date), "MMM dd, yyyy")}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                              <Truck className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
+                              <span>Delivery: {format(new Date(order.delivery_date), "MMM dd, yyyy")}</span>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-[#6D0000] hover:text-[#6D0000] hover:bg-[#6D0000]/5 -mr-2 transition-all duration-300 hover:translate-x-1"
+                            onClick={() => handleViewOrder(order)}
+                          >
+                            View Details
+                            <ChevronRight className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter className="pt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="ml-auto"
-                        onClick={() => handleViewOrder(order)}
-                      >
-                        View Details
-                      </Button>
-                    </CardFooter>
                   </Card>
                 ))}
               </div>
@@ -338,242 +371,339 @@ export default function AdminDashboard() {
 
   // Main render
   return (
-    <div className="flex max-w-7xl mx-auto min-h-screen p-4 lg:p-8 gap-4 lg:gap-8">
-      <Navbar />
-      <main className="flex-1 p-0 space-y-6">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
+      <div className="w-64 h-screen fixed left-0 bg-[#6D0000] shadow-lg">
+        <Navbar />
+      </div>
+      
+      <main className="flex-1 p-6 ml-64 space-y-8">
         {/* Header Section */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Store Orders Dashboard</h1>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={handleRefresh}
-            title="Refresh Data"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Store Orders Dashboard
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">Manage and track all store orders</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleRefresh}
+              title="Refresh Data"
+              className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
+              transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
+            </Button>
+          </div>
         </div>
         
         {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Pending Orders</CardTitle>
-              <CardDescription>Waiting for processing</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold">
-                  {isLoading.pending ? (
-                    <Skeleton className="h-10 w-12" />
-                  ) : (
-                    orders.length
-                  )}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsPendingOrdersOpen(true)}
-                >
-                  View All
-                </Button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group overflow-hidden">
+            <div className="h-1 bg-amber-500" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-full bg-amber-50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                  <Clock className="h-6 w-6 text-amber-600" />
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
+                    {isLoading.pending ? (
+                      <Skeleton className="h-9 w-12" />
+                    ) : (
+                      orders.length
+                    )}
+                  </span>
+                  <span className="text-xs text-gray-500">orders</span>
+                </div>
               </div>
+              <h3 className="text-sm font-medium text-gray-900">Pending Orders</h3>
+              <p className="text-xs text-gray-500 mt-1">Waiting for processing</p>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setIsPendingOrdersOpen(true)}
+                className="mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
+              >
+                View all
+                <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+              </Button>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">In Progress</CardTitle>
-              <CardDescription>Currently being processed</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold">
-                  {isLoading.inProgress ? (
-                    <Skeleton className="h-10 w-12" />
-                  ) : (
-                    inProgressOrders.length
-                  )}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsInProgressOrdersOpen(true)}
-                >
-                  View All
-                </Button>
+          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group overflow-hidden">
+            <div className="h-1 bg-blue-500" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-full bg-blue-50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                  <RefreshCw className="h-6 w-6 text-blue-600 transition-transform duration-700 group-hover:rotate-180" />
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
+                    {isLoading.inProgress ? (
+                      <Skeleton className="h-9 w-12" />
+                    ) : (
+                      inProgressOrders.length
+                    )}
+                  </span>
+                  <span className="text-xs text-gray-500">orders</span>
+                </div>
               </div>
+              <h3 className="text-sm font-medium text-gray-900">In Progress</h3>
+              <p className="text-xs text-gray-500 mt-1">Currently being processed</p>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setIsInProgressOrdersOpen(true)}
+                className="mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
+              >
+                View all
+                <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+              </Button>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Total Orders</CardTitle>
-              <CardDescription>All current orders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold">
-                  {isLoading.pending || isLoading.inProgress ? (
-                    <Skeleton className="h-10 w-12" />
-                  ) : (
-                    orders.length + inProgressOrders.length
-                  )}
-                </span>
+          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group overflow-hidden">
+            <div className="h-1 bg-[#6D0000]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-full bg-[#6D0000]/10 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                  <BarChart3 className="h-6 w-6 text-[#6D0000] transition-transform duration-300 group-hover:scale-110" />
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
+                    {isLoading.pending || isLoading.inProgress ? (
+                      <Skeleton className="h-9 w-12" />
+                    ) : (
+                      orders.length + inProgressOrders.length
+                    )}
+                  </span>
+                  <span className="text-xs text-gray-500">orders</span>
+                </div>
+              </div>
+              <h3 className="text-sm font-medium text-gray-900">Total Orders</h3>
+              <p className="text-xs text-gray-500 mt-1">All current orders</p>
+              <div className="mt-4 w-full bg-gray-100 rounded-full h-1.5">
+                <div 
+                  className="bg-[#6D0000] h-1.5 rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${orders.length + inProgressOrders.length > 0 
+                      ? (inProgressOrders.length / (orders.length + inProgressOrders.length)) * 100 
+                      : 0}%` 
+                  }}
+                ></div>
+              </div>
+              <div className="flex justify-between mt-1 text-xs text-gray-500">
+                <span>Pending</span>
+                <span>In Progress</span>
               </div>
             </CardContent>
           </Card>
         </div>
         
         {/* Main Content Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Track Branch Store Orders</CardTitle>
-            <CardDescription>
-              Filter and manage orders from all branch stores
-            </CardDescription>
+        <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <CardHeader className="px-6 py-4 bg-[#6D0000] text-white">
+            <div className="flex items-center justify-between group">
+              <div>
+                <CardTitle className="text-lg font-semibold text-white">Order Filtering</CardTitle>
+                <CardDescription className="text-sm text-gray-200 mt-1">
+                  Filter orders by branch, order date, or delivery date
+                </CardDescription>
+              </div>
+              <Filter className="h-5 w-5 text-white/80 transition-all duration-300 group-hover:rotate-180 group-hover:text-white" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="filter" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-1 mb-6">
-                <TabsTrigger value="filter">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter Orders
-                </TabsTrigger>
-              </TabsList>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Branch Selection */}
+              <div>
+                <label htmlFor="branchSelect" className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Branch
+                </label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      id="branchSelect" 
+                      className="w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
+                    >
+                      <span className={selectedBranch ? "text-gray-900" : "text-gray-500"}>
+                        {selectedBranch || "Select branch"}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-gray-400 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full shadow-lg border-gray-100 rounded-lg overflow-hidden">
+                    <DropdownMenuRadioGroup
+                      value={selectedBranch}
+                      onValueChange={(value) => setSelectedBranch(value)}
+                    >
+                      {orders.length > 0 &&
+                        Array.from(new Set(orders.map((order) => order.branch_name))).map((branchName) => (
+                          <DropdownMenuRadioItem 
+                            key={branchName} 
+                            value={branchName}
+                            className="py-2.5 px-3 cursor-pointer hover:bg-[#6D0000]/5 focus:bg-[#6D0000]/5"
+                          >
+                            {branchName}
+                          </DropdownMenuRadioItem>
+                        ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               
-              <TabsContent value="filter" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Branch Selection */}
-                  <div>
-                    <label htmlFor="branchSelect" className="block text-sm font-medium mb-2">
-                      Select Branch
-                    </label>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" id="branchSelect" className="w-full justify-start">
-                          {selectedBranch || "-- Select Branch --"}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                        <DropdownMenuRadioGroup
-                          value={selectedBranch}
-                          onValueChange={(value) => setSelectedBranch(value)}
-                        >
-                          {orders.length > 0 &&
-                            Array.from(new Set(orders.map((order) => order.branch_name))).map((branchName) => (
-                              <DropdownMenuRadioItem key={branchName} value={branchName}>
-                                {branchName}
-                              </DropdownMenuRadioItem>
-                            ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  
-                  {/* Order Date Selection */}
-                  <div>
-                    <label htmlFor="orderDate" className="block text-sm font-medium mb-2">
-                      Order Date
-                    </label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left",
-                            !selectedDate && "text-muted-foreground"
-                          )}
-                          id="orderDate"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDate ? format(selectedDate, "PPP") : <span>Select date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            setSelectedDate(date);
-                            if (date) {
-                              const deliveryDate = new Date(date);
-                              deliveryDate.setDate(deliveryDate.getDate() + 2);
-                              setSelectedDeliveryDate(deliveryDate);
-                            } else {
-                              setSelectedDeliveryDate(undefined);
-                            }
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  
-                  {/* Delivery Date Selection */}
-                  <div>
-                    <label htmlFor="deliveryDate" className="block text-sm font-medium mb-2">
-                      Delivery Date
-                    </label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left",
-                            !selectedDeliveryDate && "text-muted-foreground"
-                          )}
-                          id="deliveryDate"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : <span>Select date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDeliveryDate}
-                          onSelect={(date) => {
-                            setSelectedDeliveryDate(date);
-                            if (date) {
-                              const orderDate = new Date(date);
-                              orderDate.setDate(orderDate.getDate() - 2);
-                              setSelectedDate(orderDate);
-                            } else {
-                              setSelectedDate(undefined);
-                            }
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-                
-                {/* Filter Button */}
-                <div className="flex justify-end mt-6">
-                  <Button 
-                    onClick={fetchFilteredOrders}
-                    className="bg-[#6D0000] hover:bg-[#7a0000]"
-                    disabled={isLoading.filtered}
-                  >
-                    {isLoading.filtered ? "Loading..." : "View Orders"}
-                  </Button>
-                </div>
-                
-                {/* Error Alert */}
-                {renderErrorAlert(errors.filtered, () => 
-                  setErrors(prev => ({ ...prev, filtered: "" }))
+              {/* Order Date Selection */}
+              <div>
+                <label htmlFor="orderDate" className="block text-sm font-medium text-gray-700 mb-2">
+                  Order Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        !selectedDate && "text-gray-500"
+                      )}
+                      id="orderDate"
+                    >
+                      <span className="flex items-center">
+                        <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 transition-transform duration-300 group-hover:scale-110" />
+                        {selectedDate ? format(selectedDate, "PPP") : "Select date"}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-lg shadow-lg border-gray-100" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        if (date) {
+                          const deliveryDate = new Date(date);
+                          deliveryDate.setDate(deliveryDate.getDate() + 2);
+                          setSelectedDeliveryDate(deliveryDate);
+                        } else {
+                          setSelectedDeliveryDate(undefined);
+                        }
+                      }}
+                      initialFocus
+                      className="rounded-md border shadow-md"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              {/* Delivery Date Selection */}
+              <div>
+                <label htmlFor="deliveryDate" className="block text-sm font-medium text-gray-700 mb-2">
+                  Delivery Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        !selectedDeliveryDate && "text-gray-500"
+                      )}
+                      id="deliveryDate"
+                    >
+                      <span className="flex items-center">
+                        <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 transition-transform duration-300 group-hover:scale-110" />
+                        {selectedDeliveryDate ? format(selectedDeliveryDate, "PPP") : "Select date"}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-lg shadow-lg border-gray-100" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDeliveryDate}
+                      onSelect={(date) => {
+                        setSelectedDeliveryDate(date);
+                        if (date) {
+                          const orderDate = new Date(date);
+                          orderDate.setDate(orderDate.getDate() - 2);
+                          setSelectedDate(orderDate);
+                        } else {
+                          setSelectedDate(undefined);
+                        }
+                      }}
+                      initialFocus
+                      className="rounded-md border shadow-md"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-8">
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setSelectedBranch("");
+                  setSelectedDate(undefined);
+                  setSelectedDeliveryDate(undefined);
+                }}
+                className="mr-3 border-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300 hover:shadow-sm"
+              >
+                Clear Filters
+              </Button>
+              <Button 
+                onClick={fetchFilteredOrders}
+                className="bg-[#6D0000] hover:bg-[#800000] px-8 py-2.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md font-medium"
+                disabled={isLoading.filtered}
+              >
+                {isLoading.filtered ? (
+                  <span className="flex items-center">
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <Filter className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
+                    Apply Filters
+                  </span>
                 )}
-              </TabsContent>
-            </Tabs>
+              </Button>
+            </div>
+            
+            {/* Error Alert */}
+            {renderErrorAlert(errors.filtered, () => 
+              setErrors(prev => ({ ...prev, filtered: "" }))
+            )}
           </CardContent>
         </Card>
         
-        {/* Orders Widgets Section - Moved to bottom */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {renderOrdersTable(orders.slice(0, 5), "Pending Orders")}
-          {renderOrdersTable(inProgressOrders.slice(0, 5), "In Progress Orders")}
+        {/* Orders Tables Grid */}
+        {/* Removed Pending Orders and In-Progress Orders widgets as requested */}
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {renderOrdersTable(orders, "Pending Orders")}
+          {renderOrdersTable(inProgressOrders, "In-Progress Orders")}
+        </div> */}
+        
+        {/* New Order Bar */}
+        <div 
+          className="cursor-pointer bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-xl shadow-lg p-5 flex items-center justify-between mb-8 transition-all duration-300 hover:shadow-xl hover:translate-x-1 hover:-translate-y-1"
+          onClick={() => setIsPendingOrdersOpen(true)}
+          title="View Pending Orders"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/10 rounded-full">
+              <Clock className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg text-white">New Orders</h3>
+              <p className="text-white/80 text-sm">You have pending orders waiting to be processed</p>
+            </div>
+          </div>
+          <Badge className="bg-white text-[#6D0000] hover:bg-white/90 text-lg px-3 py-1 font-bold transition-all duration-300 hover:scale-105">
+            {orders.length}
+          </Badge>
         </div>
         
         {/* Error Alerts Section */}
@@ -601,7 +731,7 @@ export default function AdminDashboard() {
       {isPendingOrdersOpen && (
         <PendingOrdersModal
           orders={orders}
-          title="Pending Orders"
+          title="New Orders"
           onClose={() => setIsPendingOrdersOpen(false)}
           onViewOrder={handleViewOrder}
         />

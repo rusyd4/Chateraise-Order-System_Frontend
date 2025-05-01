@@ -38,7 +38,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CalendarIcon, FileSpreadsheet, RefreshCw } from "lucide-react";
+import { 
+  CalendarIcon, 
+  FileSpreadsheet, 
+  RefreshCw, 
+  Store,
+  Filter,
+  BarChart3,
+  ChevronRight,
+  AlertCircle,
+  PieChart
+} from "lucide-react";
 import { format } from "date-fns";
 
 // Existing imports
@@ -235,7 +245,7 @@ export default function AdminRecap() {
         if (!ws[cell_address]) continue;
         ws[cell_address].s = {
           font: { bold: true, color: { rgb: "FFFFFF" } },
-          fill: { fgColor: { rgb: "6D0000" } },
+          fill: { fgColor: { rgb: "6D0000" } }
         };
       }
 
@@ -253,119 +263,203 @@ export default function AdminRecap() {
   const showTable = !loading && !error && appliedDateRange.from && appliedDateRange.to;
   const hasData = items.length > 0;
 
+  // Get totals for summary stats
+  const totalOrderCount = filterOrdersByDateRange(orders).length;
+  const totalItemQuantity = items.reduce((acc, item) => acc + item.total, 0);
+
   return (
-    <div className="flex flex-col md:flex-row max-w-full min-h-screen bg-slate-50">
-      <Navbar />
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
+      <div className="w-64 h-screen fixed left-0 bg-[#6D0000] shadow-lg">
+        <Navbar />
+      </div>
       
-      <main className="flex-1 p-4 md:p-8 space-y-6 overflow-hidden">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Orders Recap</h1>
-            {appliedDateRange.from && appliedDateRange.to && (
-              <p className="text-slate-500 mt-1">
-                {format(appliedDateRange.from, "MMMM d, yyyy")} - {format(appliedDateRange.to, "MMMM d, yyyy")}
-              </p>
-            )}
+      <main className="flex-1 p-6 ml-64 space-y-8">
+        {/* Header Section */}
+        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Orders Recap
+              </h1>
+              {appliedDateRange.from && appliedDateRange.to && (
+                <p className="text-sm text-gray-500 mt-1">
+                  {format(appliedDateRange.from, "MMMM d, yyyy")} - {format(appliedDateRange.to, "MMMM d, yyyy")}
+                </p>
+              )}
+            </div>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={refreshData}
+              disabled={isRefreshing}
+              title="Refresh Data"
+              className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
+              transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              <RefreshCw className={`h-4 w-4 transition-transform duration-300 hover:rotate-180 ${isRefreshing ? "animate-spin" : ""}`} />
+            </Button>
           </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshData} 
-            disabled={isRefreshing}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-            Refresh Data
-          </Button>
         </div>
 
+        {/* Summary Cards */}
+        {showTable && hasData && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group overflow-hidden">
+              <div className="h-1 bg-[#6D0000]" />
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-full bg-[#6D0000]/10 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                    <BarChart3 className="h-6 w-6 text-[#6D0000]" />
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
+                      {totalOrderCount}
+                    </span>
+                    <span className="text-xs text-gray-500">orders</span>
+                  </div>
+                </div>
+                <h3 className="text-sm font-medium text-gray-900">Total Orders</h3>
+                <p className="text-xs text-gray-500 mt-1">In selected period</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group overflow-hidden">
+              <div className="h-1 bg-blue-500" />
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-full bg-blue-50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                    <PieChart className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
+                      {totalItemQuantity}
+                    </span>
+                    <span className="text-xs text-gray-500">items</span>
+                  </div>
+                </div>
+                <h3 className="text-sm font-medium text-gray-900">Total Items</h3>
+                <p className="text-xs text-gray-500 mt-1">Across all branches</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group overflow-hidden">
+              <div className="h-1 bg-amber-500" />
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-full bg-amber-50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                    <Store className="h-6 w-6 text-amber-600" />
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
+                      {storeNames.length}
+                    </span>
+                    <span className="text-xs text-gray-500">branches</span>
+                  </div>
+                </div>
+                <h3 className="text-sm font-medium text-gray-900">Active Branches</h3>
+                <p className="text-xs text-gray-500 mt-1">With orders in period</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {error && (
-          <Alert variant="destructive" className="mb-6">
+          <Alert variant="destructive" className="mb-6 animate-pulse border-0 shadow-md">
+            <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Date Range Selection</CardTitle>
-            <CardDescription>Select a date range to filter orders</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row items-start gap-4">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
-                        </>
-                      ) : (
-                        format(dateRange.from, "LLL dd, y")
-                      )
-                    ) : (
-                      "Select date range"
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={(range) => {
-                      if (range && "from" in range) {
-                        setDateRange({ from: range.from, to: range.to });
-                      }
-                    }}
-                    numberOfMonths={2}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+        <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="px-6 py-4 bg-[#6D0000] text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-5 w-5 text-white/90" />
+                  <h2 className="text-lg font-semibold text-white">Date Range Selection</h2>
+                </div>
+              </div>
+            </div>
 
-              <div className="flex flex-row gap-2 w-full sm:w-auto">
+            <div className="p-6">
+              <p className="text-sm text-gray-500 mb-4">Select a date range to filter orders and view the recap data</p>
+              
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-auto justify-start text-left font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 transition-transform duration-300 group-hover:scale-110" />
+                      {dateRange.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "LLL dd, y")
+                        )
+                      ) : (
+                        "Select date range"
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-lg shadow-lg border-gray-100" align="start">
+                    <Calendar
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={(range) => {
+                        if (range && "from" in range) {
+                          setDateRange({ from: range.from, to: range.to });
+                        }
+                      }}
+                      numberOfMonths={2}
+                      initialFocus
+                      className="rounded-md border shadow-md"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <div className="flex flex-row gap-2 w-full sm:w-auto">
+                  <Button 
+                    onClick={() => setAppliedDateRange(dateRange)}
+                    disabled={!dateRange.from || !dateRange.to}
+                    className="flex-1 sm:flex-none bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    Apply
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setDateRange({ from: undefined, to: undefined });
+                      setAppliedDateRange({ from: undefined, to: undefined });
+                    }}
+                    className="flex-1 sm:flex-none border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
+                  >
+                    Reset
+                  </Button>
+                </div>
+                
                 <Button 
-                  onClick={() => setAppliedDateRange(dateRange)}
-                  disabled={!dateRange.from || !dateRange.to}
-                  className="flex-1 sm:flex-none"
+                  variant="outline"
+                  className="gap-2 w-full sm:w-auto ml-auto border-green-600 text-green-600 hover:text-green-800 hover:border-green-800 hover:bg-green-100 transition-all duration-300 hover:shadow-md"
+                  onClick={exportToExcel} 
+                  disabled={!hasData || isExporting}
                 >
-                  Apply
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setDateRange({ from: undefined, to: undefined });
-                    setAppliedDateRange({ from: undefined, to: undefined });
-                  }}
-                  className="flex-1 sm:flex-none"
-                >
-                  Reset
+                  <FileSpreadsheet className="h-4 w-4" />
+                  {isExporting ? "Exporting..." : "Export to Excel"}
                 </Button>
               </div>
-              
-              <Button 
-                variant="secondary"
-                className="gap-2 w-full sm:w-auto ml-auto"
-                onClick={exportToExcel} 
-                disabled={!hasData || isExporting}
-              >
-                <FileSpreadsheet className="h-4 w-4" />
-                {isExporting ? "Exporting..." : "Export to Excel"}
-              </Button>
             </div>
           </CardContent>
         </Card>
 
         {loading ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
+          <Card className="border-0 shadow-md rounded-xl bg-white overflow-hidden">
+            <CardContent className="p-6">
+              <div className="space-y-4">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
@@ -376,66 +470,127 @@ export default function AdminRecap() {
           </Card>
         ) : showTable ? (
           hasData ? (
-            <Card>
+            <Card className="border-0 shadow-md rounded-xl bg-white overflow-hidden">
               <CardContent className="p-0">
-                <ScrollArea className="h-[calc(100vh-320px)] w-full">
-                  <Table>
-                    <TableCaption>
-                      Showing {items.length} food items across {storeNames.length} branches
-                    </TableCaption>
-                    <TableHeader>
-                      <TableRow className="bg-slate-100">
-                        <TableHead className="w-24">Food ID</TableHead>
-                        <TableHead>Item Name</TableHead>
-                        <TableHead className="text-right w-28">Total</TableHead>
-                        {storeNames.map((store) => (
-                          <TableHead key={store} className="text-right whitespace-nowrap">
-                            {store}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {items.map(({ itemName, storeQuantities, total, food_id }) => (
-                        <TableRow key={`${food_id}-${itemName}`} className="hover:bg-slate-50">
-                          <TableCell className="font-mono">{food_id}</TableCell>
-                          <TableCell className="font-medium">{itemName}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant="secondary" className="font-semibold">
-                              {total}
-                            </Badge>
-                          </TableCell>
+                <div className="px-6 py-4 bg-[#6D0000] text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-white/90" />
+                      <h2 className="text-lg font-semibold text-white">Orders Recap</h2>
+                    </div>
+                    <Badge variant="secondary" className="px-3 py-1 bg-white/20 text-white border-white/30 transition-all duration-300 hover:scale-105">
+                      {items.length} Products
+                    </Badge>
+                  </div>
+                </div>
+                
+                <ScrollArea className="h-[calc(100vh-400px)] w-full">
+                  <div className="p-0">
+                    <Table>
+                      <TableCaption className="mt-4 mb-2 text-gray-500">
+                        Showing {items.length} food items across {storeNames.length} branches
+                      </TableCaption>
+                      <TableHeader className="bg-gray-50">
+                        <TableRow>
+                          <TableHead className="w-24">Food ID</TableHead>
+                          <TableHead>Item Name</TableHead>
+                          <TableHead className="text-right w-28">Total</TableHead>
                           {storeNames.map((store) => (
-                            <TableCell key={`${food_id}-${store}`} className="text-right">
-                              {storeQuantities[store] ? storeQuantities[store] : "-"}
-                            </TableCell>
+                            <TableHead key={store} className="text-right whitespace-nowrap">
+                              {store}
+                            </TableHead>
                           ))}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {items.map(({ itemName, storeQuantities, total, food_id }) => (
+                          <TableRow key={`${food_id}-${itemName}`} className="hover:bg-gray-50 transition-colors duration-200 group cursor-default">
+                            <TableCell className="font-mono text-gray-600">{food_id}</TableCell>
+                            <TableCell className="font-medium text-gray-900 group-hover:text-[#6D0000] transition-colors duration-200">{itemName}</TableCell>
+                            <TableCell className="text-right">
+                              <Badge variant="outline" className="font-semibold bg-[#6D0000]/5 text-[#6D0000] border-[#6D0000]/20 hover:bg-[#6D0000]/10 transition-colors duration-200">
+                                {total}
+                              </Badge>
+                            </TableCell>
+                            {storeNames.map((store) => (
+                              <TableCell key={`${food_id}-${store}`} className="text-right">
+                                {storeQuantities[store] ? (
+                                  <span className="font-medium text-gray-700">{storeQuantities[store]}</span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardContent className="p-6 flex flex-col items-center justify-center h-64">
-                <p className="text-slate-500 text-center">No orders found for the selected period.</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => setAppliedDateRange({ from: undefined, to: undefined })}
-                >
-                  Reset Date Filter
-                </Button>
+            <Card className="border-0 shadow-md rounded-xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="px-6 py-4 bg-[#6D0000] text-white">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-white/90" />
+                    <h2 className="text-lg font-semibold text-white">No Data Found</h2>
+                  </div>
+                </div>
+                
+                <div className="p-6 flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <BarChart3 className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-lg font-medium text-gray-900 mb-2">No orders found for the selected period</p>
+                  <p className="text-sm text-gray-500 mb-6 max-w-md text-center">
+                    Try selecting a different date range or check if there are any orders in the system.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setAppliedDateRange({ from: undefined, to: undefined })}
+                    className="border-[#6D0000]/20 text-[#6D0000] hover:bg-[#6D0000]/5 hover:border-[#6D0000] transition-all duration-200"
+                  >
+                    Reset Date Filter
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )
         ) : (
-          <Card>
-            <CardContent className="p-6 flex flex-col items-center justify-center h-64">
-              <p className="text-slate-500 text-center">Please select a date range to view order data.</p>
-              <CalendarIcon className="h-16 w-16 text-slate-300 mt-4" />
+          <Card className="border-0 shadow-md rounded-xl bg-white overflow-hidden">
+            <CardContent className="p-0">
+              <div className="px-6 py-4 bg-[#6D0000] text-white">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5 text-white/90" />
+                  <h2 className="text-lg font-semibold text-white">Select Date Range</h2>
+                </div>
+              </div>
+              
+              <div className="p-6 flex flex-col items-center justify-center py-16">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <CalendarIcon className="h-8 w-8 text-gray-400" />
+                </div>
+                <p className="text-lg font-medium text-gray-900 mb-2">Please select a date range</p>
+                <p className="text-sm text-gray-500 mb-6 max-w-md text-center">
+                  Use the date range selector above to filter orders and view the recap data.
+                </p>
+                <Button 
+                  className="bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md"
+                  onClick={() => {
+                    // Set default date range - last 30 days
+                    const to = new Date();
+                    const from = new Date();
+                    from.setDate(from.getDate() - 30);
+                    setDateRange({ from, to });
+                    setAppliedDateRange({ from, to });
+                  }}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  Show Last 30 Days
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}

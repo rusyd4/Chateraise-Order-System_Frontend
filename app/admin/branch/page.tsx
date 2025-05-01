@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
-import AdminNavbar from "../../components/AdminNavbar";
+import Navbar from "../../components/AdminNavbar";
 import { 
   Edit, 
   Trash2, 
@@ -16,7 +16,11 @@ import {
   Clock, 
   MapPin,
   User,
-  Lock
+  Lock,
+  RefreshCw,
+  ChevronRight,
+  X,
+  BarChart3
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -323,58 +327,100 @@ export default function AdminBranch() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminNavbar />
-      <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
+      <div className="w-64 h-screen fixed left-0 bg-[#6D0000] shadow-lg">
+        <Navbar />
+      </div>
+      
+      <main className="flex-1 p-6 ml-64 space-y-8">
+        {/* Header Section */}
+        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
+          <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-gray-900">
                 Branch Management
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
-                Add, edit, and manage your branch locations
-              </p>
+              <p className="text-sm text-gray-500 mt-1">Add, edit, and manage your branch locations</p>
             </div>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={fetchBranches}
+              title="Refresh Data"
+              className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
+              transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
+            </Button>
           </div>
+        </div>
 
-          <Card className="mb-6">
-            <CardContent className="">
-              <div className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Store size={18} />
-                  <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Total Branches</span>
-                    <span className="text-xl font-semibold ml-2">
-                      {loading ? <Skeleton className="inline-block h-6 w-12" /> : branches.length}
-                    </span>
-                  </div>
+        {/* Stats Card */}
+        <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-[#6D0000]/10 transition-all duration-300 hover:scale-110">
+                  <Store className="h-6 w-6 text-[#6D0000]" />
                 </div>
-                <Button onClick={openAddModal} size="sm" className="gap-2">
-                  <Plus size={16} />
-                  Add Branch
-                </Button>
+                <div>
+                  <span className="text-sm text-gray-500">Total Branches</span>
+                  <span className="text-2xl font-semibold text-[#6D0000] ml-2 transition-all duration-300">
+                    {loading ? <Skeleton className="inline-block h-6 w-12" /> : branches.length}
+                  </span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+              <Button 
+                onClick={openAddModal} 
+                size="sm" 
+                className="bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 gap-2"
+              >
+                <Plus size={16} />
+                Add Branch
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <CardTitle>Branch Stores</CardTitle>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+        {/* Branch Table Card */}
+        <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="px-6 py-4 bg-[#6D0000] text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-white/90" />
+                  <h2 className="text-lg font-semibold text-white">Branch Stores</h2>
+                </div>
+                <Badge variant="secondary" className="px-3 py-1 bg-white/20 text-white border-white/30 transition-all duration-300 hover:scale-105">
+                  {filteredBranches.length} Branches
+                </Badge>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <p className="text-sm text-gray-500">Browse all branch locations in your network</p>
+                <div className="relative group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-[#6D0000] transition-colors duration-200" />
                   <Input
                     type="search"
                     placeholder="Search branches..."
-                    className="pl-9 w-full sm:w-64"
+                    className="pl-9 w-full sm:w-64 border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 pr-8"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
+                  {searchQuery && (
+                    <button
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#6D0000] transition-colors duration-200"
+                      onClick={() => setSearchQuery("")}
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+
               {loading ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
@@ -382,7 +428,7 @@ export default function AdminBranch() {
                   ))}
                 </div>
               ) : error ? (
-                <Alert variant="destructive" className="mb-4">
+                <Alert variant="destructive" className="mb-4 animate-pulse">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
@@ -390,23 +436,26 @@ export default function AdminBranch() {
                     variant="outline" 
                     size="sm" 
                     onClick={fetchBranches} 
-                    className="mt-2"
+                    className="mt-2 hover:bg-red-50"
                   >
                     Retry
                   </Button>
                 </Alert>
               ) : filteredBranches.length === 0 ? (
                 <div className="text-center py-10 space-y-4">
-                  <Store className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
+                    <Store className="h-8 w-8 text-gray-400" />
+                  </div>
                   {searchQuery ? (
                     <>
                       <p className="text-lg font-medium">No results found</p>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        No branches match your search {searchQuery}
+                      <p className="text-gray-500">
+                        No branches match your search "{searchQuery}"
                       </p>
                       <Button 
                         variant="outline" 
                         onClick={() => setSearchQuery("")}
+                        className="mt-2 border-[#6D0000]/20 text-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300"
                       >
                         Clear Search
                       </Button>
@@ -414,10 +463,13 @@ export default function AdminBranch() {
                   ) : (
                     <>
                       <p className="text-lg font-medium">No branches found</p>
-                      <p className="text-gray-500 dark:text-gray-400">
+                      <p className="text-gray-500">
                         Get started by adding your first branch
                       </p>
-                      <Button onClick={openAddModal}>
+                      <Button 
+                        onClick={openAddModal}
+                        className="mt-2 bg-[#6D0000] hover:bg-[#800000] transition-all duration-300"
+                      >
                         Add Your First Branch
                       </Button>
                     </>
@@ -425,9 +477,9 @@ export default function AdminBranch() {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-md border overflow-hidden">
+                  <div className="rounded-md border overflow-hidden shadow-sm">
                     <Table>
-                      <TableHeader className="bg-gray-100 dark:bg-gray-800">
+                      <TableHeader className="bg-gray-50">
                         <TableRow>
                           <TableHead>Branch Name</TableHead>
                           <TableHead className="hidden md:table-cell">Email</TableHead>
@@ -438,60 +490,62 @@ export default function AdminBranch() {
                       </TableHeader>
                       <TableBody>
                         {paginatedBranches.map((branch) => (
-                          <TableRow key={branch.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <TableRow key={branch.user_id} className="hover:bg-gray-50 transition-colors duration-200 group cursor-default">
                             <TableCell className="font-medium">
                               <div className="flex flex-col">
-                                <span>{branch.full_name}</span>
-                                <span className="text-sm text-gray-500 md:hidden mt-1">
+                                <span className="text-gray-900 group-hover:text-[#6D0000] transition-colors duration-200">{branch.full_name}</span>
+                                <span className="text-xs text-gray-500 md:hidden mt-1">
                                   {branch.email}
                                 </span>
                               </div>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                              <span className="flex items-center gap-2">
-                                <Mail className="h-4 w-4 text-gray-400" />
+                              <span className="flex items-center gap-2 text-gray-600">
+                                <Mail className="h-4 w-4 text-gray-400 group-hover:text-[#6D0000]/60 transition-colors duration-200" />
                                 {branch.email}
                               </span>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               {branch.branch_address ? (
-                                <span className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 text-gray-400" />
+                                <span className="flex items-center gap-2 text-gray-600">
+                                  <MapPin className="h-4 w-4 text-gray-400 group-hover:text-[#6D0000]/60 transition-colors duration-200" />
                                   {branch.branch_address}
                                 </span>
                               ) : (
-                                <Badge variant="outline" className="text-gray-500">
+                                <Badge variant="outline" className="text-gray-500 border-gray-200">
                                   Not specified
                                 </Badge>
                               )}
                             </TableCell>
                             <TableCell className="hidden lg:table-cell">
                               {branch.delivery_time ? (
-                                <span className="flex items-center gap-2">
-                                  <Clock className="h-4 w-4 text-gray-400" />
+                                <span className="flex items-center gap-2 text-gray-600">
+                                  <Clock className="h-4 w-4 text-gray-400 group-hover:text-[#6D0000]/60 transition-colors duration-200" />
                                   {branch.delivery_time}
                                 </span>
                               ) : (
-                                <Badge variant="outline" className="text-gray-500">
+                                <Badge variant="outline" className="text-gray-500 border-gray-200">
                                   Not specified
                                 </Badge>
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
+                              <div className="flex justify-end gap-2 opacity-70 group-hover:opacity-100 transition-opacity duration-200">
                                 <Button
                                   variant="outline"
                                   size="icon"
                                   onClick={() => handleEdit(branch)}
                                   title="Edit"
+                                  className="border-gray-200 text-gray-600 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button
-                                  variant="destructive"
+                                  variant="outline"
                                   size="icon"
                                   onClick={() => handleDelete(branch.user_id)}
                                   title="Delete"
+                                  className="border-gray-200 text-red-600 hover:text-white hover:bg-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -509,7 +563,7 @@ export default function AdminBranch() {
                         <PaginationItem>
                           <PaginationPrevious 
                             onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "hover:text-[#6D0000] transition-colors duration-200"}
                           />
                         </PaginationItem>
                         
@@ -526,6 +580,7 @@ export default function AdminBranch() {
                                 <PaginationLink
                                   isActive={pageNumber === currentPage}
                                   onClick={() => handlePageChange(pageNumber)}
+                                  className={pageNumber === currentPage ? "bg-[#6D0000] text-white hover:bg-[#800000]" : "hover:text-[#6D0000] hover:border-[#6D0000] transition-all duration-200"}
                                 >
                                   {pageNumber}
                                 </PaginationLink>
@@ -551,7 +606,7 @@ export default function AdminBranch() {
                         <PaginationItem>
                           <PaginationNext 
                             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "hover:text-[#6D0000] transition-colors duration-200"}
                           />
                         </PaginationItem>
                       </PaginationContent>
@@ -559,149 +614,157 @@ export default function AdminBranch() {
                   )}
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Add/Edit Branch Dialog */}
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  {editingBranchId ? (
-                    <>
-                      <Edit className="h-5 w-5" />
-                      Edit Branch
-                    </>
-                  ) : (
-                    <>
-                      <Store className="h-5 w-5" />
-                      Add New Branch
-                    </>
-                  )}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingBranchId
-                    ? "Update the branch details below"
-                    : "Fill in the details to create a new branch"}
-                </DialogDescription>
-              </DialogHeader>
+        {/* Add/Edit Branch Dialog */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-0 shadow-xl rounded-xl">
+            <DialogHeader className="px-6 py-4 bg-[#6D0000] text-white">
+              <DialogTitle className="text-xl font-semibold">
+                {editingBranchId ? "Edit Branch" : "Add New Branch"}
+              </DialogTitle>
+              <DialogDescription className="text-white/80">
+                {editingBranchId
+                  ? "Update the branch details below"
+                  : "Fill in the details to create a new branch"}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit} className="grid gap-6 p-6">
+              {formError && (
+                <Alert variant="destructive" className="animate-pulse">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{formError}</AlertDescription>
+                </Alert>
+              )}
               
-              <form onSubmit={handleSubmit} className="grid gap-6 py-4">
-                {formError && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{formError}</AlertDescription>
-                  </Alert>
-                )}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="branchName" className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      Branch Name <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="branchName"
-                      value={formFullName}
-                      onChange={(e) => setFormFullName(e.target.value)}
-                      placeholder="Chateraise Senayan"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formEmail}
-                      onChange={(e) => setFormEmail(e.target.value)}
-                      placeholder="senayan@chateraise.id"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="flex items-center gap-2">
-                      <Lock className="h-4 w-4" />
-                      {editingBranchId ? "New Password" : "Password"}
-                      {!editingBranchId && <span className="text-red-500">*</span>}
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formPassword}
-                      onChange={(e) => setFormPassword(e.target.value)}
-                      placeholder={editingBranchId ? "Leave blank to keep current" : "Enter password"}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="branchAddress" className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Branch Address <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="branchAddress"
-                      value={formBranchAddress}
-                      onChange={(e) => setFormBranchAddress(e.target.value)}
-                      placeholder="Enter branch address"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="deliveryTime" className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Delivery Time
-                    </Label>
-                    <Input
-                      id="deliveryTime"
-                      value={formDeliveryTime}
-                      onChange={(e) => setFormDeliveryTime(e.target.value)}
-                      placeholder="8am - 10am"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="branchName" className="flex items-center gap-2 text-sm font-medium">
+                    <User className="h-4 w-4 text-[#6D0000]" />
+                    Branch Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="branchName"
+                    value={formFullName}
+                    onChange={(e) => setFormFullName(e.target.value)}
+                    placeholder="Chateraise Senayan"
+                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
+                  />
                 </div>
-              </form>
-              
-              <DialogFooter className="gap-2 mt-4">
-                <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
+                    <Mail className="h-4 w-4 text-[#6D0000]" />
+                    Email <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formEmail}
+                    onChange={(e) => setFormEmail(e.target.value)}
+                    placeholder="senayan@chateraise.id"
+                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
+                    <Lock className="h-4 w-4 text-[#6D0000]" />
+                    {editingBranchId ? "New Password" : "Password"}
+                    {!editingBranchId && <span className="text-red-500">*</span>}
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formPassword}
+                    onChange={(e) => setFormPassword(e.target.value)}
+                    placeholder={editingBranchId ? "Leave blank to keep current" : "Enter password"}
+                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="branchAddress" className="flex items-center gap-2 text-sm font-medium">
+                    <MapPin className="h-4 w-4 text-[#6D0000]" />
+                    Branch Address <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="branchAddress"
+                    value={formBranchAddress}
+                    onChange={(e) => setFormBranchAddress(e.target.value)}
+                    placeholder="Enter branch address"
+                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="deliveryTime" className="flex items-center gap-2 text-sm font-medium">
+                    <Clock className="h-4 w-4 text-[#6D0000]" />
+                    Delivery Time
+                  </Label>
+                  <Input
+                    id="deliveryTime"
+                    value={formDeliveryTime}
+                    onChange={(e) => setFormDeliveryTime(e.target.value)}
+                    placeholder="8am - 10am"
+                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
+                  />
+                </div>
+              </div>
+            
+              <DialogFooter className="gap-2 mt-2 flex-row justify-end">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="border-gray-200 hover:bg-gray-50 transition-all duration-200"
+                >
                   Cancel
                 </Button>
-                <Button type="submit" onClick={handleSubmit}>
+                <Button 
+                  type="submit"
+                  className="bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md"
+                >
                   {editingBranchId ? "Update Branch" : "Add Branch"}
                 </Button>
               </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-          {/* Delete Confirmation Dialog */}
-          <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-            <AlertDialogContent>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+          <AlertDialogContent className="border-0 shadow-xl rounded-xl overflow-hidden p-0">
+            <div className="bg-red-600 px-6 py-4 text-white">
               <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                  Delete Branch
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the branch and remove all
-                  associated data from our servers.
-                </AlertDialogDescription>
+                <AlertDialogTitle className="text-xl font-semibold">Delete Branch</AlertDialogTitle>
               </AlertDialogHeader>
-              <AlertDialogFooter className="gap-2">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </div>
+            
+            <div className="p-6">
+              <AlertDialogDescription className="text-gray-700 py-4">
+                This action cannot be undone. This will permanently delete the branch and remove all
+                associated data from our servers.
+              </AlertDialogDescription>
+              
+              <AlertDialogFooter className="gap-2 mt-6 flex-row justify-end">
+                <AlertDialogCancel className="border-gray-200 hover:bg-gray-50 transition-all duration-200">
+                  Cancel
+                </AlertDialogCancel>
                 <AlertDialogAction
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
                   onClick={confirmDelete}
                 >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );
