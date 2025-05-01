@@ -448,7 +448,7 @@ export default function AdminBranch() {
                     <>
                       <p className="text-lg font-medium">No results found</p>
                       <p className="text-gray-500">
-                        No branches match your search "{searchQuery}"
+                        No branches match your search {searchQuery}
                       </p>
                       <Button 
                         variant="outline" 

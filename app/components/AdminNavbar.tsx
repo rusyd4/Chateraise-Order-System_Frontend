@@ -69,39 +69,31 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Navigation - shown on screens smaller than md */}
+      {/* Mobile Navigation */}
       <div className="md:hidden fixed top-0 w-full bg-[#6D0000] border-b border-white/10 z-50">
         <div className="flex items-center justify-between p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="text-white border-white/30">
+              <Button
+                variant="outline"
+                size="icon"
+                className="text-white border-white/30"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 ml-2 bg-[#6D0000] text-white border-white/10">
-              {/* Mobile menu header */}
-              <div className="px-2 py-1.5 text-sm font-medium flex items-center gap-2">
-                <Store className="h-4 w-4" />
-                <span>Admin Portal</span>
-              </div>
-              <DropdownMenu.DropdownMenuSeparator className="bg-white/10 h-[1px] my-1" />
-              
               {navItems.map((item) => (
                 <DropdownMenuItem
                   key={item.href}
                   asChild
-                  className={`hover:bg-[#800000] focus:bg-[#800000] ${
-                    pathname === item.href ? "bg-[#800000]" : ""
-                  }`}
+                  className={`${pathname === item.href ? "bg-[#800000]" : ""}`}
                 >
                   <Link href={item.href} className="w-full">
                     {item.label}
                   </Link>
                 </DropdownMenuItem>
               ))}
-              
-              <DropdownMenu.DropdownMenuSeparator className="bg-white/10 h-[1px] my-1" />
-              
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="text-destructive focus:text-destructive focus:bg-destructive/10"
@@ -112,11 +104,8 @@ export default function Navbar() {
           </DropdownMenu>
 
           {/* Mobile logo - centered */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-              <Store className="h-5 w-5 text-[#6D0000]" />
-            </div>
-            <span className="text-white font-medium">Admin</span>
+          <div className="w-16 h-8 bg-white rounded flex items-center justify-center">
+            <Store className="h-6 w-6 text-[#6D0000]" />
           </div>
 
           {/* Spacer for balance */}
