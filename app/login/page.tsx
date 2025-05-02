@@ -93,8 +93,8 @@ export default function LoginPage() {
     <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
       {/* Background with overlay */}
       <div 
-        className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-70 dark:opacity-30 transition-opacity duration-500"
-        style={{ backgroundImage: "url('/DSCF2264.jpg')", backgroundSize: "120%" }}
+        className="absolute inset-0 w-screen h-screen bg-center bg-no-repeat bg-cover opacity-70 dark:opacity-30 transition-opacity duration-500"
+        style={{ backgroundImage: "url('/DSCF2264.jpg')", backgroundSize: "auto" }}
       />
       <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
 

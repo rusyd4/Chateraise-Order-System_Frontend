@@ -34,11 +34,17 @@ export default function Navbar() {
       <nav className="hidden md:flex md:w-64 flex-col bg-[#6D0000] h-screen fixed left-0 shadow-lg">
         {/* Logo and Title at the very top */}
         <div className="p-6 flex flex-col items-center border-b border-white/10">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-3">
-            <Store className="h-8 w-8 text-[#6D0000]" />
+          <div className="w-140 h-12 rounded-full flex items-center justify-center mb-3">
+            <Image
+              src="/image-removebg-preview.png"
+              alt="Store Logo"
+              width={200}
+              height={140}
+              className="object-contain"
+            />
           </div>
           <h2 className="text-white font-bold text-xl">Admin Portal</h2>
-          <p className="text-white/70 text-xs">Store Management</p>
+          <p className="text-white/70 text-xs">Order Management</p>
         </div>
 
         {/* Navigation items */}
@@ -62,7 +68,7 @@ export default function Navbar() {
           <Button
             onClick={handleLogout}
             variant="destructive"
-            className="w-full"
+            className="cursor-pointer w-full"
           >
             Logout
           </Button>
@@ -77,7 +83,7 @@ export default function Navbar() {
               <Button
                 variant="outline"
                 size="icon"
-                className="text-white border-white/30"
+                className="bg-[#6D0000] text-white border-[#6D0000]"
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -104,8 +110,14 @@ export default function Navbar() {
           </DropdownMenu>
 
           {/* Mobile logo - centered */}
-          <div className="w-16 h-8 bg-white rounded flex items-center justify-center">
-            <Store className="h-6 w-6 text-[#6D0000]" />
+          <div className="w-140 h-8 rounded flex items-center justify-center">
+            <Image
+              src="/image-removebg-preview.png"
+              alt="Store Logo"
+              width={120}
+              height={120}
+              className="object-contain"
+            />
           </div>
 
           {/* Spacer for balance */}

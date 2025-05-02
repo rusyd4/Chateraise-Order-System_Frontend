@@ -406,7 +406,7 @@ export default function AdminRecap() {
                       setDateRange({ from: undefined, to: undefined });
                       setAppliedDateRange({ from: undefined, to: undefined });
                     }}
-                    className="w-24 border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md rounded-full"
+                    className="cursor-pointer w-24 border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md rounded-full"
                   >
                     Reset
                   </Button>
@@ -414,22 +414,67 @@ export default function AdminRecap() {
 
                 {/* Second row: Quick selection and export buttons */}
                 <div className="flex flex-wrap gap-3">
-                  <Button
-                    className="w-auto bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md rounded-full"
-                    onClick={() => {
-                      const to = new Date();
-                      const from = new Date();
-                      from.setDate(from.getDate() - 7);
-                      setDateRange({ from, to });
-                      setAppliedDateRange({ from, to });
-                    }}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    Last 7 Days
-                  </Button>
+                <Button
+                  className={`cursor-pointer w-auto bg-white text-[#6D0000] border border-[#6D0000] hover:bg-[#6D0000] hover:text-white rounded-full transition-all duration-200 hover:shadow-md ${
+                    appliedDateRange.from &&
+                    appliedDateRange.to &&
+                    (() => {
+                      const now = new Date();
+                      const last7From = new Date();
+                      last7From.setDate(now.getDate() - 7);
+                      // Normalize dates for comparison
+                      const appliedFrom = new Date(appliedDateRange.from);
+                      const appliedTo = new Date(appliedDateRange.to);
+                      appliedFrom.setHours(0, 0, 0, 0);
+                      appliedTo.setHours(23, 59, 59, 999);
+                      last7From.setHours(0, 0, 0, 0);
+                      now.setHours(23, 59, 59, 999);
+                      if (
+                        appliedFrom.getTime() === last7From.getTime() &&
+                        appliedTo.getTime() === now.getTime()
+                      ) {
+                        return "bg-[#6D0000] text-white";
+                      }
+                      return "bg-white text-[#6D0000] hover:bg-[#6D0000] hover:text-white";
+                    })()
+                  }`}
+                  onClick={() => {
+                    const to = new Date();
+                    const from = new Date();
+                    from.setDate(from.getDate() - 7);
+                    setDateRange({ from, to });
+                    setAppliedDateRange({ from, to });
+                  }}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  Last 7 Days
+                </Button>
+
 
                   <Button
-                    className="w-auto bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md rounded-full"
+                  className={`cursor-pointer w-auto bg-white text-[#6D0000] border border-[#6D0000] hover:bg-[#6D0000] hover:text-white rounded-full transition-all duration-200 hover:shadow-md ${
+                    appliedDateRange.from &&
+                      appliedDateRange.to &&
+                      (() => {
+                        const now = new Date();
+                        const last30From = new Date();
+                        last30From.setDate(now.getDate() - 30);
+                        // Normalize dates for comparison
+                        const appliedFrom = new Date(appliedDateRange.from);
+                        const appliedTo = new Date(appliedDateRange.to);
+                        appliedFrom.setHours(0, 0, 0, 0);
+                        appliedTo.setHours(23, 59, 59, 999);
+                        last30From.setHours(0, 0, 0, 0);
+                        now.setHours(23, 59, 59, 999);
+                        if (
+                          appliedFrom.getTime() === last30From.getTime() &&
+                          appliedTo.getTime() === now.getTime()
+                        ) {
+                          return "bg-[#6D0000] text-white";
+                        }
+                        return "bg-white text-[#6D0000] hover:bg-[#6D0000] hover:text-white";
+                      })()
+                    }`}
                     onClick={() => {
                       const to = new Date();
                       const from = new Date();
@@ -444,7 +489,7 @@ export default function AdminRecap() {
 
                   <Button
                     variant="outline"
-                    className="w-auto ml-auto gap-2 border-green-600 text-green-600 hover:text-green-800 hover:border-green-800 hover:bg-green-50 transition-all duration-300 hover:shadow-md rounded-full"
+                    className="cursor-pointer w-auto ml-auto gap-2 border-green-600 text-green-600 hover:text-green-800 hover:border-green-800 hover:bg-green-50 transition-all duration-300 hover:shadow-md rounded-full"
                     onClick={exportToExcel}
                     disabled={!hasData || isExporting}
                   >

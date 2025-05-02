@@ -390,7 +390,7 @@ export default function AdminDashboard() {
                 size="icon"
                 onClick={handleRefresh}
                 title="Refresh Data"
-                className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
+                className="cursor-pointer rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
                 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
@@ -400,7 +400,7 @@ export default function AdminDashboard() {
                 size="sm"
                 onClick={() => setIsPendingOrdersOpen(true)}
                 title="View New Orders"
-                className="relative rounded-full border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+                className="cursor-pointer relative rounded-full border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 {orders.length} New Orders
                 <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600 animate-ping"></span>
@@ -412,7 +412,7 @@ export default function AdminDashboard() {
         
         {/* Key Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group overflow-hidden">
+          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
             <div className="h-1 bg-amber-500" />
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -436,7 +436,7 @@ export default function AdminDashboard() {
                 variant="link"
                 size="sm"
                 onClick={() => setIsPendingOrdersOpen(true)}
-                className="mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
+                className="cursor-pointer mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
               >
                 View all
                 <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
@@ -444,7 +444,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group overflow-hidden">
+          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
             <div className="h-1 bg-blue-500" />
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -468,7 +468,7 @@ export default function AdminDashboard() {
                 variant="link"
                 size="sm"
                 onClick={() => setIsInProgressOrdersOpen(true)}
-                className="mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
+                className="cursor-pointer mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
               >
                 View all
                 <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
@@ -476,7 +476,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group overflow-hidden">
+          <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
             <div className="h-1 bg-[#6D0000]" />
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -539,7 +539,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       id="branchSelect" 
-                      className="w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
+                      className="cursor-pointer w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
                     >
                       <span className={selectedBranch ? "text-gray-900" : "text-gray-500"}>
                         {selectedBranch || "Select branch"}
@@ -577,7 +577,7 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        "cursor-pointer w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
                         !selectedDate && "text-gray-500"
                       )}
                       id="orderDate"
@@ -619,7 +619,7 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        "cursor-pointer w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
                         !selectedDeliveryDate && "text-gray-500"
                       )}
                       id="deliveryDate"
@@ -660,13 +660,13 @@ export default function AdminDashboard() {
                   setSelectedDate(undefined);
                   setSelectedDeliveryDate(undefined);
                 }}
-                className="mr-3 border-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300 hover:shadow-sm"
+                className="cursor-pointer mr-3 border-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300 hover:shadow-sm"
               >
                 Clear Filters
               </Button>
               <Button 
                 onClick={fetchFilteredOrders}
-                className="bg-[#6D0000] hover:bg-[#800000] px-8 py-2.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md font-medium"
+                className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] px-8 py-2.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md font-medium"
                 disabled={isLoading.filtered}
               >
                 {isLoading.filtered ? (

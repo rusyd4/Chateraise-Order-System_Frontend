@@ -130,9 +130,6 @@ export default function PendingOrdersModal({
                 className="pl-8"
               />
             </div>
-            <Button variant="outline" size="icon" title="Advanced Filters">
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button>
           </div>
         </div>
         
@@ -190,7 +187,7 @@ export default function PendingOrdersModal({
                           <Button 
                             variant="default" 
                             size="sm"
-                            className="bg-[#6D0000] hover:bg-[#7a0000]"
+                            className="cursor-pointer bg-[#6D0000] hover:bg-[#7a0000]"
                             onClick={() => handleViewOrder(order)}
                           >
                             View Order

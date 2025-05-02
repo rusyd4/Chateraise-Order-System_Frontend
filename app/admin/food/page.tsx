@@ -317,7 +317,7 @@ export default function ManageFoodItems() {
               size="icon"
               onClick={fetchFoodItems}
               title="Refresh Data"
-              className="rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
+              className="cursor-pointer rounded-full border-gray-200 text-gray-500 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5
               transition-all duration-300 shadow-sm hover:shadow-md"
             >
               <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
@@ -343,7 +343,7 @@ export default function ManageFoodItems() {
               <Button 
                 onClick={handleAddFood} 
                 size="sm" 
-                className="bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 gap-2"
+                className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 gap-2"
               >
                 <Plus size={16} />
                 Add Product
@@ -499,7 +499,7 @@ export default function ManageFoodItems() {
                                   size="icon"
                                   onClick={() => handleEditFood(item)}
                                   title="Edit"
-                                  className="border-gray-200 text-gray-600 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                                  className="cursor-pointer border-gray-200 text-gray-600 hover:text-[#6D0000] hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -508,7 +508,7 @@ export default function ManageFoodItems() {
                                   size="icon"
                                   onClick={() => handleDeleteFood(item.food_id)}
                                   title="Delete"
-                                  className="border-gray-200 text-red-600 hover:text-white hover:bg-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                                  className="cursor-pointer border-gray-200 text-red-600 hover:text-white hover:bg-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -526,7 +526,7 @@ export default function ManageFoodItems() {
                         <PaginationItem>
                           <PaginationPrevious 
                             onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "hover:text-[#6D0000] transition-colors duration-200"}
+                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-[#6D0000] transition-colors duration-200"}
                           />
                         </PaginationItem>
                         
@@ -542,7 +542,7 @@ export default function ManageFoodItems() {
                                 <PaginationLink
                                   isActive={pageNumber === currentPage}
                                   onClick={() => handlePageChange(pageNumber)}
-                                  className={pageNumber === currentPage ? "bg-[#6D0000] text-white hover:bg-[#800000]" : "hover:text-[#6D0000] hover:border-[#6D0000] transition-all duration-200"}
+                                  className={pageNumber === currentPage ? "bg-[#6D0000] text-white hover:bg-[#800000] hover:text-white" : "cursor-pointer hover:text-[#6D0000] hover:border-[#6D0000] transition-all duration-200"}
                                 >
                                   {pageNumber}
                                 </PaginationLink>
@@ -567,7 +567,7 @@ export default function ManageFoodItems() {
                         <PaginationItem>
                           <PaginationNext 
                             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "hover:text-[#6D0000] transition-colors duration-200"}
+                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-[#6D0000] transition-colors duration-200"}
                           />
                         </PaginationItem>
                       </PaginationContent>
@@ -691,13 +691,13 @@ export default function ManageFoodItems() {
                   type="button" 
                   variant="outline" 
                   onClick={() => setIsModalOpen(false)}
-                  className="border-gray-200 hover:bg-gray-50 transition-all duration-200"
+                  className="cursor-pointer border-gray-200 hover:bg-gray-50 transition-all duration-200"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit"
-                  className="bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md"
+                  className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md"
                 >
                   {foodForm.editingId ? "Update Product" : "Add Product"}
                 </Button>
