@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,11 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Menu, Store } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -66,7 +69,7 @@ export default function Navbar() {
         {/* Logout button */}
         <div className="p-4 border-t border-white/10">
           <Button
-            onClick={handleLogout}
+            onClick={() => setLogoutDialogOpen(true)}
             variant="destructive"
             className="cursor-pointer w-full"
           >
@@ -101,7 +104,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuItem
-                onClick={handleLogout}
+                onClick={() => setLogoutDialogOpen(true)}
                 className="text-destructive focus:text-destructive focus:bg-destructive/10"
               >
                 Logout
@@ -124,6 +127,26 @@ export default function Navbar() {
           <div className="w-10"></div>
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to logout?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" className="cursor-pointer" onClick={() => setLogoutDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" className="cursor-pointer" onClick={() => { setLogoutDialogOpen(false); handleLogout(); }}>
+              Logout
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

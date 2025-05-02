@@ -750,11 +750,11 @@ export default function AdminBranch() {
               </AlertDialogDescription>
               
               <AlertDialogFooter className="gap-2 mt-6 flex-row justify-end">
-                <AlertDialogCancel className="border-gray-200 hover:bg-gray-50 transition-all duration-200">
+                <AlertDialogCancel className="cursor-pointer border-gray-200 hover:bg-gray-50 transition-all duration-200">
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  className="bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="cursor-pointer bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
                   onClick={confirmDelete}
                 >
                   Delete

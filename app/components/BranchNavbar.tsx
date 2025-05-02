@@ -35,6 +35,7 @@ export default function BranchNavbar() {
   const [scanError, setScanError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const qrScannerRef = useRef<QrScanner | null>(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   // Logout function placeholder
   function handleLogout() {
@@ -211,7 +212,7 @@ export default function BranchNavbar() {
             variant="ghost"
             size="sm"
             className="cursor-pointer gap-2 hover:opacity-90 text-destructive"
-            onClick={handleLogout}
+            onClick={() => setLogoutDialogOpen(true)}
           >
             <X className="h-4 w-4" />
             <span className="hidden sm:inline">Logout</span>
@@ -250,8 +251,8 @@ export default function BranchNavbar() {
               ))}
               <DropdownMenuItem
                 className="text-destructive"
-                onClick={handleLogout}
-              >
+                onClick={() => setLogoutDialogOpen(true)}
+                >
                 <X className="h-4 w-4 mr-2" />
                 Logout
               </DropdownMenuItem>
@@ -317,6 +318,26 @@ export default function BranchNavbar() {
                 </Button>
               </label>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to logout?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" className="cursor-pointer" onClick={() => setLogoutDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" className="cursor-pointer" onClick={() => { setLogoutDialogOpen(false); handleLogout(); }}>
+              Logout
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
