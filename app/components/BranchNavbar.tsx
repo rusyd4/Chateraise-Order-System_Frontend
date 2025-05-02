@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef, useEffect, ChangeEvent } from "react";
-import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { Camera, ShoppingCart, History, Upload, X } from "lucide-react";
 import QrScanner from "qr-scanner";
@@ -175,21 +174,18 @@ export default function BranchNavbar() {
       }
       stopCamera();
     };
-  }, [scannerOpen, router, stopCamera]);
+  }, [scannerOpen]);
 
   return (
-    <nav className="bg-primary text-primary-foreground px-4 py-3 shadow-sm sticky top-0 z-50">
+    <nav className="bg-[#6D0000] text-primary-foreground px-4 py-3 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div 
-          className="cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => router.push("/")}
+          className="hover:opacity-90 transition-opacity"
         >
-          <Image 
+          <img 
             src="/image-removebg-preview.png" 
             alt="Logo" 
-            width={120}
-            height={48}
             className="h-10 md:h-12" 
           />
         </div>
@@ -203,7 +199,7 @@ export default function BranchNavbar() {
               size="sm"
               className={cn(
                 "gap-2",
-                item.active ? "bg-background text-foreground" : "hover:opacity-90"
+                item.active ? "bg-background text-foreground" : "cursor-pointer hover:opacity-90"
               )}
               onClick={item.action}
             >
@@ -214,7 +210,7 @@ export default function BranchNavbar() {
           <Button
             variant="ghost"
             size="sm"
-            className="gap-2 hover:opacity-90 text-destructive"
+            className="cursor-pointer gap-2 hover:opacity-90 text-destructive"
             onClick={handleLogout}
           >
             <X className="h-4 w-4" />

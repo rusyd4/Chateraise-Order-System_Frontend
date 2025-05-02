@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -38,6 +39,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface OrderItem {
   food_name: string;
@@ -192,6 +194,46 @@ export default function OrderHistory() {
     XLSX.writeFile(wb, "order_history.xlsx");
   }
 
+  const isLast7DaysSelected =
+    appliedDateRange?.from !== undefined &&
+    appliedDateRange?.to !== undefined &&
+    (() => {
+      const now = new Date();
+      const last7From = new Date();
+      last7From.setDate(now.getDate() - 7);
+      // Normalize dates for comparison
+      const appliedFrom = new Date(appliedDateRange.from!);
+      const appliedTo = new Date(appliedDateRange.to!);
+      appliedFrom.setHours(0, 0, 0, 0);
+      appliedTo.setHours(23, 59, 59, 999);
+      last7From.setHours(0, 0, 0, 0);
+      now.setHours(23, 59, 59, 999);
+      return (
+        appliedFrom.getTime() === last7From.getTime() &&
+        appliedTo.getTime() === now.getTime()
+      );
+    })();
+
+  const isLast30DaysSelected =
+    appliedDateRange?.from !== undefined &&
+    appliedDateRange?.to !== undefined &&
+    (() => {
+      const now = new Date();
+      const last30From = new Date();
+      last30From.setDate(now.getDate() - 30);
+      // Normalize dates for comparison
+      const appliedFrom = new Date(appliedDateRange.from!);
+      const appliedTo = new Date(appliedDateRange.to!);
+      appliedFrom.setHours(0, 0, 0, 0);
+      appliedTo.setHours(23, 59, 59, 999);
+      last30From.setHours(0, 0, 0, 0);
+      now.setHours(23, 59, 59, 999);
+      return (
+        appliedFrom.getTime() === last30From.getTime() &&
+        appliedTo.getTime() === now.getTime()
+      );
+    })();
+
   return (
     <>
       <BranchNavbar />
@@ -206,7 +248,7 @@ export default function OrderHistory() {
           <div className="flex flex-col sm:flex-row gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto">
+                <Button variant="outline" className="cursor-pointer w-full sm:w-auto">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {dateRange?.from ? (
                     dateRange.to ? (
@@ -232,12 +274,12 @@ export default function OrderHistory() {
               </PopoverContent>
             </Popover>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <Button
                 onClick={() => setAppliedDateRange(dateRange)}
                 variant="default"
                 size="sm"
-                className="gap-1"
+                className="cursor-pointer bg-[#6D0000] gap-1"
               >
                 <Check className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -251,31 +293,61 @@ export default function OrderHistory() {
                 }}
                 variant="outline"
                 size="sm"
-                className="gap-1"
+                className="cursor-pointer gap-1"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                   Reset
                 </span>
               </Button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={exportToExcel}
-                    variant="outline"
-                    size="sm"
-                    className="gap-1"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Export
-                    </span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Export to Excel</p>
-                </TooltipContent>
-              </Tooltip>
+
+              <Button
+                className={`cursor-pointer w-auto rounded-full border border-[#6D0000] text-[#6D0000] hover:bg-[#6D0000] hover:text-white transition-all duration-200 hover:shadow-md ${
+                  isLast7DaysSelected
+                    ? "bg-[#6D0000] text-white"
+                    : "bg-white text-[#6D0000]"
+                }`}
+                onClick={() => {
+                  const to = new Date();
+                  const from = new Date();
+                  from.setDate(from.getDate() - 7);
+                  setDateRange({ from, to });
+                  setAppliedDateRange({ from, to });
+                }}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                Last 7 Days
+              </Button>
+
+              <Button
+                className={`cursor-pointer w-auto rounded-full border border-[#6D0000] text-[#6D0000] hover:bg-[#6D0000] hover:text-white transition-all duration-200 hover:shadow-md ${
+                  isLast30DaysSelected
+                    ? "bg-[#6D0000] text-white"
+                    : "bg-white text-[#6D0000]"
+                }`}
+                onClick={() => {
+                  const to = new Date();
+                  const from = new Date();
+                  from.setDate(from.getDate() - 30);
+                  setDateRange({ from, to });
+                  setAppliedDateRange({ from, to });
+                }}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                Last 30 Days
+              </Button>
+
+              <Button
+                onClick={exportToExcel}
+                variant="outline"
+                size="sm"
+                className="cursor-pointer w-auto ml-auto gap-2 border-green-600 text-green-600 hover:text-green-800 hover:border-green-800 hover:bg-green-50 transition-all duration-300 hover:shadow-md rounded-full"
+              >
+                <Download className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Export to Excel
+                </span>
+              </Button>
             </div>
           </div>
         </div>
@@ -287,114 +359,125 @@ export default function OrderHistory() {
           </Badge>
         )}
 
-        {loading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full" />
-            ))}
-          </div>
-        ) : error ? (
-          <Card className="bg-destructive/10 border-destructive">
-            <CardHeader>
-              <CardTitle>Error loading orders</CardTitle>
-              <CardDescription>{error}</CardDescription>
-            </CardHeader>
-          </Card>
-        ) : (
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead colSpan={3}></TableHead>
-                      <TableHead
-                        colSpan={uniqueDates.length}
-                        className="text-center border"
-                      >
-                        Order Date
-                      </TableHead>
-                    </TableRow>
-                    <TableRow>
-                      <TableHead colSpan={3}></TableHead>
-                      {uniqueDates.map((date) => (
-                        <TableHead key={date} className="text-center border">
-                          {new Date(date).toLocaleDateString(undefined, {
-                            day: "2-digit",
-                            month: "short",
-                          })}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                    <TableRow>
-                      <TableHead colSpan={3}></TableHead>
-                      <TableHead
-                        colSpan={uniqueDates.length}
-                        className="text-center border"
-                      >
-                        Delivery Date
-                      </TableHead>
-                    </TableRow>
-                    <TableRow>
-                      <TableHead className="border">Food Items</TableHead>
-                      <TableHead className="border">Price</TableHead>
-                      <TableHead className="border">Total Quantity</TableHead>
-                      {uniqueDates.map((date) => {
-                        const deliveryDate = addDays(new Date(date), 2);
-                        return (
-                          <TableHead key={"qty-" + date} className="border">
-                            {deliveryDate.toLocaleDateString(undefined, {
-                              day: "2-digit",
-                              month: "short",
-                            })}
-                          </TableHead>
-                        );
-                      })}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {foodAggregates.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={3 + uniqueDates.length}
-                          className="text-center py-4"
-                        >
-                          No orders found for the selected date range.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      foodAggregates.map((food) => (
-                        <TableRow
-                          key={food.food_name}
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell className="font-medium border">
-                            {food.food_name}
-                          </TableCell>
-                          <TableCell className="border">
-                            {new Intl.NumberFormat("id-ID", {
-                              style: "currency",
-                              currency: "IDR",
-                            }).format(food.price)}
-                          </TableCell>
-                          <TableCell className="border">
-                            {food.totalQty}
-                          </TableCell>
-                          {uniqueDates.map((date) => (
-                            <TableCell key={date} className="border">
-                              {food.qtyByDate[date] || 0}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+        <AnimatePresence>
+          {appliedDateRange?.from && appliedDateRange?.to && (
+            loading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : error ? (
+              <Card className="bg-destructive/10 border-destructive">
+                <CardHeader>
+                  <CardTitle>Error loading orders</CardTitle>
+                  <CardDescription>{error}</CardDescription>
+                </CardHeader>
+              </Card>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead colSpan={3}></TableHead>
+                            <TableHead
+                              colSpan={uniqueDates.length}
+                              className="text-center border"
+                            >
+                              Order Date
+                            </TableHead>
+                          </TableRow>
+                          <TableRow>
+                            <TableHead colSpan={3}></TableHead>
+                            {uniqueDates.map((date) => (
+                              <TableHead key={date} className="text-center border">
+                                {new Date(date).toLocaleDateString(undefined, {
+                                  day: "2-digit",
+                                  month: "short",
+                                })}
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                          <TableRow>
+                            <TableHead colSpan={3}></TableHead>
+                            <TableHead
+                              colSpan={uniqueDates.length}
+                              className="text-center border"
+                            >
+                              Delivery Date
+                            </TableHead>
+                          </TableRow>
+                          <TableRow>
+                            <TableHead className="border">Food Items</TableHead>
+                            <TableHead className="border">Price</TableHead>
+                            <TableHead className="border">Total Quantity</TableHead>
+                            {uniqueDates.map((date) => {
+                              const deliveryDate = addDays(new Date(date), 2);
+                              return (
+                                <TableHead key={"qty-" + date} className="border">
+                                  {deliveryDate.toLocaleDateString(undefined, {
+                                    day: "2-digit",
+                                    month: "short",
+                                  })}
+                                </TableHead>
+                              );
+                            })}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {foodAggregates.length === 0 ? (
+                            <TableRow>
+                              <TableCell
+                                colSpan={3 + uniqueDates.length}
+                                className="text-center py-4"
+                              >
+                                No orders found for the selected date range.
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            foodAggregates.map((food) => (
+                              <TableRow
+                                key={food.food_name}
+                                className="hover:bg-muted/50"
+                              >
+                                <TableCell className="font-medium border">
+                                  {food.food_name}
+                                </TableCell>
+                                <TableCell className="border">
+                                  {new Intl.NumberFormat("id-ID", {
+                                    style: "currency",
+                                    currency: "IDR",
+                                  }).format(food.price)}
+                                </TableCell>
+                                <TableCell className="border">
+                                  {food.totalQty}
+                                </TableCell>
+                                {uniqueDates.map((date) => (
+                                  <TableCell key={date} className="border">
+                                    {food.qtyByDate[date] || 0}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

@@ -49,7 +49,7 @@ export default function BranchStore() {
   const router = useRouter();
 
   function formatRupiah(price: number): string {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price);
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
   }
 
   useEffect(() => {
@@ -145,125 +145,128 @@ export default function BranchStore() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <BranchNavbar />
+      <div className="sticky top-0 z-50 bg-gray-50 shadow-md">
+        <BranchNavbar />
+        <main className="container mx-auto px-4 pt-4 pb-1">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+            
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search menu..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-40 bg-white"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              </div>
+              
+              <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="default" className="cursor-pointer bg-[#6D0000] hover:bg-[#7a0000] relative">
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    <span>Cart</span>
+                    {totalItems > 0 && (
+                      <Badge className="absolute -top-2 -right-2 bg-white text-[#6D0000] font-bold">
+                        {totalItems}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="sm:max-w-md">
+                  <SheetHeader>
+                    <SheetTitle>Your Cart</SheetTitle>
+                  </SheetHeader>
+                  
+                  {cart.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <ShoppingCart className="h-16 w-16 text-gray-300 mb-4" />
+                      <p className="text-gray-500">Your cart is empty</p>
+                    </div>
+                  ) : (
+                    <>
+                      <ScrollArea className="h-[calc(100vh-220px)] mt-6 mx-6  ">
+                        {cart.map((item) => (
+                          <div key={item.food_id} className="py-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-medium">{item.food_name}</h3>
+                                <p className="text-sm text-gray-500">{formatRupiah(item.price)} each</p>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => removeItemCompletely(item.food_id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            
+                            <div className="flex items-center justify-between mt-2">
+                              <p className="font-medium">
+                                {formatRupiah(item.price * item.quantity)}
+                              </p>
+                              <div className="flex items-center space-x-2">
+                                <Input 
+                                  type="number"
+                                  min="0"
+                                  value={item.quantity}
+                                  onChange={(e) => {
+                                    const newQuantity = parseInt(e.target.value) || 0;
+                                    
+                                    if (newQuantity === 0) {
+                                      // Remove from cart if quantity is 0
+                                      removeItemCompletely(item.food_id);
+                                    } else {
+                                      // Update quantity directly
+                                      setCart(prev => 
+                                        prev.map(cartItem => 
+                                          cartItem.food_id === item.food_id 
+                                            ? { ...cartItem, quantity: newQuantity } 
+                                            : cartItem
+                                        )
+                                      );
+                                    }
+                                  }}
+                                  className="w-16 h-8 text-center"
+                                />
+                              </div>
+                            </div>
+                            <Separator className="mt-4" />
+                          </div>
+                        ))}
+                      </ScrollArea>
+                      
+                      <SheetFooter className="mt-auto">
+                        <div className="w-full space-y-4">
+                          <div className="flex justify-between">
+                            <span className="font-semibold">Total</span>
+                            <span className="font-bold">{formatRupiah(totalPrice)}</span>
+                          </div>
+                          <Button 
+                            className="cursor-pointer w-full bg-[#6D0000] hover:bg-[#7a0000]"
+                            onClick={() => {
+                              handleCheckout();
+                              setIsCartOpen(false);
+                            }}
+                          >
+                            Proceed to Checkout
+                          </Button>
+                        </div>
+                      </SheetFooter>
+                    </>
+                  )}
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+        </main>
+      </div>
       
       <main className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Menu Items</h1>
-          
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search menu..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-40 bg-white"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            </div>
-            
-            <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-              <SheetTrigger asChild>
-                <Button variant="default" className="bg-[#6D0000] hover:bg-[#7a0000] relative">
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  <span>Cart</span>
-                  {totalItems > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-white text-[#6D0000] font-bold">
-                      {totalItems}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-md">
-                <SheetHeader>
-                  <SheetTitle>Your Cart</SheetTitle>
-                </SheetHeader>
-                
-                {cart.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <ShoppingCart className="h-16 w-16 text-gray-300 mb-4" />
-                    <p className="text-gray-500">Your cart is empty</p>
-                  </div>
-                ) : (
-                  <>
-                    <ScrollArea className="h-[calc(100vh-220px)] mt-6">
-                      {cart.map((item) => (
-                        <div key={item.food_id} className="py-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-medium">{item.food_name}</h3>
-                              <p className="text-sm text-gray-500">{formatRupiah(item.price)} each</p>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => removeItemCompletely(item.food_id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-2">
-                            <p className="font-medium">
-                              {formatRupiah(item.price * item.quantity)}
-                            </p>
-                            <div className="flex items-center space-x-2">
-                              <Input 
-                                type="number"
-                                min="0"
-                                value={item.quantity}
-                                onChange={(e) => {
-                                  const newQuantity = parseInt(e.target.value) || 0;
-                                  
-                                  if (newQuantity === 0) {
-                                    // Remove from cart if quantity is 0
-                                    removeItemCompletely(item.food_id);
-                                  } else {
-                                    // Update quantity directly
-                                    setCart(prev => 
-                                      prev.map(cartItem => 
-                                        cartItem.food_id === item.food_id 
-                                          ? { ...cartItem, quantity: newQuantity } 
-                                          : cartItem
-                                      )
-                                    );
-                                  }
-                                }}
-                                className="w-16 h-8 text-center"
-                              />
-                            </div>
-                          </div>
-                          <Separator className="mt-4" />
-                        </div>
-                      ))}
-                    </ScrollArea>
-                    
-                    <SheetFooter className="mt-auto">
-                      <div className="w-full space-y-4">
-                        <div className="flex justify-between">
-                          <span className="font-semibold">Total</span>
-                          <span className="font-bold">{formatRupiah(totalPrice)}</span>
-                        </div>
-                        <Button 
-                          className="w-full bg-[#6D0000] hover:bg-[#7a0000]"
-                          onClick={() => {
-                            handleCheckout();
-                            setIsCartOpen(false);
-                          }}
-                        >
-                          Proceed to Checkout
-                        </Button>
-                      </div>
-                    </SheetFooter>
-                  </>
-                )}
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
             {[...Array(8)].map((_, i) => (
@@ -288,7 +291,7 @@ export default function BranchStore() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {filteredFoodItems.map((food) => (
-<Card key={food.food_id} className="overflow-hidden transition-all hover:shadow-lg flex flex-col justify-between h-full">
+              <Card key={food.food_id} className="overflow-hidden transition-all hover:shadow-lg flex flex-col justify-between h-full">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-lg truncate" title={food.food_name}>
                     {food.food_name}
@@ -343,7 +346,7 @@ export default function BranchStore() {
                     />
                     <Button 
                       variant="default" 
-                      className="flex-1 bg-[#6D0000] hover:bg-[#7a0000]"
+                      className="cursor-pointer flex-1 bg-[#6D0000] hover:bg-[#7a0000]"
                       onClick={() => addToCart(food)}
                     >
                       Add to Cart
