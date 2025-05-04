@@ -105,7 +105,7 @@ export default function PendingOrdersModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="[&>button]:hidden sm:max-w-[800px] max-h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-3">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>

@@ -8,7 +8,7 @@ import {
   Edit, 
   Trash2, 
   Plus, 
-  Pizza, 
+  CakeSlice, 
   AlertCircle, 
   Search,
   DollarSign,
@@ -75,7 +75,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface FoodItem {
   food_id: number;
   food_name: string;
-  description: string;
   price: number;
   is_available: boolean;
 }
@@ -94,7 +93,6 @@ export default function ManageFoodItems() {
   const [foodForm, setFoodForm] = useState({
     food_id: "",
     food_name: "",
-    description: "",
     price: "",
     is_available: true,
     editingId: null as number | null,
@@ -137,7 +135,6 @@ export default function ManageFoodItems() {
       const filtered = foodItems.filter(
         (item) =>
           item.food_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.food_id.toString().includes(searchQuery)
       );
       setFilteredFoodItems(filtered);
@@ -172,7 +169,6 @@ export default function ManageFoodItems() {
     setFoodForm({
       food_id: "",
       food_name: "",
-      description: "",
       price: "",
       is_available: true,
       editingId: null,
@@ -188,11 +184,6 @@ export default function ManageFoodItems() {
     
     if (!foodForm.food_name.trim()) {
       setFormError("Product name is required");
-      return false;
-    }
-    
-    if (!foodForm.description.trim()) {
-      setFormError("Description is required");
       return false;
     }
     
@@ -219,7 +210,7 @@ export default function ManageFoodItems() {
     }
     
     try {
-      const { food_id, food_name, description, price, is_available, editingId } = foodForm;
+      const { food_id, food_name, price, is_available, editingId } = foodForm;
       const method = editingId ? "PUT" : "POST";
       const url = editingId ? `/admin/food-items/${editingId}` : "/admin/food-items";
       
@@ -228,7 +219,6 @@ export default function ManageFoodItems() {
         body: JSON.stringify({
           food_id: parseInt(food_id, 10),
           food_name,
-          description,
           price: parseFloat(price),
           is_available,
         }),
@@ -254,7 +244,6 @@ export default function ManageFoodItems() {
     setFoodForm({
       food_id: item.food_id.toString(),
       food_name: item.food_name,
-      description: item.description,
       price: item.price.toString(),
       is_available: item.is_available,
       editingId: item.food_id,
@@ -304,13 +293,13 @@ export default function ManageFoodItems() {
         <Navbar />
         <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
         {/* Header Section */}
-        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
+        <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-white">
                 Product Management
               </h1>
-              <p className="text-sm text-gray-500 mt-1">Add, edit, and manage your product catalog</p>
+              <p className="text-sm text-white mt-1">Add, edit, and manage your product catalog</p>
             </div>
             <Button 
               variant="outline" 
@@ -331,7 +320,7 @@ export default function ManageFoodItems() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-full bg-[#6D0000]/10 transition-all duration-300 hover:scale-110">
-                  <Pizza className="h-6 w-6 text-[#6D0000]" />
+                  <CakeSlice className="h-6 w-6 text-[#6D0000]" />
                 </div>
                 <div>
                   <span className="text-sm text-gray-500">Total Products</span>
@@ -355,7 +344,7 @@ export default function ManageFoodItems() {
         {/* Product Table Card */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
           <CardContent className="p-0">
-            <div className="px-6 py-4 bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-t-xl">
+            <div className="px-6 py-4 bg-gradient-to-r from-[#a52422] to-[#6D0000] text-white rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-white/90" />
@@ -414,7 +403,7 @@ export default function ManageFoodItems() {
               ) : filteredFoodItems.length === 0 ? (
                 <div className="text-center py-10 space-y-4">
                   <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
-                    <Pizza className="h-8 w-8 text-gray-400" />
+                    <CakeSlice className="h-8 w-8 text-gray-400" />
                   </div>
                   {searchQuery ? (
                     <>
@@ -449,30 +438,23 @@ export default function ManageFoodItems() {
                 <>
                   <div className="rounded-md border overflow-hidden shadow-sm">
                     <Table>
-                      <TableHeader className="bg-gray-50">
+                      <TableHeader className="bg-gradient-to-r from-[#ffa2ac] via-[#ff949d] to-[#ffa2ac]">
                         <TableRow>
-                          <TableHead>Product ID</TableHead>
-                          <TableHead>Product Name</TableHead>
-                          <TableHead className="hidden md:table-cell">Description</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                          <TableHead className="text-white">Product ID</TableHead>
+                          <TableHead className="text-white">Product Name</TableHead>
+                          <TableHead className="text-white">Price</TableHead>
+                          <TableHead className="text-white">Status</TableHead>
+                          <TableHead className="text-right text-white">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {paginatedFoodItems.map((item) => (
-                          <TableRow key={item.food_id} className="hover:bg-gray-50 transition-colors duration-200 group cursor-default">
+                          <TableRow key={item.food_id} className="hover:bg-gradient-to-r from-[#ffbac5] to-[#ff969f] transition-colors duration-200 group cursor-default">
                             <TableCell className="font-medium">{item.food_id}</TableCell>
                             <TableCell>
                               <div>
                                 {item.food_name}
-                                <p className="text-sm text-gray-500 md:hidden mt-1 line-clamp-1">
-                                  {item.description}
-                                </p>
                               </div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell max-w-xs">
-                              <p className="truncate">{item.description}</p>
                             </TableCell>
                             <TableCell>
                               {new Intl.NumberFormat('id-ID', { 
@@ -621,7 +603,7 @@ export default function ManageFoodItems() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="food_name" className="flex items-center gap-2 text-sm font-medium">
-                    <Pizza className="h-4 w-4 text-[#6D0000]" />
+                    <CakeSlice className="h-4 w-4 text-[#6D0000]" />
                     Product Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -631,22 +613,6 @@ export default function ManageFoodItems() {
                     value={foodForm.food_name}
                     onChange={handleFoodFormChange}
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="description" className="flex items-center gap-2 text-sm font-medium">
-                    <FileText className="h-4 w-4 text-[#6D0000]" />
-                    Description <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="Add a Description"
-                    value={foodForm.description}
-                    onChange={handleFoodFormChange}
-                    rows={3}
-                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 resize-none"
                   />
                 </div>
                 

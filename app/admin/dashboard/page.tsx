@@ -62,7 +62,8 @@ import {
   ChevronLeft,
   ArrowRight,
   BarChart3,
-  ChevronRight
+  ChevronRight,
+  CircleCheckBig
 } from "lucide-react";
 
 // Components
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
   // State management
   const [orders, setOrders] = useState<Order[]>([]);
   const [inProgressOrders, setInProgressOrders] = useState<Order[]>([]);
+  const [finishedOrders, setFinishedOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   
@@ -105,6 +107,7 @@ export default function AdminDashboard() {
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const [isPendingOrdersOpen, setIsPendingOrdersOpen] = useState(false);
   const [isInProgressOrdersOpen, setIsInProgressOrdersOpen] = useState(false);
+  const [isFinishedOrdersOpen, setIsFinishedOrdersOpen] = useState(false);
 
   // Loading and error states
   const [isLoading, setIsLoading] = useState({
@@ -126,6 +129,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchPendingOrders();
     fetchInProgressOrders();
+    fetchFinishedOrders();
   }, []);
 
   // API calls
@@ -151,6 +155,21 @@ export default function AdminDashboard() {
     try {
       const data = await apiFetch("/admin/orders/in-progress");
       setInProgressOrders(data);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setErrors(prev => ({ ...prev, inProgress: errorMessage }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, inProgress: false }));
+    }
+  }
+
+  async function fetchFinishedOrders() {
+    setIsLoading(prev => ({ ...prev, inProgress: true }));
+    setErrors(prev => ({ ...prev, inProgress: "" }));
+    
+    try {
+      const data = await apiFetch("/admin/orders/finished");
+      setFinishedOrders(data);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       setErrors(prev => ({ ...prev, inProgress: errorMessage }));
@@ -227,6 +246,7 @@ export default function AdminDashboard() {
       // Refresh orders after update
       fetchPendingOrders();
       fetchInProgressOrders();
+      fetchFinishedOrders();
     } catch (error) {
       console.error("Error generating PDF:", error);
       setErrors(prev => ({ ...prev, filtered: "Failed to generate PDF: " + String(error) }));
@@ -237,6 +257,7 @@ export default function AdminDashboard() {
   const handleRefresh = () => {
     fetchPendingOrders();
     fetchInProgressOrders();
+    fetchFinishedOrders();
   };
 
   const handleViewOrder = (order: Order) => {
@@ -249,6 +270,7 @@ export default function AdminDashboard() {
     setIsOrderDetailsOpen(true);
     setIsPendingOrdersOpen(false);
     setIsInProgressOrdersOpen(false);
+    setIsFinishedOrdersOpen(false);
   };
 
   const handleCloseOrderDetails = () => {
@@ -376,15 +398,26 @@ export default function AdminDashboard() {
       
         <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
         {/* Header Section */}
-        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-8">
+        <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-white">
                 Store Orders Dashboard
               </h1>
-              <p className="text-sm text-gray-500 mt-1">Manage and track all store orders</p>
+              <p className="text-sm text-white mt-1">Manage and track all store orders</p>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsPendingOrdersOpen(true)}
+                title="View New Orders"
+                className="cursor-pointer relative rounded-full bg-white text-[#6D0000] hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+              >
+                {orders.length} New Orders
+                <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-white animate-ping"></span>
+                <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600"></span>
+              </Button>
               <Button 
                 variant="outline" 
                 size="icon"
@@ -394,17 +427,6 @@ export default function AdminDashboard() {
                 transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 <RefreshCw className="h-4 w-4 transition-transform duration-300 hover:rotate-180" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsPendingOrdersOpen(true)}
-                title="View New Orders"
-                className="cursor-pointer relative rounded-full border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
-              >
-                {orders.length} New Orders
-                <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600 animate-ping"></span>
-                <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600"></span>
               </Button>
             </div>
           </div>
@@ -479,44 +501,39 @@ export default function AdminDashboard() {
           <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
             <div className="h-1 bg-[#6D0000]" />
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-full bg-[#6D0000]/10 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <BarChart3 className="h-6 w-6 text-[#6D0000] transition-transform duration-300 group-hover:scale-110" />
+            <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-full bg-blue-50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                  <CircleCheckBig className="h-6 w-6 text-[#6D0000]" />
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="text-3xl font-bold text-[#6D0000] transition-all duration-300 group-hover:scale-105">
-                    {isLoading.pending || isLoading.inProgress ? (
+                    {isLoading.inProgress ? (
                       <Skeleton className="h-9 w-12" />
                     ) : (
-                      orders.length + inProgressOrders.length
+                      finishedOrders.length
                     )}
                   </span>
                   <span className="text-xs text-gray-500">orders</span>
                 </div>
               </div>
-              <h3 className="text-sm font-medium text-gray-900">Total Orders</h3>
-              <p className="text-xs text-gray-500 mt-1">All current orders</p>
-              <div className="mt-4 w-full bg-gray-100 rounded-full h-1.5">
-                <div 
-                  className="bg-[#6D0000] h-1.5 rounded-full transition-all duration-500"
-                  style={{ 
-                    width: `${orders.length + inProgressOrders.length > 0 
-                      ? (inProgressOrders.length / (orders.length + inProgressOrders.length)) * 100 
-                      : 0}%` 
-                  }}
-                ></div>
-              </div>
-              <div className="flex justify-between mt-1 text-xs text-gray-500">
-                <span>Pending</span>
-                <span>In Progress</span>
-              </div>
+              <h3 className="text-sm font-medium text-gray-900">Finished</h3>
+              <p className="text-xs text-gray-500 mt-1">Delivered successfully</p>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setIsFinishedOrdersOpen(true)}
+                className="cursor-pointer mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
+              >
+                View all
+                <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+              </Button>
             </CardContent>
           </Card>
         </div>
         
         {/* Main Content Section */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
-          <CardHeader className="px-6 py-4 bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-t-xl">
+          <CardHeader className="px-6 py-4 bg-gradient-to-r from-[#a52422] to-[#6d0000] text-white rounded-t-xl">
             <div className="flex items-center justify-between group">
               <div>
                 <CardTitle className="text-lg font-semibold text-white">Order Filtering</CardTitle>
@@ -539,7 +556,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       id="branchSelect" 
-                      className="cursor-pointer w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
+                      className="cursor-pointer w-full justify-between font-normal border-gray-200 border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
                     >
                       <span className={selectedBranch ? "text-gray-900" : "text-gray-500"}>
                         {selectedBranch || "Select branch"}
@@ -577,7 +594,7 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "cursor-pointer w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        "cursor-pointer w-full justify-between font-normal border-gray-200 border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
                         !selectedDate && "text-gray-500"
                       )}
                       id="orderDate"
@@ -619,7 +636,7 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "cursor-pointer w-full justify-between font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        "cursor-pointer w-full justify-between font-normal border-gray-200 border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
                         !selectedDeliveryDate && "text-gray-500"
                       )}
                       id="deliveryDate"
@@ -703,14 +720,15 @@ export default function AdminDashboard() {
       
       {/* Modals */}
       {/* Order Details Modal */}
-      {isOrderDetailsOpen && (
-        <OrderDetailsModal
-          filteredOrders={filteredOrders}
-          printRef={printRef}
-          handleSaveAsPDF={handleSaveAsPDF}
-          onClose={handleCloseOrderDetails}
-        />
-      )}
+{isOrderDetailsOpen && (
+  <OrderDetailsModal
+    filteredOrders={filteredOrders}
+    printRef={printRef}
+    handleSaveAsPDF={handleSaveAsPDF}
+    onClose={handleCloseOrderDetails}
+    showSaveAsPDFButton={selectedOrder ? !finishedOrders.some(o => o.order_id === selectedOrder.order_id) : true}
+  />
+)}
       
       {/* Pending Orders Modal */}
       {isPendingOrdersOpen && (
@@ -728,6 +746,16 @@ export default function AdminDashboard() {
           orders={inProgressOrders}
           title="In-Progress Orders"
           onClose={() => setIsInProgressOrdersOpen(false)}
+          onViewOrder={handleViewOrder}
+        />
+      )}
+      
+      {/* Finished Orders Modal */}
+      {isFinishedOrdersOpen && (
+        <PendingOrdersModal
+          orders={finishedOrders}
+          title="Finished Orders"
+          onClose={() => setIsFinishedOrdersOpen(false)}
           onViewOrder={handleViewOrder}
         />
       )}

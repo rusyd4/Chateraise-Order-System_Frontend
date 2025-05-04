@@ -332,13 +332,13 @@ export default function AdminBranch() {
       
         <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
         {/* Header Section */}
-        <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
+        <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-white">
                 Branch Management
               </h1>
-              <p className="text-sm text-gray-500 mt-1">Add, edit, and manage your branch locations</p>
+              <p className="text-sm text-white mt-1">Add, edit, and manage your branch locations</p>
             </div>
             <Button 
               variant="outline" 
@@ -383,7 +383,7 @@ export default function AdminBranch() {
         {/* Branch Table Card */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
           <CardContent className="p-0">
-            <div className="px-6 py-4 bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-t-xl">
+            <div className="px-6 py-4 bg-gradient-to-r from-[#a52422] to-[#6D0000] text-white rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-white/90" />
@@ -477,13 +477,13 @@ export default function AdminBranch() {
                 <>
                   <div className="rounded-md border overflow-hidden shadow-sm">
                     <Table>
-                      <TableHeader className="bg-gray-50">
+                      <TableHeader className="bg-gradient-to-r from-[#f79f00] via-[#ffa651] to-[#f79f00]">
                         <TableRow>
-                          <TableHead>Branch Name</TableHead>
-                          <TableHead className="hidden md:table-cell">Email</TableHead>
-                          <TableHead className="hidden md:table-cell">Address</TableHead>
-                          <TableHead className="hidden lg:table-cell">Delivery Time</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                          <TableHead className="text-white">Branch Name</TableHead>
+                          <TableHead className="hidden md:table-cell text-white">Email</TableHead>
+                          <TableHead className="hidden md:table-cell text-white">Address</TableHead>
+                          <TableHead className="hidden lg:table-cell text-white">Delivery Time</TableHead>
+                          <TableHead className="text-right text-white">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

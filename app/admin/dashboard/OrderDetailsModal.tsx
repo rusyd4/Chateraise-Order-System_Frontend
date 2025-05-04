@@ -27,6 +27,7 @@ interface OrderDetailsModalProps {
   printRef: RefObject<HTMLDivElement | null>;
   handleSaveAsPDF: () => Promise<void>;
   onClose: () => void;
+  showSaveAsPDFButton: boolean;
 }
 
 export default function OrderDetailsModal({
@@ -34,6 +35,7 @@ export default function OrderDetailsModal({
   printRef,
   handleSaveAsPDF,
   onClose,
+  showSaveAsPDFButton,
 }: OrderDetailsModalProps) {
   return (
     <div className="fixed inset-0 bg-black/75 flex justify-center items-center z-50 overflow-y-auto">
@@ -192,12 +194,14 @@ export default function OrderDetailsModal({
         )}
       </div>
       <div className="ml-4 flex flex-col space-y-4">
-        <button
-          onClick={handleSaveAsPDF}
-          className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
-        >
-          Save as PDF
-        </button>
+        {showSaveAsPDFButton && (
+          <button
+            onClick={handleSaveAsPDF}
+            className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+          >
+            Save as PDF
+          </button>
+        )}
         <button
           onClick={onClose}
           className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"

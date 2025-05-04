@@ -296,11 +296,11 @@ export default function AdminRecap() {
       <Navbar />
 
       <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
-      <div className="bg-white rounded-xl px-6 py-5 shadow-md mb-6">
+      <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
               <div>
-              <h1 className="text-2xl font-bold text-gray-900">Orders Recap</h1>
-              <p className="text-sm text-gray-500 mt-1">Filter orders by date</p>
+              <h1 className="text-2xl font-bold text-white">Orders Recap</h1>
+              <p className="text-sm text-white mt-1">Filter orders by date</p>
             </div>
             <Button
               variant="outline"
@@ -333,7 +333,7 @@ export default function AdminRecap() {
 
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
           <CardContent className="p-0">
-            <div className="px-6 py-4 bg-gradient-to-r from-[#6D0000] to-[#8B0000] text-white rounded-t-xl">
+            <div className="px-6 py-4 bg-gradient-to-r from-[#a52422] to-[#6D0000] text-white rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Filter className="h-5 w-5 text-white/90" />
@@ -356,7 +356,7 @@ export default function AdminRecap() {
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-64 justify-start text-left font-normal border-gray-200 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md rounded-full"
+                        className="cursor-pointer w-64 justify-start text-left font-normal border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md rounded-full"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 transition-transform duration-300 group-hover:scale-110" />
                         {dateRange.from ? (
@@ -608,7 +608,7 @@ export default function AdminRecap() {
                 >
                   <Card className="border-0 shadow-md rounded-xl bg-white overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="px-6 py-4 bg-[#6D0000] text-white">
+                      <div className="px-6 py-4 bg-gradient-to-r from-[#a52422] to-[#6D0000] text-white rounded-t-xl">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <BarChart3 className="h-5 w-5 text-white/90" />
