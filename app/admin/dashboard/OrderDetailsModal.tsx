@@ -1,9 +1,7 @@
 'use client'
 
 import React, { RefObject } from "react";
-import { format } from "date-fns";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas-pro";
+import Image from "next/image";
 
 interface OrderItem {
   food_id: number;
@@ -65,7 +63,7 @@ export default function OrderDetailsModal({
                 <div key={order.order_id || index} className="mb-6 border-b border-gray-300 pb-4">
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center space-x-4">
-                      <img
+                      <Image
                         src="/Chateraiselogo.png"
                         alt="Chateraise Logo"
                         width={120}
@@ -73,7 +71,7 @@ export default function OrderDetailsModal({
                         className="object-contain"
                       />
                       {order.qrCodeImageUrl && (
-                        <img
+                        <Image
                           src={order.qrCodeImageUrl}
                           alt="Order QR Code"
                           width={80}

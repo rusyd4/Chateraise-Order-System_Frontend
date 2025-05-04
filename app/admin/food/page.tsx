@@ -12,14 +12,11 @@ import {
   AlertCircle, 
   Search,
   DollarSign,
-  FileText,
   Tag,
   CheckCircle,
   XCircle,
   X,
   RefreshCw,
-  ChevronRight,
-  Store,
   BarChart3
 } from "lucide-react";
 import { toast } from "sonner";
@@ -69,7 +66,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface FoodItem {
@@ -80,7 +76,6 @@ interface FoodItem {
 }
 
 export default function ManageFoodItems() {
-  const pathname = usePathname();
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [filteredFoodItems, setFilteredFoodItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);

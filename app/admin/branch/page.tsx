@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import apiFetch from "../../../lib/api";
+import apiFetch from "@/lib/api";
 import Navbar from "../../components/AdminNavbar";
 import { 
   Edit, 
@@ -11,14 +11,12 @@ import {
   Store, 
   AlertCircle, 
   Search, 
-  RotateCcw, 
   Mail, 
   Clock, 
   MapPin,
   User,
   Lock,
   RefreshCw,
-  ChevronRight,
   X,
   BarChart3
 } from "lucide-react";
@@ -52,7 +50,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -60,19 +58,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import { Camera, ShoppingCart, History, Upload, X } from "lucide-react";
 import QrScanner from "qr-scanner";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,6 @@ import {
   DialogTitle,
   DialogDescription 
 } from "@/components/ui/dialog";
-import { 
-  // Tooltip,
-  // TooltipTrigger,
-  // TooltipContent
-} from "@/components/ui/tooltip";
 
 import {
   DropdownMenu,
@@ -184,7 +180,7 @@ export default function BranchNavbar() {
         <div 
           className="hover:opacity-90 transition-opacity"
         >
-          <img 
+          <Image 
             src="/image-removebg-preview.png" 
             alt="Logo" 
             className="h-10 md:h-12" 

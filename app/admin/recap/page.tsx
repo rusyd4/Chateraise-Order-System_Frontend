@@ -10,10 +10,6 @@ import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Popover,
@@ -32,7 +28,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   CalendarIcon,
@@ -41,7 +36,6 @@ import {
   Store,
   Filter,
   BarChart3,
-  ChevronRight,
   AlertCircle,
   PieChart,
 } from "lucide-react";

@@ -13,7 +13,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,19 +29,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 // Icons
@@ -51,17 +40,12 @@ import {
   Store, 
   Package, 
   Clock, 
-  FileText, 
   AlertCircle, 
-  CheckCircle2, 
   X, 
-  Printer, 
   Filter, 
   Truck, 
   RefreshCw,
-  ChevronLeft,
   ArrowRight,
-  BarChart3,
   ChevronRight,
   CircleCheckBig
 } from "lucide-react";
@@ -103,7 +87,6 @@ export default function AdminDashboard() {
   const [selectedDeliveryDate, setSelectedDeliveryDate] = useState<Date | undefined>(undefined);
   
   // UI states
-  const [activeTab, setActiveTab] = useState("filter");
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const [isPendingOrdersOpen, setIsPendingOrdersOpen] = useState(false);
   const [isInProgressOrdersOpen, setIsInProgressOrdersOpen] = useState(false);
@@ -123,7 +106,6 @@ export default function AdminDashboard() {
   });
 
   const printRef = useRef<HTMLDivElement | null>(null);
-  const pathname = usePathname();
 
   // Fetch orders on component mount
   useEffect(() => {

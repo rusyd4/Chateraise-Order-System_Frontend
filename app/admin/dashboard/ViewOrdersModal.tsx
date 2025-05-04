@@ -38,11 +38,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Calendar, 
   Search, 
-  Store, 
   Truck, 
-  Clock, 
   ExternalLink,
-  SlidersHorizontal,
   AlertCircle,
   X
 } from "lucide-react";
