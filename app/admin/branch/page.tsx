@@ -228,7 +228,7 @@ export default function AdminBranch() {
         setIsModalOpen(false);
       } else {
         // Create new branch
-        await apiFetch("/auth/register", {
+        await apiFetch("/admin/branches", {
           method: "POST",
           body: JSON.stringify({
             full_name: formFullName,
@@ -388,7 +388,7 @@ export default function AdminBranch() {
                   <Input
                     type="search"
                     placeholder="Search branches..."
-                    className="pl-9 w-full sm:w-64 border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 pr-8"
+                    className="pl-9 w-full sm:w-64 border-gray-400 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 pr-8"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />

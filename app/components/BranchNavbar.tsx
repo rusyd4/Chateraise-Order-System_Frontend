@@ -180,7 +180,7 @@ export default function BranchNavbar() {
         <div 
           className="hover:opacity-90 transition-opacity"
         >
-          <Image 
+          <img 
             src="/image-removebg-preview.png" 
             alt="Logo" 
             className="h-10 md:h-12" 

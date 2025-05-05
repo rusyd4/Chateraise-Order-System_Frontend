@@ -359,7 +359,7 @@ export default function ManageFoodItems() {
                   <Input
                     type="search"
                     placeholder="Search products..."
-                    className="pl-9 w-full sm:w-64 border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 pr-8"
+                    className="pl-9 w-full sm:w-64 border-gray-400 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 pr-8"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
