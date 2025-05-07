@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
 import { Camera, ShoppingCart, History, Upload, X } from "lucide-react";
 import QrScanner from "qr-scanner";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,11 @@ import {
   DialogTitle,
   DialogDescription 
 } from "@/components/ui/dialog";
+import { 
+  // Tooltip,
+  // TooltipTrigger,
+  // TooltipContent
+} from "@/components/ui/tooltip";
 
 import {
   DropdownMenu,
@@ -174,7 +178,7 @@ export default function BranchNavbar() {
   }, [scannerOpen]);
 
   return (
-    <nav className="bg-[#6D0000] text-primary-foreground px-4 py-3 shadow-sm sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-[#a52422] to-[#6D0000] text-primary-foreground px-4 py-3 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div 

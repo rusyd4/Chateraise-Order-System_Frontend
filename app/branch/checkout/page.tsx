@@ -157,7 +157,7 @@ export default function CheckoutPage() {
               <Button 
                 onClick={goToStore} 
                 variant="default" 
-                className="bg-red-900 hover:bg-red-800"
+                className="cursor-pointer bg-red-900 hover:bg-red-800"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Return to Store
               </Button>
@@ -214,12 +214,13 @@ export default function CheckoutPage() {
               <Button 
                 variant="outline" 
                 onClick={goToStore}
+                className="cursor-pointer"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Continue Shopping
               </Button>
               <Button 
                 onClick={handleConfirmOrder} 
-                className="bg-red-900 hover:bg-red-800" 
+                className="cursor-pointer bg-red-900 hover:bg-red-800" 
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Processing..." : "Confirm Order"}
@@ -303,12 +304,13 @@ export default function CheckoutPage() {
               <Button 
                 variant="outline" 
                 onClick={goToStore}
+                className="cursor-pointer"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Return to Store
               </Button>
               <Button 
                 onClick={handlePrint} 
-                className="bg-red-900 hover:bg-red-800"
+                className="cursor-pointer bg-red-900 hover:bg-red-800"
               >
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
               </Button>

@@ -7,17 +7,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Eye, EyeOff } from "lucide-react";
-import { Toaster } from "sonner";
 import { toast } from "sonner";
 import apiFetch from "../../lib/api";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Define form schema with validation
 const loginFormSchema = z.object({
@@ -55,11 +52,6 @@ export default function LoginPage() {
       localStorage.setItem("role", response.role);
       localStorage.setItem("full_name", response.full_name);
 
-      // Show success toast
-      toast.success("Login successful!", {
-        description: `Welcome back, ${response.full_name}!`,
-      });
-
       // Redirect based on role with slight delay for toast visibility
       setTimeout(() => {
         if (response.role === "admin") {
@@ -93,10 +85,10 @@ export default function LoginPage() {
     <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
       {/* Background with overlay */}
       <div 
-        className="absolute inset-0 w-screen bg-center bg-no-repeat bg-cover opacity-70 dark:opacity-30 transition-opacity duration-500"
-        style={{ backgroundImage: "url('/DSCF2264.jpg')" }}
+        className="absolute inset-0 w-screen bg-center bg-no-repeat bg-cover opacity-150 dark:opacity-30 transition-opacity duration-500"
+        style={{ backgroundImage: "url('/DSCF2264.jpg')", transform: "scale(1.2)", transformOrigin: "center" }}
       />
-      <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-background/15 backdrop-blur-[2px]" />
 
       {/* Login Card */}
       <Card className="relative max-w-md w-full mx-4 shadow-[0_5px_30px_rgba(109,0,0,0.3)] dark:shadow-[0_5px_30px_rgba(230,0,0,0.15)] border-primary/10 backdrop-blur-sm bg-card/90">
@@ -126,10 +118,10 @@ export default function LoginPage() {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="your.email@example.com" 
+                        placeholder="Enter your email" 
                         type="email" 
                         autoComplete="email"
-                        className="bg-background/50"
+                        className="bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
                         {...field}
                       />
                     </FormControl>
@@ -150,7 +142,7 @@ export default function LoginPage() {
                           placeholder="••••••••" 
                           type={showPassword ? "text" : "password"} 
                           autoComplete="current-password"
-                          className="pr-10 bg-background/50"
+                          className="pr-10 bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
                           {...field}
                         />
                         <Button
@@ -178,20 +170,15 @@ export default function LoginPage() {
               
               <Button 
                 type="submit" 
-                className="w-full bg-[#6D0000] hover:bg-[#8A0000] text-white font-medium transition-all"
+                className="w-full bg-[#6D0000] hover:bg-[#8A0000] hover:shadow-lg hover:-translate-y-0.5 text-white font-medium transition-all duration-300 ease-in-out"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? "Logging in..." : "Log in"}
               </Button>
             </form>
           </Form>
         </CardContent>
         
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Need help? <a href="#" className="text-primary hover:underline">Contact support</a>
-          </p>
-        </CardFooter>
       </Card>
       
     </div>

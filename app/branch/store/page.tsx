@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
 import BranchNavbar from "../../components/BranchNavbar";
 import { 
   Card, 
-  CardContent, 
-  CardFooter,
   CardHeader,
   CardTitle, 
-  CardDescription 
+  CardDescription,
+  CardContent
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,12 +20,21 @@ import {
   SheetHeader, 
   SheetTitle, 
   SheetFooter,
-  SheetTrigger 
+  SheetTrigger,
+  SheetClose
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Search, ShoppingCart, Plus, Minus, X, History } from "lucide-react";
-
+import { 
+  Search, 
+  ShoppingCart, 
+  Plus, 
+  Minus, 
+  X, 
+  ArrowRight,
+  ChevronUp,
+  MenuIcon,
+  ShoppingBag
+} from "lucide-react";
 interface FoodItem {
   food_id: number;
   food_name: string;
@@ -46,14 +54,36 @@ export default function BranchStore() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const router = useRouter();
 
+  // Theme Colors - Defining them here for easy access
+  const colors = {
+    primary: "#8B1E3F",        // Deep burgundy
+    secondary: "#5E1224",      // Darker burgundy
+    accent: "#DB4C40",         // Bright rust/coral accent
+    background: "#F9F1F2",     // Pale pink background
+    card: "#FFFFFF",           // White card background
+    text: "#2D1A20",           // Very dark burgundy text
+    lightText: "#6D5A5F",      // Medium burgundy-gray text
+    success: "#5F9E64",        // Muted green success
+    highlight: "#FCF0ED",      // Light coral highlight
+    gold: "#C89F65"            // Gold accent for premium feel
+  };
+
   function formatRupiah(price: number): string {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
+    return new Intl.NumberFormat('id-ID', { 
+      style: 'currency', 
+      currency: 'IDR', 
+      minimumFractionDigits: 0, 
+      maximumFractionDigits: 0 
+    }).format(price);
   }
 
   useEffect(() => {
     fetchFoodItems();
+    
     // Load cart from localStorage if available
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -63,6 +93,29 @@ export default function BranchStore() {
         console.error("Failed to parse saved cart");
       }
     }
+    
+    // Check screen size
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+    
+    // Listen for scroll events
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+    };
+    
+    // Initial check
+    checkScreenSize();
+    
+    // Add event listeners
+    window.addEventListener('resize', checkScreenSize);
+    window.addEventListener('scroll', handleScroll);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   // Save cart to localStorage whenever it changes
@@ -130,10 +183,6 @@ export default function BranchStore() {
     router.push("/branch/checkout");
   }
 
-  function goToOrderHistory() {
-    router.push("/branch/order_history");
-  }
-
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
@@ -143,221 +192,395 @@ export default function BranchStore() {
     return name.includes(term);
   });
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="sticky top-0 z-50 bg-gray-50 shadow-md">
-        <BranchNavbar />
-        <main className="container mx-auto px-4 pt-4 pb-1">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-            
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search menu..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-40 bg-white"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              </div>
-              
-              <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="default" className="cursor-pointer bg-[#6D0000] hover:bg-[#7a0000] relative">
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    <span>Cart</span>
-                    {totalItems > 0 && (
-                      <Badge className="absolute -top-2 -right-2 bg-white text-[#6D0000] font-bold">
-                        {totalItems}
-                      </Badge>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="sm:max-w-md">
-                  <SheetHeader>
-                    <SheetTitle>Your Cart</SheetTitle>
-                  </SheetHeader>
-                  
-                  {cart.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <ShoppingCart className="h-16 w-16 text-gray-300 mb-4" />
-                      <p className="text-gray-500">Your cart is empty</p>
-                    </div>
-                  ) : (
-                    <>
-                      <ScrollArea className="h-[calc(100vh-220px)] mt-6 mx-6  ">
-                        {cart.map((item) => (
-                          <div key={item.food_id} className="py-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h3 className="font-medium">{item.food_name}</h3>
-                                <p className="text-sm text-gray-500">{formatRupiah(item.price)} each</p>
-                              </div>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => removeItemCompletely(item.food_id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            
-                            <div className="flex items-center justify-between mt-2">
-                              <p className="font-medium">
-                                {formatRupiah(item.price * item.quantity)}
-                              </p>
-                              <div className="flex items-center space-x-2">
-                                <Input 
-                                  type="number"
-                                  min="0"
-                                  value={item.quantity}
-                                  onChange={(e) => {
-                                    const newQuantity = parseInt(e.target.value) || 0;
-                                    
-                                    if (newQuantity === 0) {
-                                      // Remove from cart if quantity is 0
-                                      removeItemCompletely(item.food_id);
-                                    } else {
-                                      // Update quantity directly
-                                      setCart(prev => 
-                                        prev.map(cartItem => 
-                                          cartItem.food_id === item.food_id 
-                                            ? { ...cartItem, quantity: newQuantity } 
-                                            : cartItem
-                                        )
-                                      );
-                                    }
-                                  }}
-                                  className="w-16 h-8 text-center"
-                                />
-                              </div>
-                            </div>
-                            <Separator className="mt-4" />
-                          </div>
-                        ))}
-                      </ScrollArea>
-                      
-                      <SheetFooter className="mt-auto">
-                        <div className="w-full space-y-4">
-                          <div className="flex justify-between">
-                            <span className="font-semibold">Total</span>
-                            <span className="font-bold">{formatRupiah(totalPrice)}</span>
-                          </div>
-                          <Button 
-                            className="cursor-pointer w-full bg-[#6D0000] hover:bg-[#7a0000]"
-                            onClick={() => {
-                              handleCheckout();
-                              setIsCartOpen(false);
-                            }}
-                          >
-                            Proceed to Checkout
-                          </Button>
-                        </div>
-                      </SheetFooter>
-                    </>
-                  )}
-                </SheetContent>
-              </Sheet>
-            </div>
+  // Function to scroll back to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
+
+  // Cart component that works for both mobile and desktop
+  const CartComponent = ({ isMobile = false }) => (
+    <div className="w-full h-full flex flex-col">
+      <SheetHeader className="mb-4">
+        <SheetTitle className="text-2xl font-bold" style={{ color: colors.primary }}>
+          Your Cart
+        </SheetTitle>
+      </SheetHeader>
+      
+      {cart.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-full py-12">
+          <div className="p-6 rounded-full mb-4" style={{ background: colors.highlight }}>
+            <ShoppingBag className="h-12 w-12" style={{ color: colors.primary }} />
           </div>
-        </main>
+          <p style={{ color: colors.primary }} className="text-lg text-center">
+            Your cart is empty
+          </p>
+          <p className="text-sm mt-2 text-center" style={{ color: colors.lightText }}>
+            Add some delicious items to get started
+          </p>
+          <SheetClose asChild>
+            <Button 
+              className="mt-6 cursor-pointer"
+              style={{ 
+                background: colors.primary,
+                color: 'white',
+              }}
+            >
+              Browse Menu
+            </Button>
+          </SheetClose>
+        </div>
+      ) : (
+        <>
+          <ScrollArea className={`${isMobile ? 'h-[50vh]' : 'h-[calc(100vh-220px)]'} mt-2 mx-2 px-1`}>
+            {cart.map((item) => (
+              <div 
+                key={item.food_id} 
+                className="py-3 px-3 mb-3 rounded-lg"
+                style={{ 
+                  background: colors.card,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                }}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1 mr-2">
+                    <h3 className="font-medium line-clamp-1" style={{ color: colors.text }}>
+                      {item.food_name}
+                    </h3>
+                    <p className="text-xs" style={{ color: colors.lightText }}>
+                      {formatRupiah(item.price)} each
+                    </p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-7 w-7 rounded-full hover:bg-red-50"
+                    style={{ color: colors.lightText }}
+                    onClick={() => removeItemCompletely(item.food_id)}
+                    aria-label="Remove item"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between mt-2">
+                  <p className="font-bold text-sm" style={{ color: colors.primary }}>
+                    {formatRupiah(item.price * item.quantity)}
+                  </p>
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7 rounded-full hover:bg-red-50"
+                      style={{ 
+                        borderColor: colors.primary, 
+                        color: colors.primary
+                      }}
+                      onClick={() => removeFromCart(item)}
+                      disabled={item.quantity <= 1}
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <span className="w-6 text-center font-medium text-sm" style={{ color: colors.text }}>
+                      {item.quantity}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7 rounded-full hover:bg-red-50"
+                      style={{ 
+                        borderColor: colors.primary, 
+                        color: colors.primary
+                      }}
+                      onClick={() => addToCart(item)}
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </ScrollArea>
+          
+          <div className="mt-auto pt-4 px-2 w-full space-y-3">
+            <div className="flex justify-between p-3 rounded-lg" style={{ 
+              background: colors.highlight
+            }}>
+              <span className="font-semibold" style={{ color: colors.primary }}>Total</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {formatRupiah(totalPrice)}
+              </span>
+            </div>
+            <Button 
+              className="cursor-pointer w-full flex items-center justify-center gap-2 h-10 rounded-full text-base font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+              style={{ 
+                background: `linear-gradient(135deg, ${colors.accent}, ${colors.primary})`,
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)'
+              }}
+              onClick={() => {
+                handleCheckout();
+                setIsCartOpen(false);
+              }}
+            >
+              <span>Checkout</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  // SearchBar component
+  const SearchBar = ({ className = "" }) => (
+    <div className={`relative ${className}`}>
+      <Input
+        type="text"
+        placeholder="Search product..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10 pr-3 py-2 w-full bg-white/90 backdrop-blur-sm border-none rounded-full shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-accent"
+        aria-label="Search for menu items"
+      />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary h-4 w-4" />
+      {searchTerm && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 rounded-full"
+          onClick={() => setSearchTerm("")}
+          aria-label="Clear search"
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: colors.background }}>
+      {/* Header - Sticks to top with shadow effect */}
+
+      <div 
+        className={`bg-gradient-to-r from-[#a52422] to-[#6D0000] sticky top-0 z-50 transition-shadow duration-300 ${scrollPosition > 10 ? 'shadow-lg' : ''}`} 
+      >
+        <BranchNavbar />
+        
+        {/* Search bar and cart icon - side by side on both mobile and desktop */}
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex justify-between items-center gap-3">
+            <SearchBar className="flex-grow max-w-[280px]" />
+            
+            <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="default" 
+                  className="cursor-pointer relative rounded-full px-3 py-3 shadow-md transition-all duration-300"
+                  style={{
+                    background: colors.accent,
+                    color: 'white',
+                  }}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {totalItems > 0 && (
+                    <Badge className="absolute -top-2 -right-2 bg-white text-black text-xs h-5 w-5 flex items-center justify-center p-0 rounded-full">
+                      {totalItems}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="sm:max-w-md border-l-0 p-4" style={{ 
+                background: colors.background,
+                boxShadow: `-5px 0 15px rgba(139,30,63,0.1)`
+              }}>
+                <CartComponent />
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
       </div>
       
-      <main className="container mx-auto px-4 py-6">
+      {/* Main content area */}
+      <main className="flex-grow container mx-auto px-4 py-6">
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-gray-200 h-64 rounded-lg"></div>
+          // Responsive loading skeleton
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 animate-pulse">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <div className="bg-white h-40 sm:h-48 rounded-lg shadow"></div>
+                <div className="h-4 bg-white rounded w-3/4"></div>
+                <div className="h-3 bg-white rounded w-1/2"></div>
+              </div>
             ))}
           </div>
         ) : error ? (
-          <div className="bg-red-50 p-4 rounded-lg border border-red-200 text-red-700">
-            <p>{error}</p>
-            <Button 
-              variant="outline" 
-              className="mt-2" 
-              onClick={fetchFoodItems}
-            >
-              Try Again
-            </Button>
+          // Error state with retry button
+          <div className="bg-red-50 p-4 sm:p-6 rounded-lg border border-red-200 text-red-600 shadow-md max-w-lg mx-auto">
+            <p className="font-medium text-center mb-4">{error}</p>
+            <div className="flex justify-center">
+              <Button 
+                variant="outline" 
+                className="border-red-400 text-red-500 hover:bg-red-100" 
+                onClick={fetchFoodItems}
+              >
+                Try Again
+              </Button>
+            </div>
           </div>
         ) : filteredFoodItems.length === 0 ? (
+          // No search results state
           <div className="text-center py-12">
-            <p className="text-gray-500">No items found matching {searchTerm}</p>
+            <div className="bg-white p-6 rounded-lg inline-block shadow-md">
+              <Search className="h-12 w-12 mx-auto mb-3" style={{ color: colors.primary }} />
+              <p className="text-base" style={{ color: colors.primary }}>
+                No items found matching "{searchTerm}"
+              </p>
+              <Button 
+                variant="ghost"
+                className="mt-3"
+                style={{ color: colors.accent }}
+                onClick={() => setSearchTerm("")}
+              >
+                Clear Search
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          // Food items grid - responsive columns based on screen size
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             {filteredFoodItems.map((food) => (
-              <Card key={food.food_id} className="overflow-hidden transition-all hover:shadow-lg flex flex-col justify-between h-full">
-                <CardHeader className="p-4 pb-2">
-                  <CardTitle className="text-lg truncate" title={food.food_name}>
+              <Card 
+                key={food.food_id} 
+                className="overflow-hidden transition-all duration-300 shadow hover:shadow-md group flex flex-col rounded-xl border" 
+                style={{ 
+                  background: colors.card,
+                  borderColor: 'rgba(139, 30, 63, 0.1)'
+                }}
+              >
+                {/* Card header with food item details */}
+                <CardHeader className="p-4 flex flex-col items-center text-center space-y-2">
+                  {/* Badge showing quantity if in cart */}
+                  {getQuantity(food.food_id) > 0 && (
+                    <Badge 
+                      className="absolute top-2 right-2 h-5 px-1.5 flex items-center justify-center text-xs font-bold"
+                      style={{ background: colors.accent, color: 'white' }}
+                    >
+                      {getQuantity(food.food_id)}
+                    </Badge>
+                  )}
+                  
+                  <div className="w-14 h-14 rounded-full mb-1 flex items-center justify-center"
+                    style={{ 
+                      background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
+                    }}>
+                    <span className="text-white text-lg font-bold">{food.food_name.charAt(0)}</span>
+                  </div>
+                  
+                  <CardTitle className="text-base truncate w-full" style={{ color: colors.text }} title={food.food_name}>
                     {food.food_name}
                   </CardTitle>
-                  <CardDescription className="text-xs">
-                    ID: {food.food_id}
-                  </CardDescription>
+                  
+                  <p className="font-bold py-1 px-2.5 rounded-full text-xs inline-block"
+                    style={{ 
+                      background: colors.highlight,
+                      color: colors.primary
+                    }}>
+                    {formatRupiah(food.price)}
+                  </p>
                 </CardHeader>
                 
-                <CardContent className="p-4 pt-2">
-                  <p className="font-medium text-lg">{formatRupiah(food.price)}</p>
-                  {food.description && (
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{food.description}</p>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="p-4 pt-0">
-                  <div className="flex items-center justify-between w-full gap-2">
-                    <Input 
-                      type="number"
-                      min="0"
-                      value={getQuantity(food.food_id)}
-                      onChange={(e) => {
-                        const newQuantity = parseInt(e.target.value) || 0;
-                        const currentQuantity = getQuantity(food.food_id);
-                        
-                        if (newQuantity === 0) {
-                          // Remove from cart if quantity is 0
-                          if (currentQuantity > 0) {
-                            removeItemCompletely(food.food_id);
-                          }
-                        } else if (newQuantity > currentQuantity) {
-                          // Add items to reach new quantity
-                          for (let i = 0; i < newQuantity - currentQuantity; i++) {
-                            addToCart(food);
-                          }
-                        } else if (newQuantity < currentQuantity) {
-                          // Remove items to reach new quantity
-                          const currentItem = cart.find(item => item.food_id === food.food_id);
-                          if (currentItem) {
-                            setCart(prev => 
-                              prev.map(item => 
-                                item.food_id === food.food_id 
-                                  ? { ...item, quantity: newQuantity } 
-                                  : item
-                              )
-                            );
-                          }
-                        }
-                      }}
-                      className="w-20 text-center"
-                    />
+                {/* Card actions */}
+                <CardContent className="p-3 pt-0 mt-auto">
+                  {getQuantity(food.food_id) === 0 ? (
+                    // Add to cart button when item is not in cart
                     <Button 
                       variant="default" 
-                      className="cursor-pointer flex-1 bg-[#6D0000] hover:bg-[#7a0000]"
+                      className="cursor-pointer w-full py-1.5 text-sm rounded-full shadow group-hover:shadow-md transition-all duration-300"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${colors.accent}, ${colors.primary})`,
+                        color: 'white',
+                      }}
                       onClick={() => addToCart(food)}
                     >
                       Add to Cart
                     </Button>
-                  </div>
-                </CardFooter>
+                  ) : (
+                    // Quantity controls when item is in cart
+                    <div className="flex items-center justify-between w-full gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="cursor-pointer h-7 w-7 rounded-full"
+                        style={{ 
+                          borderColor: colors.primary, 
+                          color: colors.primary
+                        }}
+                        onClick={() => removeFromCart(food)}
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      
+<Input
+  type="text"
+  min={1}
+  className="flex-grow text-center text-sm font-medium py-1"
+  style={{ color: colors.primary, paddingTop: '0.25rem', paddingBottom: '0.25rem' }}
+  value={getQuantity(food.food_id)}
+  onChange={(e) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && value > 0) {
+      setCart((prev) =>
+        prev.map((item) =>
+          item.food_id === food.food_id ? { ...item, quantity: value } : item
+        )
+      );
+    }
+  }}
+/>
+                      
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="cursor-pointer h-7 w-7 rounded-full"
+                        style={{ 
+                          borderColor: colors.primary, 
+                          color: colors.primary
+                        }}
+                        onClick={() => addToCart(food)}
+                        aria-label="Increase quantity"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             ))}
           </div>
         )}
       </main>
+      
+      {/* "Back to top" button - appears when scrolled down */}
+      {scrollPosition > 300 && (
+        <Button
+          className="fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full shadow-lg hover:shadow-xl"
+          style={{
+            background: colors.primary,
+            color: 'white'
+          }}
+          onClick={scrollToTop}
+          aria-label="Back to top"
+        >
+          <ChevronUp className="h-6 w-6" />
+        </Button>
+      )}
+      
     </div>
   );
 }

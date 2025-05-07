@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -32,7 +31,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Download, Calendar as CalendarIcon, X, Check } from "lucide-react";
+import { Download, Calendar as CalendarIcon, X, Check, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Popover,
@@ -51,6 +50,7 @@ interface Order {
   order_id: number;
   delivery_date: string;
   order_date: string;
+  order_status: string; // added order_status
   items: OrderItem[];
 }
 
@@ -107,13 +107,58 @@ export default function OrderHistory() {
     }
   }
 
-  const uniqueDates = Array.from(
-    new Set(
-      filteredOrders.map((order) =>
-        new Date(order.order_date).toISOString().slice(0, 10)
-      )
-    )
-  ).sort();
+  // Get unique dates and organize them by date
+  const ordersByDate = filteredOrders.reduce((acc, order) => {
+    const orderDate = new Date(order.order_date).toISOString().slice(0, 10);
+    if (!acc[orderDate]) {
+      acc[orderDate] = [];
+    }
+    acc[orderDate].push(order);
+    return acc;
+  }, {} as { [date: string]: Order[] });
+
+  // Get unique dates sorted
+  const uniqueDates = Object.keys(ordersByDate).sort();
+
+  // Get dominant status for each date
+  const getStatusForDate = (date: string) => {
+    const ordersOnDate = ordersByDate[date] || [];
+    if (ordersOnDate.length === 0) return "none";
+    
+    // Count occurrences of each status
+    const statusCounts = ordersOnDate.reduce((acc, order) => {
+      acc[order.order_status] = (acc[order.order_status] || 0) + 1;
+      return acc;
+    }, {} as { [status: string]: number });
+    
+    // Find status with most occurrences
+    let maxCount = 0;
+    let dominantStatus = "none";
+    
+    for (const [status, count] of Object.entries(statusCounts)) {
+      if (count > maxCount) {
+        maxCount = count;
+        dominantStatus = status;
+      }
+    }
+    
+    return dominantStatus.toLowerCase();
+  };
+
+  // Get background color based on status
+  const getStatusColorClass = (date: string) => {
+    const status = getStatusForDate(date);
+    switch (status) {
+      case "pending":
+        return "bg-orange-100";
+      case "in-progress":
+        return "bg-blue-100";
+      case "finished":
+        return "bg-green-100";
+      default:
+        return "";
+    }
+  };
 
   interface FoodAggregate {
     food_name: string;
@@ -341,7 +386,13 @@ export default function OrderHistory() {
                 onClick={exportToExcel}
                 variant="outline"
                 size="sm"
-                className="cursor-pointer w-auto ml-auto gap-2 border-green-600 text-green-600 hover:text-green-800 hover:border-green-800 hover:bg-green-50 transition-all duration-300 hover:shadow-md rounded-full"
+                disabled={!appliedDateRange?.from || !appliedDateRange?.to}
+                className={`cursor-pointer w-auto ml-auto gap-2 border-green-600 text-green-600 transition-all duration-300 rounded-full
+                  ${!appliedDateRange?.from || !appliedDateRange?.to
+                    ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-green-600 hover:border-green-600 hover:shadow-none"
+                    : "hover:text-green-800 hover:border-green-800 hover:bg-green-50 hover:shadow-md"
+                  }
+                `}
               >
                 <Download className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -352,132 +403,167 @@ export default function OrderHistory() {
           </div>
         </div>
 
-        {appliedDateRange?.from && appliedDateRange?.to && (
-          <Badge variant="secondary" className="text-sm font-normal">
-            Showing orders from {format(appliedDateRange.from, "MMM d, yyyy")} to{" "}
-            {format(appliedDateRange.to, "MMM d, yyyy")}
-          </Badge>
-        )}
+        {/* Status Legend */}
+        <div className="flex items-center gap-4 mt-4 bg-gray-50 p-3 rounded-lg border shadow-sm">
+          <div className="flex items-center gap-1">
+            <Info size={16} className="text-slate-500" />
+            <span className="text-sm font-medium">Status Legend:</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded bg-orange-100 border border-orange-200"></div>
+              <span className="text-xs">Pending</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded bg-blue-100 border border-blue-200"></div>
+              <span className="text-xs">In-progress</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded bg-green-100 border border-green-200"></div>
+              <span className="text-xs">Finished</span>
+            </div>
+          </div>
+        </div>
 
-        <AnimatePresence>
-          {appliedDateRange?.from && appliedDateRange?.to && (
-            loading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-10 w-full" />
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : error ? (
-              <Card className="bg-destructive/10 border-destructive">
-                <CardHeader>
-                  <CardTitle>Error loading orders</CardTitle>
-                  <CardDescription>{error}</CardDescription>
-                </CardHeader>
-              </Card>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -50 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              >
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead colSpan={3}></TableHead>
-                            <TableHead
-                              colSpan={uniqueDates.length}
-                              className="text-center border"
-                            >
-                              Order Date
-                            </TableHead>
-                          </TableRow>
-                          <TableRow>
-                            <TableHead colSpan={3}></TableHead>
-                            {uniqueDates.map((date) => (
-                              <TableHead key={date} className="text-center border">
-                                {new Date(date).toLocaleDateString(undefined, {
-                                  day: "2-digit",
-                                  month: "short",
-                                })}
+        {!appliedDateRange?.from || !appliedDateRange?.to ? (
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            Please select a date range to display the table.
+          </p>
+        ) : (
+          <>
+            <Badge variant="secondary" className="text-sm font-normal">
+              Showing orders from {format(appliedDateRange.from, "MMM d, yyyy")} to{" "}
+              {format(appliedDateRange.to, "MMM d, yyyy")}
+            </Badge>
+
+            <AnimatePresence>
+              {loading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : error ? (
+                <Card className="bg-destructive/10 border-destructive">
+                  <CardHeader>
+                    <CardTitle>Error loading orders</CardTitle>
+                    <CardDescription>{error}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: -50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -50 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <Card>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead colSpan={3}></TableHead>
+                              <TableHead
+                                colSpan={uniqueDates.length}
+                                className="text-center border"
+                              >
+                                Order Date
                               </TableHead>
-                            ))}
-                          </TableRow>
-                          <TableRow>
-                            <TableHead colSpan={3}></TableHead>
-                            <TableHead
-                              colSpan={uniqueDates.length}
-                              className="text-center border"
-                            >
-                              Delivery Date
-                            </TableHead>
-                          </TableRow>
-                          <TableRow>
-                            <TableHead className="border">Food Items</TableHead>
-                            <TableHead className="border">Price</TableHead>
-                            <TableHead className="border">Total Quantity</TableHead>
-                            {uniqueDates.map((date) => {
-                              const deliveryDate = addDays(new Date(date), 2);
-                              return (
-                                <TableHead key={"qty-" + date} className="border">
-                                  {deliveryDate.toLocaleDateString(undefined, {
+                            </TableRow>
+                            <TableRow>
+                              <TableHead colSpan={3}></TableHead>
+                              {uniqueDates.map((date) => (
+                                <TableHead 
+                                  key={date} 
+                                  className={`text-center border ${getStatusColorClass(date)}`}
+                                >
+                                  {new Date(date).toLocaleDateString(undefined, {
                                     day: "2-digit",
                                     month: "short",
                                   })}
                                 </TableHead>
-                              );
-                            })}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {foodAggregates.length === 0 ? (
-                            <TableRow>
-                              <TableCell
-                                colSpan={3 + uniqueDates.length}
-                                className="text-center py-4"
-                              >
-                                No orders found for the selected date range.
-                              </TableCell>
+                              ))}
                             </TableRow>
-                          ) : (
-                            foodAggregates.map((food) => (
-                              <TableRow
-                                key={food.food_name}
-                                className="hover:bg-muted/50"
+                            <TableRow>
+                              <TableHead colSpan={3}></TableHead>
+                              <TableHead
+                                colSpan={uniqueDates.length}
+                                className="text-center border"
                               >
-                                <TableCell className="font-medium border">
-                                  {food.food_name}
+                                Delivery Date
+                              </TableHead>
+                            </TableRow>
+                            <TableRow>
+                              <TableHead className="border">Food Items</TableHead>
+                              <TableHead className="border">Price</TableHead>
+                              <TableHead className="border">Total Quantity</TableHead>
+                              {uniqueDates.map((date) => {
+                                const deliveryDate = addDays(new Date(date), 2);
+                                return (
+                                  <TableHead 
+                                    key={"qty-" + date} 
+                                    className={`border ${getStatusColorClass(date)}`}
+                                  >
+                                    {deliveryDate.toLocaleDateString(undefined, {
+                                      day: "2-digit",
+                                      month: "short",
+                                    })}
+                                  </TableHead>
+                                );
+                              })}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {foodAggregates.length === 0 ? (
+                              <TableRow>
+                                <TableCell
+                                  colSpan={3 + uniqueDates.length}
+                                  className="text-center py-4"
+                                >
+                                  No orders found for the selected date range.
                                 </TableCell>
-                                <TableCell className="border">
-                                  {new Intl.NumberFormat("id-ID", {
-                                    style: "currency",
-                                    currency: "IDR",
-                                  }).format(food.price)}
-                                </TableCell>
-                                <TableCell className="border">
-                                  {food.totalQty}
-                                </TableCell>
-                                {uniqueDates.map((date) => (
-                                  <TableCell key={date} className="border">
-                                    {food.qtyByDate[date] || 0}
-                                  </TableCell>
-                                ))}
                               </TableRow>
-                            ))
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )
-          )}
-        </AnimatePresence>
+                            ) : (
+                              foodAggregates.map((food) => (
+                                <TableRow
+                                  key={food.food_name}
+                                  className="hover:bg-muted/50"
+                                >
+                                  <TableCell className="font-medium border">
+                                    {food.food_name}
+                                  </TableCell>
+                                  <TableCell className="border">
+                                    {new Intl.NumberFormat("id-ID", {
+                                      style: "currency",
+                                      currency: "IDR",
+                                    }).format(food.price)}
+                                  </TableCell>
+                                  <TableCell className="border">
+                                    {food.totalQty}
+                                  </TableCell>
+                                  {uniqueDates.map((date) => (
+                                    <TableCell 
+                                      key={date} 
+                                      className={`border ${getStatusColorClass(date)}`}
+                                    >
+                                      {food.qtyByDate[date] || 0}
+                                    </TableCell>
+                                  ))}
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
       </div>
     </>
   );

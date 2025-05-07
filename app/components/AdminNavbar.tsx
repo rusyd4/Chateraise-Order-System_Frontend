@@ -34,7 +34,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop Navigation - shown on md screens and up */}
-      <nav className="hidden md:flex md:w-64 flex-col bg-[#6D0000] h-screen fixed left-0 shadow-lg">
+      <nav className="hidden md:flex md:w-64 flex-col bg-gradient-to-r from-[#6d0000] to-[#961c1a] h-screen fixed left-0 shadow-lg">
         {/* Logo and Title at the very top */}
         <div className="p-6 flex flex-col items-center border-b border-white/10">
           <div className="w-140 h-12 rounded-full flex items-center justify-center mb-3">
@@ -57,8 +57,8 @@ export default function Navbar() {
               key={item.href}
               asChild
               variant="ghost"
-              className={`justify-start text-white hover:bg-[#800000] hover:text-white ${
-                pathname === item.href ? "bg-[#800000]" : ""
+              className={`justify-start text-white hover:bg-white hover:text-[#6D0000] ${
+                pathname === item.href ? "bg-[#ffffff] text-[#6D0000]" : ""
               }`}
             >
               <Link href={item.href}>{item.label}</Link>
