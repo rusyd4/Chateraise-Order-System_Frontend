@@ -224,7 +224,11 @@ export default function ManageFoodItems() {
       fetchFoodItems();
       toast.success(editingId ? "Product updated successfully" : "Product added successfully");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
+      let message = err instanceof Error ? err.message : String(err);
+      // Check for duplicate key error in message
+      if (message.includes('duplicate key value violates unique constraint')) {
+        message = "A product with this Product ID already exists. Please use a different Product ID.";
+      }
       setFormError(message);
       toast.error(`Failed: ${message}`);
     }

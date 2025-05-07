@@ -246,7 +246,11 @@ export default function AdminBranch() {
         setIsModalOpen(false);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
+      let message = err instanceof Error ? err.message : String(err);
+      // Check for duplicate key error in message
+      if (message.includes('duplicate key value violates unique constraint')) {
+        message = "A branch with this email or identifier already exists. Please use a different email or identifier.";
+      }
       setFormError(message);
       toast.error(`Failed: ${message}`);
     }
