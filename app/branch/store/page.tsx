@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
 import BranchNavbar from "../../components/BranchNavbar";
@@ -35,6 +35,7 @@ import {
   MenuIcon,
   ShoppingBag
 } from "lucide-react";
+
 interface FoodItem {
   food_id: number;
   food_name: string;
@@ -46,6 +47,47 @@ interface FoodItem {
 interface CartItem extends FoodItem {
   quantity: number;
 }
+
+const SearchBar = ({ 
+  className = "",
+  searchTerm,
+  setSearchTerm 
+}: {
+  className?: string;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className={`relative ${className}`}>
+      <Input
+        ref={inputRef}
+        type="text"
+        placeholder="Search product..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10 pr-3 py-2 w-full bg-white/90 backdrop-blur-sm border-none rounded-full shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-accent"
+        aria-label="Search for menu items"
+      />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary h-4 w-4" />
+      {searchTerm && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 rounded-full"
+          onClick={() => {
+            setSearchTerm("");
+            inputRef.current?.focus();
+          }}
+          aria-label="Clear search"
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  );
+};
 
 export default function BranchStore() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -140,7 +182,7 @@ export default function BranchStore() {
     }
   }
 
-  function addToCart(food: FoodItem) {
+  const addToCart = useCallback((food: FoodItem) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.food_id === food.food_id);
       if (existing) {
@@ -151,9 +193,9 @@ export default function BranchStore() {
         return [...prev, { ...food, quantity: 1 }];
       }
     });
-  }
+  }, []);
 
-  function removeFromCart(food: FoodItem) {
+  const removeFromCart = useCallback((food: FoodItem) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.food_id === food.food_id);
       if (existing) {
@@ -167,30 +209,31 @@ export default function BranchStore() {
       }
       return prev;
     });
-  }
+  }, []);
 
-  function removeItemCompletely(foodId: number) {
+  const removeItemCompletely = useCallback((foodId: number) => {
     setCart((prev) => prev.filter((item) => item.food_id !== foodId));
-  }
+  }, []);
 
-  function getQuantity(food_id: number) {
+  const getQuantity = useCallback((food_id: number) => {
     const item = cart.find((item) => item.food_id === food_id);
     return item ? item.quantity : 0;
-  }
+  }, [cart]);
 
   function handleCheckout() {
     localStorage.setItem("cart", JSON.stringify(cart));
     router.push("/branch/checkout");
   }
 
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const totalItems = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
+  const totalPrice = useMemo(() => cart.reduce((acc, item) => acc + (item.price * item.quantity), 0), [cart]);
 
-  const filteredFoodItems = foodItems.filter((food) => {
+  const filteredFoodItems = useMemo(() => foodItems.filter((food) => {
     const name = food.food_name.toLowerCase();
     const term = searchTerm.toLowerCase();
-    return name.includes(term);
-  });
+    const idStr = food.food_id.toString();
+    return name.includes(term) || idStr.includes(term);
+  }), [foodItems, searchTerm]);
 
   // Function to scroll back to top
   const scrollToTop = () => {
@@ -336,36 +379,9 @@ export default function BranchStore() {
     </div>
   );
 
-  // SearchBar component
-  const SearchBar = ({ className = "" }) => (
-    <div className={`relative ${className}`}>
-      <Input
-        type="text"
-        placeholder="Search product..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="pl-10 pr-3 py-2 w-full bg-white/90 backdrop-blur-sm border-none rounded-full shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-accent"
-        aria-label="Search for menu items"
-      />
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary h-4 w-4" />
-      {searchTerm && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 rounded-full"
-          onClick={() => setSearchTerm("")}
-          aria-label="Clear search"
-        >
-          <X className="h-3 w-3" />
-        </Button>
-      )}
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: colors.background }}>
       {/* Header - Sticks to top with shadow effect */}
-
       <div 
         className={`bg-gradient-to-r from-[#a52422] to-[#6D0000] sticky top-0 z-50 transition-shadow duration-300 ${scrollPosition > 10 ? 'shadow-lg' : ''}`} 
       >
@@ -374,7 +390,12 @@ export default function BranchStore() {
         {/* Search bar and cart icon - side by side on both mobile and desktop */}
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center gap-3">
-            <SearchBar className="flex-grow max-w-[280px]" />
+            <SearchBar 
+              key="main-search-bar"
+              className="flex-grow max-w-[280px]" 
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+            />
             
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
@@ -438,7 +459,7 @@ export default function BranchStore() {
             <div className="bg-white p-6 rounded-lg inline-block shadow-md">
               <Search className="h-12 w-12 mx-auto mb-3" style={{ color: colors.primary }} />
               <p className="text-base" style={{ color: colors.primary }}>
-                No items found matching "{searchTerm}"
+                No items found matching {searchTerm}
               </p>
               <Button 
                 variant="ghost"
@@ -484,7 +505,9 @@ export default function BranchStore() {
                   <CardTitle className="text-base truncate w-full" style={{ color: colors.text }} title={food.food_name}>
                     {food.food_name}
                   </CardTitle>
-                  
+                  <p className="text-xs text-muted-foreground" style={{ color: colors.lightText }}>
+                    ID: {food.food_id}
+                  </p>
                   <p className="font-bold py-1 px-2.5 rounded-full text-xs inline-block"
                     style={{ 
                       background: colors.highlight,
@@ -526,23 +549,23 @@ export default function BranchStore() {
                         <Minus className="h-3 w-3" />
                       </Button>
                       
-<Input
-  type="text"
-  min={1}
-  className="flex-grow text-center text-sm font-medium py-1"
-  style={{ color: colors.primary, paddingTop: '0.25rem', paddingBottom: '0.25rem' }}
-  value={getQuantity(food.food_id)}
-  onChange={(e) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0) {
-      setCart((prev) =>
-        prev.map((item) =>
-          item.food_id === food.food_id ? { ...item, quantity: value } : item
-        )
-      );
-    }
-  }}
-/>
+                      <Input
+                        type="text"
+                        min={1}
+                        className="flex-grow text-center text-sm font-medium py-1"
+                        style={{ color: colors.primary, paddingTop: '0.25rem', paddingBottom: '0.25rem' }}
+                        value={getQuantity(food.food_id)}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          if (!isNaN(value) && value > 0) {
+                            setCart((prev) =>
+                              prev.map((item) =>
+                                item.food_id === food.food_id ? { ...item, quantity: value } : item
+                              )
+                            );
+                          }
+                        }}
+                      />
                       
                       <Button
                         size="icon"
@@ -580,7 +603,6 @@ export default function BranchStore() {
           <ChevronUp className="h-6 w-6" />
         </Button>
       )}
-      
     </div>
   );
 }
