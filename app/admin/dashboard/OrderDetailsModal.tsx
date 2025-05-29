@@ -22,7 +22,7 @@ interface Order {
 
 interface OrderDetailsModalProps {
   filteredOrders: Order[];
-  printRef: RefObject<HTMLDivElement | null>;
+  printRef: RefObject<HTMLDivElement>;
   handleSaveAsPDF: () => Promise<void>;
   onClose: () => void;
   showSaveAsPDFButton: boolean;
