@@ -73,6 +73,7 @@ interface FoodItem {
   food_name: string;
   price: number;
   is_available: boolean;
+  food_image?: string | null;
 }
 
 export default function ManageFoodItems() {
@@ -91,6 +92,7 @@ export default function ManageFoodItems() {
     price: "",
     is_available: true,
     editingId: null as number | null,
+    food_image: null as File | null,
   });
   const [formError, setFormError] = useState("");
 
@@ -153,6 +155,15 @@ export default function ManageFoodItems() {
     }));
   }
 
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files.length > 0) {
+      setFoodForm((prev) => ({
+        ...prev,
+        food_image: e.target.files![0],
+      }));
+    }
+  }
+
   function handleCheckboxChange(checked: boolean) {
     setFoodForm((prev) => ({
       ...prev,
@@ -167,6 +178,7 @@ export default function ManageFoodItems() {
       price: "",
       is_available: true,
       editingId: null,
+      food_image: null,
     });
     setFormError("");
   }
@@ -205,18 +217,25 @@ export default function ManageFoodItems() {
     }
     
     try {
-      const { food_id, food_name, price, is_available, editingId } = foodForm;
+      const { food_id, food_name, price, is_available, editingId, food_image } = foodForm;
       const method = editingId ? "PUT" : "POST";
       const url = editingId ? `/admin/food-items/${editingId}` : "/admin/food-items";
+
+      const formData = new FormData();
+      formData.append("food_id", food_id);
+      formData.append("food_name", food_name);
+      formData.append("price", price);
+      formData.append("is_available", is_available ? "true" : "false");
+      if (food_image) {
+        formData.append("food_image", food_image);
+      }
       
       await apiFetch(url, {
         method,
-        body: JSON.stringify({
-          food_id: parseInt(food_id, 10),
-          food_name,
-          price: parseFloat(price),
-          is_available,
-        }),
+        body: formData,
+        headers: {
+          // Let browser set Content-Type with boundary for multipart/form-data
+        }
       });
       
       resetForm();
@@ -246,6 +265,7 @@ export default function ManageFoodItems() {
       price: item.price.toString(),
       is_available: item.is_available,
       editingId: item.food_id,
+      food_image: null,
     });
     setIsModalOpen(true);
   }
@@ -613,6 +633,23 @@ export default function ManageFoodItems() {
                     onChange={handleFoodFormChange}
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="food_image" className="flex items-center gap-2 text-sm font-medium">
+                    <CakeSlice className="h-4 w-4 text-[#6D0000]" />
+                    Product Image
+                  </Label>
+                  <input
+                    id="food_image"
+                    name="food_image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200 rounded-md p-1"
+                  />
+                  {foodForm.food_image && (
+                    <p className="text-sm text-gray-600 mt-1">{foodForm.food_image.name}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
