@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import apiFetch from "../../../lib/api";
+import apiFetch, { API_BASE_URL } from "../../../lib/api";
 import BranchNavbar from "../../components/BranchNavbar";
 import { 
   Card, 
@@ -496,13 +496,13 @@ export default function BranchStore() {
                     </Badge>
                   )}
                   
-{food.food_image ? (
-  <img 
-    src={`http://localhost:5000/uploads/food_images/${food.food_image}`} 
-    alt={food.food_name} 
-    className="w-14 h-14 rounded-full object-cover mb-1"
-  />
-) : (
+              {food.food_image ? (
+                <img 
+                  src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`} 
+                  alt={food.food_name} 
+                  className="w-14 h-14 rounded-full object-cover mb-1"
+                />
+              ) : (
                     <div className="w-14 h-14 rounded-full mb-1 flex items-center justify-center"
                       style={{ 
                         background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
