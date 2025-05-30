@@ -101,6 +101,9 @@ export default function CheckoutPage() {
       const items = cart.map(({ food_id, quantity }) => ({ food_id, quantity }));
       const data = await apiFetch("/branch/orders", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ delivery_date, items }),
       });
       console.log("Order created:", data);

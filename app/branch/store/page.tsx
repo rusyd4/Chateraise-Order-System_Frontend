@@ -434,7 +434,7 @@ export default function BranchStore() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 animate-pulse">
             {[...Array(10)].map((_, i) => (
               <div key={i} className="flex flex-col gap-2">
-                <div className="bg-white h-40 sm:h-48 rounded-lg shadow"></div>
+                <div className="bg-white h-48 sm:h-56 md:h-60 rounded-lg shadow"></div>
                 <div className="h-4 bg-white rounded w-3/4"></div>
                 <div className="h-3 bg-white rounded w-1/2"></div>
               </div>
@@ -478,120 +478,123 @@ export default function BranchStore() {
             {filteredFoodItems.map((food) => (
               <Card 
                 key={food.food_id} 
-                className="overflow-hidden transition-all duration-300 shadow hover:shadow-md group flex flex-col rounded-xl border" 
+                className="overflow-hidden transition-all duration-300 shadow hover:shadow-md group flex flex-col rounded-xl border-0 p-0" 
                 style={{ 
                   background: colors.card,
                   borderColor: 'rgba(139, 30, 63, 0.1)'
                 }}
               >
-                {/* Card header with food item details */}
-                <CardHeader className="p-4 flex flex-col items-center text-center space-y-2">
+                {/* Image section - taller height, fills the top of the card with no gaps */}
+                <div className="relative w-full h-40 sm:h-48 md:h-52 lg:h-56 overflow-hidden rounded-t-xl">
                   {/* Badge showing quantity if in cart */}
                   {getQuantity(food.food_id) > 0 && (
                     <Badge 
-                      className="absolute top-2 right-2 h-5 px-1.5 flex items-center justify-center text-xs font-bold"
+                      className="absolute top-2 right-2 z-10 h-5 px-1.5 flex items-center justify-center text-xs font-bold"
                       style={{ background: colors.accent, color: 'white' }}
                     >
                       {getQuantity(food.food_id)}
                     </Badge>
                   )}
                   
-              {food.food_image ? (
-                <img 
-                  src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`} 
-                  alt={food.food_name} 
-                  className="w-14 h-14 rounded-full object-cover mb-1"
-                />
-              ) : (
-                    <div className="w-14 h-14 rounded-full mb-1 flex items-center justify-center"
+                  {food.food_image ? (
+                    <img 
+                      src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`} 
+                      alt={food.food_name} 
+                      className="w-full h-full object-cover block"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"
                       style={{ 
                         background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
                       }}>
-                      <span className="text-white text-lg font-bold">{food.food_name.charAt(0)}</span>
+                      <span className="text-white text-2xl sm:text-3xl font-bold">{food.food_name.charAt(0)}</span>
                     </div>
                   )}
-                  
-                  <CardTitle className="text-base truncate w-full" style={{ color: colors.text }} title={food.food_name}>
+                </div>
+
+                {/* Card content - product details */}
+                <div className="flex flex-col flex-grow p-3">
+                  <CardTitle className="text-sm sm:text-base line-clamp-2 mb-1" style={{ color: colors.text }} title={food.food_name}>
                     {food.food_name}
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground" style={{ color: colors.lightText }}>
+                  <p className="text-xs text-muted-foreground mb-2" style={{ color: colors.lightText }}>
                     ID: {food.food_id}
                   </p>
-                  <p className="font-bold py-1 px-2.5 rounded-full text-xs inline-block"
+                  <p className="font-bold py-1 px-2.5 rounded-full text-xs inline-block mb-3 self-start"
                     style={{ 
                       background: colors.highlight,
                       color: colors.primary
                     }}>
                     {formatRupiah(food.price)}
                   </p>
-                </CardHeader>
                 
-                {/* Card actions */}
-                <CardContent className="p-3 pt-0 mt-auto">
-                  {getQuantity(food.food_id) === 0 ? (
-                    // Add to cart button when item is not in cart
-                    <Button 
-                      variant="default" 
-                      className="cursor-pointer w-full py-1.5 text-sm rounded-full shadow group-hover:shadow-md transition-all duration-300"
-                      style={{ 
-                        background: `linear-gradient(135deg, ${colors.accent}, ${colors.primary})`,
-                        color: 'white',
-                      }}
-                      onClick={() => addToCart(food)}
-                    >
-                      Add to Cart
-                    </Button>
-                  ) : (
-                    // Quantity controls when item is in cart
-                    <div className="flex items-center justify-between w-full gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="cursor-pointer h-7 w-7 rounded-full"
+                  {/* Card actions - positioned at bottom */}
+                  <div className="mt-auto">
+                    {getQuantity(food.food_id) === 0 ? (
+                      // Add to cart button when item is not in cart
+                      <Button 
+                        variant="default" 
+                        className="cursor-pointer w-full py-1.5 text-sm rounded-full shadow group-hover:shadow-md transition-all duration-300"
                         style={{ 
-                          borderColor: colors.primary, 
-                          color: colors.primary
-                        }}
-                        onClick={() => removeFromCart(food)}
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      
-                      <Input
-                        type="text"
-                        min={1}
-                        className="flex-grow text-center text-sm font-medium py-1"
-                        style={{ color: colors.primary, paddingTop: '0.25rem', paddingBottom: '0.25rem' }}
-                        value={getQuantity(food.food_id)}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value, 10);
-                          if (!isNaN(value) && value > 0) {
-                            setCart((prev) =>
-                              prev.map((item) =>
-                                item.food_id === food.food_id ? { ...item, quantity: value } : item
-                              )
-                            );
-                          }
-                        }}
-                      />
-                      
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="cursor-pointer h-7 w-7 rounded-full"
-                        style={{ 
-                          borderColor: colors.primary, 
-                          color: colors.primary
+                          background: `linear-gradient(135deg, ${colors.accent}, ${colors.primary})`,
+                          color: 'white',
                         }}
                         onClick={() => addToCart(food)}
-                        aria-label="Increase quantity"
                       >
-                        <Plus className="h-3 w-3" />
+                        Add to Cart
                       </Button>
-                    </div>
-                  )}
-                </CardContent>
+                    ) : (
+                      // Quantity controls when item is in cart
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="cursor-pointer h-7 w-7 rounded-full"
+                          style={{ 
+                            borderColor: colors.primary, 
+                            color: colors.primary
+                          }}
+                          onClick={() => removeFromCart(food)}
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        
+                        <Input
+                          type="text"
+                          min={1}
+                          className="flex-grow text-center text-sm font-medium py-1"
+                          style={{ color: colors.primary, paddingTop: '0.25rem', paddingBottom: '0.25rem' }}
+                          value={getQuantity(food.food_id)}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (!isNaN(value) && value > 0) {
+                              setCart((prev) =>
+                                prev.map((item) =>
+                                  item.food_id === food.food_id ? { ...item, quantity: value } : item
+                                )
+                              );
+                            }
+                          }}
+                        />
+                        
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="cursor-pointer h-7 w-7 rounded-full"
+                          style={{ 
+                            borderColor: colors.primary, 
+                            color: colors.primary
+                          }}
+                          onClick={() => addToCart(food)}
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </Card>
             ))}
           </div>
