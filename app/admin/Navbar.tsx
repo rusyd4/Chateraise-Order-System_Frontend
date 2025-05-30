@@ -1,0 +1,81 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Clear auth token from localStorage
+    localStorage.removeItem("authToken");
+    router.push("/login");
+  };
+
+  return (
+    <nav className="w-48 flex flex-col space-y-4 border-r border-gray-300 pr-4 h-full">
+      <div className="mb-4">
+        <img
+          src="/Chateraiselogo.png"
+          alt="Chateraise Logo"
+          width={200}
+          height={70}
+          className="object-contain"
+        />
+      </div>
+      <Link
+        href="/admin/dashboard"
+        className={
+          "px-3 py-2 rounded transition transform " +
+          (pathname === "/admin/dashboard"
+            ? "bg-[#6D0000] text-white"
+            : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+        }
+      >
+        Orders
+      </Link>
+      <Link
+        href="/admin/food"
+        className={
+          "px-3 py-2 rounded transition transform " +
+          (pathname === "/admin/food"
+            ? "bg-[#6D0000] text-white"
+            : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+        }
+      >
+        Manage Products
+      </Link>
+      <Link
+        href="/admin/branch"
+        className={
+          "px-3 py-2 rounded transition transform " +
+          (pathname === "/admin/branch"
+            ? "bg-[#6D0000] text-white"
+            : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+        }
+      >
+        Manage Branch Stores
+      </Link>
+      <Link
+        href="/admin/recap"
+        className={
+          "px-3 py-2 rounded transition transform " +
+          (pathname === "/admin/recap"
+            ? "bg-[#6D0000] text-white"
+            : "hover:bg-[#7a0000] hover:text-white hover:scale-105")
+        }
+      >
+        Recap
+      </Link>
+      <div className="mt-auto">
+        <button
+          onClick={handleLogout}
+          className="w-full text-left px-3 py-2 rounded transition transform bg-red-600 text-white hover:bg-red-700 hover:scale-105"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+  );
+}

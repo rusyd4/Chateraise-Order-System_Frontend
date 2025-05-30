@@ -41,7 +41,7 @@ interface FoodItem {
   food_name: string;
   description: string;
   price: number;
-  image_url?: string;
+  food_image?: string | null;
 }
 
 interface CartItem extends FoodItem {
@@ -170,6 +170,7 @@ export default function BranchStore() {
     setError("");
     try {
       const data = await apiFetch("/branch/food-items");
+      console.log("Fetched food items:", data);
       setFoodItems(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -495,12 +496,20 @@ export default function BranchStore() {
                     </Badge>
                   )}
                   
-                  <div className="w-14 h-14 rounded-full mb-1 flex items-center justify-center"
-                    style={{ 
-                      background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
-                    }}>
-                    <span className="text-white text-lg font-bold">{food.food_name.charAt(0)}</span>
-                  </div>
+{food.food_image ? (
+  <img 
+    src={`http://localhost:5000/uploads/food_images/${food.food_image}`} 
+    alt={food.food_name} 
+    className="w-14 h-14 rounded-full object-cover mb-1"
+  />
+) : (
+                    <div className="w-14 h-14 rounded-full mb-1 flex items-center justify-center"
+                      style={{ 
+                        background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
+                      }}>
+                      <span className="text-white text-lg font-bold">{food.food_name.charAt(0)}</span>
+                    </div>
+                  )}
                   
                   <CardTitle className="text-base truncate w-full" style={{ color: colors.text }} title={food.food_name}>
                     {food.food_name}
