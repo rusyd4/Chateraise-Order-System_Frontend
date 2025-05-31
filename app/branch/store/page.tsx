@@ -30,6 +30,8 @@ import {
   Plus, 
   Minus, 
   X, 
+  MapPin,
+  Clock,
   ArrowRight,
   ChevronUp,
   MenuIcon,
@@ -390,41 +392,78 @@ export default function BranchStore() {
         
         {/* Search bar and cart icon - side by side on both mobile and desktop */}
         <div className="container mx-auto px-4 py-3">
-          <div className="flex justify-between items-center gap-3">
-            <SearchBar 
-              key="main-search-bar"
-              className="flex-grow max-w-[280px]" 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-            />
-            
-            <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="default" 
-                  className="cursor-pointer relative rounded-full px-3 py-3 shadow-md transition-all duration-300"
-                  style={{
-                    background: colors.accent,
-                    color: 'white',
-                  }}
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  {totalItems > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-white text-black text-xs h-5 w-5 flex items-center justify-center p-0 rounded-full">
-                      {totalItems}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-md border-l-0 p-4" style={{ 
-                background: colors.background,
-                boxShadow: `-5px 0 15px rgba(139,30,63,0.1)`
-              }}>
-                <CartComponent />
-              </SheetContent>
-            </Sheet>
+  <div className="flex justify-between items-center flex-wrap gap-3">
+    {/* Left Side: Search and Cart */}
+    <div className="flex items-center gap-2 flex-wrap">
+      <SearchBar 
+        key="main-search-bar"
+        className="flex-grow max-w-[280px]" 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
+
+      <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+        <SheetTrigger asChild>
+          <Button 
+            variant="default" 
+            className="cursor-pointer relative rounded-full px-3 py-3 shadow-md transition-all duration-300"
+            style={{
+              background: colors.accent,
+              color: 'white',
+            }}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {totalItems > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-white text-black text-xs h-5 w-5 flex items-center justify-center p-0 rounded-full">
+                {totalItems}
+              </Badge>
+            )}
+          </Button>
+        </SheetTrigger>
+        <SheetContent className="sm:max-w-md border-l-0 p-4" style={{ 
+          background: colors.background,
+          boxShadow: `-5px 0 15px rgba(139,30,63,0.1)`
+        }}>
+          <CartComponent />
+        </SheetContent>
+      </Sheet>
+    </div>
+
+    {/* Right Side: Delivery Info */}
+    <div className="flex items-center gap-6 text-white/90">
+      <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
+        <MapPin className="h-4 w-4 text-white/80" />
+        <div className="text-sm">
+          <div className="font-medium">Order Today</div>
+          <div className="text-xs text-white/70">
+            {new Date().toLocaleDateString(undefined, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'numeric',
+              day: 'numeric',
+            })}
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
+        <Clock className="h-4 w-4 text-white/80" />
+        <div className="text-sm">
+          <div className="font-medium">Delivery</div>
+          <div className="text-xs text-white/70">
+            {new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'numeric',
+              day: 'numeric',
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
       
       {/* Main content area */}
