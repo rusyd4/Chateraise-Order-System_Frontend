@@ -294,7 +294,7 @@ export default function BranchStore() {
                       {item.food_name}
                     </h3>
                     <p className="text-xs" style={{ color: colors.lightText }}>
-                      {formatRupiah(item.price)} each
+                      {formatRupiah(item.price)} each carton
                     </p>
                   </div>
                   <Button 
@@ -545,11 +545,11 @@ export default function BranchStore() {
                       </Button>
                     ) : (
                       // Quantity controls when item is in cart
-                      <div className="flex items-center justify-between w-full gap-2">
+                      <div className="flex items-center justify-between w-full gap-1">
                         <Button
                           size="icon"
                           variant="outline"
-                          className="cursor-pointer h-7 w-7 rounded-full"
+                          className="cursor-pointer h-7 w-7 rounded-full flex-shrink-0"
                           style={{ 
                             borderColor: colors.primary, 
                             color: colors.primary
@@ -560,28 +560,35 @@ export default function BranchStore() {
                           <Minus className="h-3 w-3" />
                         </Button>
                         
-                        <Input
-                          type="text"
-                          min={1}
-                          className="flex-grow text-center text-sm font-medium py-1"
-                          style={{ color: colors.primary, paddingTop: '0.25rem', paddingBottom: '0.25rem' }}
-                          value={getQuantity(food.food_id)}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value, 10);
-                            if (!isNaN(value) && value > 0) {
-                              setCart((prev) =>
-                                prev.map((item) =>
-                                  item.food_id === food.food_id ? { ...item, quantity: value } : item
-                                )
-                              );
-                            }
-                          }}
-                        />
+                        <div className="flex-1 flex items-center justify-center">
+                          <div className="flex items-center bg-white rounded-md border px-2 py-1 w-full justify-center" style={{ borderColor: colors.primary }}>
+                            <Input
+                              type="text"
+                              min={1}
+                              className="text-center text-sm font-bold border-0 p-0 h-5 w-full bg-transparent focus:ring-0 focus:outline-none"
+                              style={{ color: colors.primary }}
+                              value={getQuantity(food.food_id)}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value, 10);
+                                if (!isNaN(value) && value > 0) {
+                                  setCart((prev) =>
+                                    prev.map((item) =>
+                                      item.food_id === food.food_id ? { ...item, quantity: value } : item
+                                    )
+                                  );
+                                }
+                              }}
+                            />
+                            <span className="text-xs font-medium ml-1 whitespace-nowrap" style={{ color: colors.primary }}>
+                              {getQuantity(food.food_id) === 1 ? 'carton' : 'cartons'}
+                            </span>
+                          </div>
+                        </div>
                         
                         <Button
                           size="icon"
                           variant="outline"
-                          className="cursor-pointer h-7 w-7 rounded-full"
+                          className="cursor-pointer h-7 w-7 rounded-full flex-shrink-0"
                           style={{ 
                             borderColor: colors.primary, 
                             color: colors.primary

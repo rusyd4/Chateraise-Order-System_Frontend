@@ -461,7 +461,7 @@ export default function ManageFoodItems() {
                         <TableRow>
                           <TableHead className="text-white">Product ID</TableHead>
                           <TableHead className="text-white">Product Name</TableHead>
-                          <TableHead className="text-white">Price</TableHead>
+                          <TableHead className="text-white">Price /Ctn</TableHead>
                           <TableHead className="text-white">Status</TableHead>
                           <TableHead className="text-right text-white">Actions</TableHead>
                         </TableRow>
@@ -655,7 +655,7 @@ export default function ManageFoodItems() {
                 <div className="space-y-2">
                   <Label htmlFor="price" className="flex items-center gap-2 text-sm font-medium">
                     <DollarSign className="h-4 w-4 text-[#6D0000]" />
-                    Price <span className="text-red-500">*</span>
+                    Price /Ctn <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="price"

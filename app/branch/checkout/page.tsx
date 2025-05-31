@@ -331,10 +331,10 @@ export default function CheckoutPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={createOrder}
-              className="bg-red-900 hover:bg-red-800 text-white"
+              className="cursor-pointer bg-red-900 hover:bg-red-800 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Processing..." : "Confirm Order"}
