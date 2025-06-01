@@ -20,8 +20,8 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuGroup,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -35,15 +35,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
 // Icons
-import { 
-  CalendarIcon, 
-  Store, 
-  Package, 
-  Clock, 
-  AlertCircle, 
-  X, 
-  Filter, 
-  Truck, 
+import {
+  CalendarIcon,
+  Store,
+  Package,
+  Clock,
+  AlertCircle,
+  X,
+  Filter,
+  Truck,
   RefreshCw,
   ArrowRight,
   ChevronRight,
@@ -80,12 +80,13 @@ export default function AdminDashboard() {
   const [finishedOrders, setFinishedOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  
+
   // Filter states
   const [selectedBranch, setSelectedBranch] = useState("");
+  const [branchSearch, setBranchSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedDeliveryDate, setSelectedDeliveryDate] = useState<Date | undefined>(undefined);
-  
+
   // UI states
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const [isPendingOrdersOpen, setIsPendingOrdersOpen] = useState(false);
@@ -98,7 +99,7 @@ export default function AdminDashboard() {
     inProgress: false,
     filtered: false
   });
-  
+
   const [errors, setErrors] = useState({
     pending: "",
     inProgress: "",
@@ -118,7 +119,7 @@ export default function AdminDashboard() {
   async function fetchPendingOrders() {
     setIsLoading(prev => ({ ...prev, pending: true }));
     setErrors(prev => ({ ...prev, pending: "" }));
-    
+
     try {
       const data = await apiFetch("/admin/orders/pending");
       setOrders(data);
@@ -133,7 +134,7 @@ export default function AdminDashboard() {
   async function fetchInProgressOrders() {
     setIsLoading(prev => ({ ...prev, inProgress: true }));
     setErrors(prev => ({ ...prev, inProgress: "" }));
-    
+
     try {
       const data = await apiFetch("/admin/orders/in-progress");
       setInProgressOrders(data);
@@ -148,7 +149,7 @@ export default function AdminDashboard() {
   async function fetchFinishedOrders() {
     setIsLoading(prev => ({ ...prev, inProgress: true }));
     setErrors(prev => ({ ...prev, inProgress: "" }));
-    
+
     try {
       const data = await apiFetch("/admin/orders/finished");
       setFinishedOrders(data);
@@ -162,22 +163,22 @@ export default function AdminDashboard() {
 
   async function fetchFilteredOrders() {
     if (!selectedBranch && !selectedDate && !selectedDeliveryDate) {
-      setErrors(prev => ({ 
-        ...prev, 
-        filtered: "Please select at least one filter: branch, order date, or delivery date" 
+      setErrors(prev => ({
+        ...prev,
+        filtered: "Please select at least one filter: branch, order date, or delivery date"
       }));
       return;
     }
-    
+
     setIsLoading(prev => ({ ...prev, filtered: true }));
     setErrors(prev => ({ ...prev, filtered: "" }));
-    
+
     try {
       const queryParams = new URLSearchParams();
       if (selectedBranch) queryParams.append("branch_name", selectedBranch);
       if (selectedDate) queryParams.append("order_date", format(selectedDate, "yyyy-MM-dd"));
       if (selectedDeliveryDate) queryParams.append("delivery_date", format(selectedDeliveryDate, "yyyy-MM-dd"));
-      
+
       const data = await apiFetch("/admin/orders/filter?" + queryParams.toString());
       setFilteredOrders(data);
       setIsOrderDetailsOpen(true);
@@ -194,12 +195,12 @@ export default function AdminDashboard() {
       setErrors(prev => ({ ...prev, filtered: "Nothing to print" }));
       return;
     }
-    
+
     if (filteredOrders.length === 0) {
       setErrors(prev => ({ ...prev, filtered: "No orders to update" }));
       return;
     }
-    
+
     try {
       // Update order status to 'In-progress' for each filtered order
       for (const order of filteredOrders) {
@@ -224,7 +225,7 @@ export default function AdminDashboard() {
       });
       pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
       pdf.save("orders.pdf");
-      
+
       // Refresh orders after update
       fetchPendingOrders();
       fetchInProgressOrders();
@@ -264,7 +265,7 @@ export default function AdminDashboard() {
   // Render functions
   const renderErrorAlert = (message: string, onDismiss?: () => void) => {
     if (!message) return null;
-    
+
     return (
       <Alert variant="destructive" className="mt-4 rounded-lg transition-all duration-300 hover:shadow-lg animate-pulse">
         <AlertCircle className="h-4 w-4" />
@@ -272,9 +273,9 @@ export default function AdminDashboard() {
         <AlertDescription className="flex justify-between items-center">
           <span>{message}</span>
           {onDismiss && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onDismiss}
               className="transition-all duration-300 hover:scale-110 hover:rotate-90"
             >
@@ -327,19 +328,19 @@ export default function AdminDashboard() {
                               {order.branch_name}
                             </p>
                           </div>
-                          <Badge 
+                          <Badge
                             variant={title === "Pending Orders" ? "secondary" : "default"}
                             className={cn(
                               "px-2.5 py-0.5 text-xs transition-all duration-300 group-hover:scale-105",
-                              title === "Pending Orders" 
-                                ? "bg-amber-50 text-amber-700 border-amber-200" 
+                              title === "Pending Orders"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
                                 : "bg-blue-50 text-blue-700 border-blue-200"
                             )}
                           >
                             {title === "Pending Orders" ? "Pending" : "In Progress"}
                           </Badge>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1.5 text-xs text-gray-600">
@@ -351,8 +352,8 @@ export default function AdminDashboard() {
                               <span>Delivery: {format(new Date(order.delivery_date), "MMM dd, yyyy")}</span>
                             </div>
                           </div>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="text-[#6D0000] hover:text-[#6D0000] hover:bg-[#6D0000]/5 -mr-2 transition-all duration-300 hover:translate-x-1"
                             onClick={() => handleViewOrder(order)}
@@ -376,9 +377,9 @@ export default function AdminDashboard() {
   // Main render
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-        <Navbar />
-      
-        <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
+      <Navbar />
+
+      <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-8">
           <div className="flex justify-between items-center">
@@ -400,8 +401,8 @@ export default function AdminDashboard() {
                 <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-white animate-ping"></span>
                 <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-600"></span>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="icon"
                 onClick={handleRefresh}
                 title="Refresh Data"
@@ -413,7 +414,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-        
+
         {/* Key Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
@@ -447,7 +448,7 @@ export default function AdminDashboard() {
               </Button>
             </CardContent>
           </Card>
-          
+
           <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
             <div className="h-1 bg-blue-500" />
             <CardContent className="p-6">
@@ -479,11 +480,11 @@ export default function AdminDashboard() {
               </Button>
             </CardContent>
           </Card>
-          
+
           <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden">
             <div className="h-1 bg-[#6D0000]" />
             <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="p-3 rounded-full bg-blue-50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
                   <CircleCheckBig className="h-6 w-6 text-[#6D0000]" />
                 </div>
@@ -512,7 +513,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Main Content Section */}
         <Card className="border-0 shadow-md rounded-xl bg-white transition-all duration-300 hover:shadow-lg overflow-hidden">
           <CardHeader className="px-6 py-4 bg-gradient-to-r from-[#a52422] to-[#6d0000] text-white rounded-t-xl">
@@ -535,9 +536,9 @@ export default function AdminDashboard() {
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      id="branchSelect" 
+                    <Button
+                      variant="outline"
+                      id="branchSelect"
                       className="cursor-pointer w-full justify-between font-normal border-gray-200 border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
                     >
                       <span className={selectedBranch ? "text-gray-900" : "text-gray-500"}>
@@ -547,25 +548,40 @@ export default function AdminDashboard() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-full shadow-lg border-gray-100 rounded-lg overflow-hidden">
-                    <DropdownMenuRadioGroup
-                      value={selectedBranch}
-                      onValueChange={(value) => setSelectedBranch(value)}
-                    >
+                    <div className="p-2">
+                      <input
+                        type="text"
+                        placeholder="Search branches..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                        value={branchSearch}
+                        onChange={(e) => setBranchSearch(e.target.value)}
+                      // Removed autoFocus from here
+                      />
+                    </div>
+                    <DropdownMenuGroup>
                       {orders.length > 0 &&
-                        Array.from(new Set(orders.map((order) => order.branch_name))).map((branchName) => (
-                          <DropdownMenuRadioItem 
-                            key={branchName} 
-                            value={branchName}
-                            className="py-2.5 px-3 cursor-pointer hover:bg-[#6D0000]/5 focus:bg-[#6D0000]/5"
-                          >
-                            {branchName}
-                          </DropdownMenuRadioItem>
-                        ))}
-                    </DropdownMenuRadioGroup>
+                        Array.from(new Set(orders.map((order) => order.branch_name)))
+                          .filter(branchName => branchName.toLowerCase().includes(branchSearch.toLowerCase()))
+                          .map((branchName) => (
+                            <DropdownMenuItem
+                              key={branchName}
+                              className={cn(
+                                "py-2.5 px-3 cursor-pointer hover:bg-[#6D0000]/5 focus:bg-[#6D0000]/5",
+                                selectedBranch === branchName && "bg-[#6D0000]/10 font-semibold"
+                              )}
+                              onClick={() => {
+                                setSelectedBranch(branchName);
+                                setBranchSearch("");
+                              }}
+                            >
+                              {branchName}
+                            </DropdownMenuItem>
+                          ))}
+                    </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              
+
               {/* Order Date Selection */}
               <div>
                 <label htmlFor="orderDate" className="block text-sm font-medium text-gray-700 mb-2">
@@ -607,7 +623,7 @@ export default function AdminDashboard() {
                   </PopoverContent>
                 </Popover>
               </div>
-              
+
               {/* Delivery Date Selection */}
               <div>
                 <label htmlFor="deliveryDate" className="block text-sm font-medium text-gray-700 mb-2">
@@ -650,9 +666,9 @@ export default function AdminDashboard() {
                 </Popover>
               </div>
             </div>
-            
+
             <div className="flex justify-end mt-8">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => {
                   setSelectedBranch("");
@@ -663,7 +679,7 @@ export default function AdminDashboard() {
               >
                 Clear Filters
               </Button>
-              <Button 
+              <Button
                 onClick={fetchFilteredOrders}
                 className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] px-8 py-2.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md font-medium"
                 disabled={isLoading.filtered}
@@ -681,37 +697,37 @@ export default function AdminDashboard() {
                 )}
               </Button>
             </div>
-            
+
             {/* Error Alert */}
-            {renderErrorAlert(errors.filtered, () => 
+            {renderErrorAlert(errors.filtered, () =>
               setErrors(prev => ({ ...prev, filtered: "" }))
             )}
           </CardContent>
         </Card>
-        
-        
+
+
         {/* Error Alerts Section */}
-        {errors.pending && renderErrorAlert(errors.pending, () => 
+        {errors.pending && renderErrorAlert(errors.pending, () =>
           setErrors(prev => ({ ...prev, pending: "" }))
         )}
-        
-        {errors.inProgress && renderErrorAlert(errors.inProgress, () => 
+
+        {errors.inProgress && renderErrorAlert(errors.inProgress, () =>
           setErrors(prev => ({ ...prev, inProgress: "" }))
         )}
       </main>
-      
+
       {/* Modals */}
       {/* Order Details Modal */}
-{isOrderDetailsOpen && (
-  <OrderDetailsModal
-    filteredOrders={filteredOrders}
-    printRef={printRef}
-    handleSaveAsPDF={handleSaveAsPDF}
-    onClose={handleCloseOrderDetails}
-    showSaveAsPDFButton={selectedOrder ? !finishedOrders.some(o => o.order_id === selectedOrder.order_id) : true}
-  />
-)}
-      
+      {isOrderDetailsOpen && (
+        <OrderDetailsModal
+          filteredOrders={filteredOrders}
+          printRef={printRef}
+          handleSaveAsPDF={handleSaveAsPDF}
+          onClose={handleCloseOrderDetails}
+          showSaveAsPDFButton={selectedOrder ? !finishedOrders.some(o => o.order_id === selectedOrder.order_id) : true}
+        />
+      )}
+
       {/* Pending Orders Modal */}
       {isPendingOrdersOpen && (
         <PendingOrdersModal
@@ -721,7 +737,7 @@ export default function AdminDashboard() {
           onViewOrder={handleViewOrder}
         />
       )}
-      
+
       {/* In Progress Orders Modal */}
       {isInProgressOrdersOpen && (
         <PendingOrdersModal
@@ -731,7 +747,7 @@ export default function AdminDashboard() {
           onViewOrder={handleViewOrder}
         />
       )}
-      
+
       {/* Finished Orders Modal */}
       {isFinishedOrdersOpen && (
         <PendingOrdersModal

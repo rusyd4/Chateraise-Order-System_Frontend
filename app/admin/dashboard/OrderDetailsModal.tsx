@@ -102,21 +102,25 @@ export default function OrderDetailsModal({
                   </div>
 
                   <h1 className="text-center text-2xl font-extrabold mb-2">DELIVERY ORDER</h1>
-
                   <div className="mb-6 grid grid-cols-[1fr_2fr] gap-x-8 text-xs">
-                    <div className="space-y-1">
-                      <p>Customer Name  :</p>
-                      <p>Delivery Date  :</p>
-                      <p>Delivery Time  :</p>
-                      <p>Delivery Address :</p>
+                    <div className="col-span-full border-b border-black grid grid-cols-subgrid mb-1">
+                      <p>Customer Name :</p>
+                      <p className="font-bold">{order.branch_name}</p>
                     </div>
-                    <div className="space-y-1 font-bold">
-                      <p>{order.branch_name}</p>
-                      <p>{`${deliveryDateFormatted} (${deliveryDay})`}</p>
-                      <p>{order.delivery_time || "--"}</p>
-                      <p>{order.branch_address || "--"}</p>
+                    <div className="col-span-full border-b border-black grid grid-cols-subgrid mb-1">
+                      <p>Delivery Date :</p>
+                      <p className="font-bold">{`${deliveryDateFormatted} (${deliveryDay})`}</p>
+                    </div>
+                    <div className="col-span-full border-b border-black grid grid-cols-subgrid mb-1">
+                      <p>Delivery Time :</p>
+                      <p className="font-bold">{order.delivery_time || "--"}</p>
+                    </div>
+                    <div className="col-span-full border-b border-black grid grid-cols-subgrid mb-1">
+                      <p>Delivery Address :</p>
+                      <p className="font-bold">{order.branch_address || "--"}</p>
                     </div>
                   </div>
+
 
 
                   <table className="w-full border border-black rounded mb-6 text-xs">
