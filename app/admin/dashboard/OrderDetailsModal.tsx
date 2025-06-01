@@ -101,9 +101,9 @@ export default function OrderDetailsModal({
                     </table>
                   </div>
 
-                  <h1 className="text-center text-4xl font-extrabold mb-6">DELIVERY ORDER</h1>
+                  <h1 className="text-center text-2xl font-extrabold mb-2">DELIVERY ORDER</h1>
 
-                  <div className="mb-6 grid grid-cols-3 gap-x-8">
+                  <div className="mb-6 grid grid-cols-[1fr_2fr] gap-x-8 text-xs">
                     <div className="space-y-1">
                       <p>Customer Name  :</p>
                       <p>Delivery Date  :</p>
@@ -118,7 +118,8 @@ export default function OrderDetailsModal({
                     </div>
                   </div>
 
-                  <table className="w-full border border-black rounded mb-6 text-sm">
+
+                  <table className="w-full border border-black rounded mb-6 text-xs">
                     <thead>
                       <tr>
                         <th className="border border-t-white border-b-black border-x-white px-2 py-1"></th>
@@ -142,7 +143,7 @@ export default function OrderDetailsModal({
                         <tr key={idx} className="odd:bg-white even:bg-gray-50">
                           <td className="border border-black px-2 py-1">{item.food_id}</td>
                           <td className="border border-black px-2 py-1">{item.food_name}</td>
-                          <td className="border border-black px-2 py-1">{item.quantity} carton</td>
+                          <td className="border border-black px-2 py-1">{item.quantity} ctn</td>
                           <td className="border border-black px-2 py-1"></td>
                           <td className="border border-black px-2 py-1"></td>
                           <td className="border border-black px-2 py-1"></td>
