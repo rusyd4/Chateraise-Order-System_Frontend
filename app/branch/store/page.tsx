@@ -128,15 +128,8 @@ export default function BranchStore() {
   useEffect(() => {
     fetchFoodItems();
 
-    // Load cart from localStorage if available
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error("Failed to parse saved cart");
-      }
-    }
+    // Clear cart from localStorage on page load to reset cart
+    localStorage.removeItem("cart");
 
     // Check screen size
     const checkScreenSize = () => {
