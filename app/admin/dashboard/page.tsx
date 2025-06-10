@@ -224,7 +224,16 @@ export default function AdminDashboard() {
         format: [canvas.width, canvas.height],
       });
       pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-      pdf.save("orders.pdf");
+
+      // Use the first order's branch_name and delivery_date for filename
+      const firstOrder = filteredOrders[0];
+      const branchName = firstOrder.branch_name.replace(/\s+/g, '_'); // replace spaces with underscores
+      // Format deliveryDate to yyyy-MM-dd for filename
+      const deliveryDateObj = new Date(firstOrder.delivery_date);
+      const formattedDeliveryDate = deliveryDateObj.toISOString().split('T')[0].replace(/-/g, '_');
+      const filename = `${branchName}-${formattedDeliveryDate}.pdf`;
+
+      pdf.save(filename);
 
       // Refresh orders after update
       fetchPendingOrders();
