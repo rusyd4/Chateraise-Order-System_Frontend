@@ -202,15 +202,19 @@ export default function AdminDashboard() {
     }
 
     try {
-      // Update order status to 'In-progress' for each filtered order
+      // Update order status to 'In-progress' for each filtered order only if current status is 'pending'
       for (const order of filteredOrders) {
-        try {
-          await apiFetch(`/admin/orders/${order.order_id}/status/in-progress`, {
-            method: "PUT",
-          });
-        } catch (error) {
-          console.error(`Failed to update order ${order.order_id} status:`, error);
-          throw new Error(`Failed to update order ${order.order_id}`);
+        // Check if order is currently pending by checking if it exists in orders array
+        const isPending = orders.some(o => o.order_id === order.order_id);
+        if (isPending) {
+          try {
+            await apiFetch(`/admin/orders/${order.order_id}/status/in-progress`, {
+              method: "PUT",
+            });
+          } catch (error) {
+            console.error(`Failed to update order ${order.order_id} status:`, error);
+            throw new Error(`Failed to update order ${order.order_id}`);
+          }
         }
       }
 
