@@ -83,9 +83,28 @@ export default function AdminDashboard() {
 
   // Filter states
   const [selectedBranch, setSelectedBranch] = useState("");
+  const [branches, setBranches] = useState<{ user_id: number; full_name: string; email: string; branch_address: string; delivery_time: string; created_at: string; }[]>([]);
   const [branchSearch, setBranchSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedDeliveryDate, setSelectedDeliveryDate] = useState<Date | undefined>(undefined);
+  
+  // Filtered branches based on search
+  const filteredBranches = branches.filter(branch =>
+    branch.full_name.toLowerCase().includes(branchSearch.toLowerCase())
+  );
+
+  // Fetch branches on component mount
+  useEffect(() => {
+    async function fetchBranches() {
+      try {
+        const data = await apiFetch("/admin/branches");
+        setBranches(data);
+      } catch (error) {
+        console.error("Failed to fetch branches:", error);
+      }
+    }
+    fetchBranches();
+  }, []);
 
   // UI states
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
@@ -551,45 +570,54 @@ export default function AdminDashboard() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
+                      onClick={() => {
+                        setTimeout(() => {
+                          const input = document.getElementById("branchSearchInput");
+                          if (input) {
+                            input.focus();
+                          }
+                        }, 100);
+                      }}
+                      className={cn(
+                        "cursor-pointer w-full justify-between font-normal border-gray-200 border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md",
+                        !selectedBranch && "text-gray-500"
+                      )}
                       id="branchSelect"
-                      className="cursor-pointer w-full justify-between font-normal border-gray-200 border-gray-400 hover:border-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300 hover:shadow-md"
                     >
-                      <span className={selectedBranch ? "text-gray-900" : "text-gray-500"}>
-                        {selectedBranch || "Select branch"}
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-gray-400 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      {selectedBranch ? selectedBranch : "Select branch"}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full shadow-lg border-gray-100 rounded-lg overflow-hidden">
+                  <DropdownMenuContent className="w-full max-h-60 overflow-auto">
                     <div className="p-2">
                       <input
+                        id="branchSearchInput"
                         type="text"
                         placeholder="Search branches..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
                         value={branchSearch}
                         onChange={(e) => setBranchSearch(e.target.value)}
-                      // Removed autoFocus from here
+                        className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6D0000]"
+                        onKeyDown={(e) => {
+                          e.stopPropagation();
+                        }}
                       />
                     </div>
                     <DropdownMenuGroup>
-                      {orders.length > 0 &&
-                        Array.from(new Set(orders.map((order) => order.branch_name)))
-                          .filter(branchName => branchName.toLowerCase().includes(branchSearch.toLowerCase()))
-                          .map((branchName) => (
-                            <DropdownMenuItem
-                              key={branchName}
-                              className={cn(
-                                "py-2.5 px-3 cursor-pointer hover:bg-[#6D0000]/5 focus:bg-[#6D0000]/5",
-                                selectedBranch === branchName && "bg-[#6D0000]/10 font-semibold"
-                              )}
-                              onClick={() => {
-                                setSelectedBranch(branchName);
-                                setBranchSearch("");
-                              }}
-                            >
-                              {branchName}
-                            </DropdownMenuItem>
-                          ))}
+                      {filteredBranches.length === 0 ? (
+                        <DropdownMenuItem disabled>No branches found</DropdownMenuItem>
+                      ) : (
+                        filteredBranches.map((branch) => (
+                          <DropdownMenuItem
+                            key={branch.user_id}
+                            onSelect={() => setSelectedBranch(branch.full_name)}
+                            className={cn(
+                              "cursor-pointer",
+                              selectedBranch === branch.full_name ? "font-semibold text-[#6D0000]" : ""
+                            )}
+                          >
+                            {branch.full_name}
+                          </DropdownMenuItem>
+                        ))
+                      )}
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
