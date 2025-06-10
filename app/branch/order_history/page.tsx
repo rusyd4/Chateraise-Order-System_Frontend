@@ -124,24 +124,24 @@ export default function OrderHistory() {
   const getStatusForDate = (date: string) => {
     const ordersOnDate = ordersByDate[date] || [];
     if (ordersOnDate.length === 0) return "none";
-    
+
     // Count occurrences of each status
     const statusCounts = ordersOnDate.reduce((acc, order) => {
       acc[order.order_status] = (acc[order.order_status] || 0) + 1;
       return acc;
     }, {} as { [status: string]: number });
-    
+
     // Find status with most occurrences
     let maxCount = 0;
     let dominantStatus = "none";
-    
+
     for (const [status, count] of Object.entries(statusCounts)) {
       if (count > maxCount) {
         maxCount = count;
         dominantStatus = status;
       }
     }
-    
+
     return dominantStatus.toLowerCase();
   };
 
@@ -347,11 +347,10 @@ export default function OrderHistory() {
               </Button>
 
               <Button
-                className={`cursor-pointer w-auto rounded-full border border-[#6D0000] text-[#6D0000] hover:bg-[#6D0000] hover:text-white transition-all duration-200 hover:shadow-md ${
-                  isLast7DaysSelected
+                className={`cursor-pointer w-auto rounded-full border border-[#6D0000] text-[#6D0000] hover:bg-[#6D0000] hover:text-white transition-all duration-200 hover:shadow-md ${isLast7DaysSelected
                     ? "bg-[#6D0000] text-white"
                     : "bg-white text-[#6D0000]"
-                }`}
+                  }`}
                 onClick={() => {
                   const to = new Date();
                   const from = new Date();
@@ -365,11 +364,10 @@ export default function OrderHistory() {
               </Button>
 
               <Button
-                className={`cursor-pointer w-auto rounded-full border border-[#6D0000] text-[#6D0000] hover:bg-[#6D0000] hover:text-white transition-all duration-200 hover:shadow-md ${
-                  isLast30DaysSelected
+                className={`cursor-pointer w-auto rounded-full border border-[#6D0000] text-[#6D0000] hover:bg-[#6D0000] hover:text-white transition-all duration-200 hover:shadow-md ${isLast30DaysSelected
                     ? "bg-[#6D0000] text-white"
                     : "bg-white text-[#6D0000]"
-                }`}
+                  }`}
                 onClick={() => {
                   const to = new Date();
                   const from = new Date();
@@ -475,8 +473,8 @@ export default function OrderHistory() {
                             <TableRow>
                               <TableHead colSpan={3}></TableHead>
                               {uniqueDates.map((date) => (
-                                <TableHead 
-                                  key={date} 
+                                <TableHead
+                                  key={date}
                                   className={`text-center border ${getStatusColorClass(date)}`}
                                 >
                                   {new Date(date).toLocaleDateString(undefined, {
@@ -502,8 +500,8 @@ export default function OrderHistory() {
                               {uniqueDates.map((date) => {
                                 const deliveryDate = addDays(new Date(date), 2);
                                 return (
-                                  <TableHead 
-                                    key={"qty-" + date} 
+                                  <TableHead
+                                    key={"qty-" + date}
                                     className={`border ${getStatusColorClass(date)}`}
                                   >
                                     {deliveryDate.toLocaleDateString(undefined, {
@@ -544,8 +542,8 @@ export default function OrderHistory() {
                                     {food.totalQty}
                                   </TableCell>
                                   {uniqueDates.map((date) => (
-                                    <TableCell 
-                                      key={date} 
+                                    <TableCell
+                                      key={date}
                                       className={`border ${getStatusColorClass(date)}`}
                                     >
                                       {food.qtyByDate[date] || 0}

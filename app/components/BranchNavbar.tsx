@@ -4,14 +4,14 @@ import { useRouter, usePathname } from "next/navigation";
 import { Camera, ShoppingCart, History, Upload, X } from "lucide-react";
 import QrScanner from "qr-scanner";
 import { Button } from "@/components/ui/button";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
-  DialogDescription 
+  DialogDescription
 } from "@/components/ui/dialog";
-import { 
+import {
   // Tooltip,
   // TooltipTrigger,
   // TooltipContent
@@ -97,14 +97,14 @@ export default function BranchNavbar() {
     if (!file) return;
 
     setScanError(null);
-    
+
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
       const result = event.target?.result;
       if (!result) return;
-      
-      QrScanner.scanImage(result as string, { 
-        returnDetailedScanResult: true 
+
+      QrScanner.scanImage(result as string, {
+        returnDetailedScanResult: true
       })
         .then(result => {
           if (result?.data) {
@@ -126,17 +126,17 @@ export default function BranchNavbar() {
     if (scannerOpen) {
       async function startCamera() {
         try {
-          const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment" } 
+          const mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }
           });
           setStream(mediaStream);
-          
+
           if (videoRef.current) {
             videoRef.current.srcObject = mediaStream;
             videoRef.current.play();
 
             qrScannerRef.current = new QrScanner(
-              videoRef.current, 
+              videoRef.current,
               (result) => {
                 if (result?.data) {
                   const orderId = result.data;
@@ -181,13 +181,13 @@ export default function BranchNavbar() {
     <nav className="bg-gradient-to-r from-[#a52422] to-[#6D0000] text-primary-foreground px-4 py-3 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <div 
+        <div
           className="hover:opacity-90 transition-opacity"
         >
-          <img 
-            src="/image-removebg-preview.png" 
-            alt="Logo" 
-            className="h-10 md:h-12" 
+          <img
+            src="/image-removebg-preview.png"
+            alt="Logo"
+            className="h-10 md:h-12"
           />
         </div>
 
@@ -252,7 +252,7 @@ export default function BranchNavbar() {
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => setLogoutDialogOpen(true)}
-                >
+              >
                 <X className="h-4 w-4 mr-2" />
                 Logout
               </DropdownMenuItem>
@@ -273,14 +273,14 @@ export default function BranchNavbar() {
               Scan a QR code to view order details
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {scanError && (
               <Badge variant="destructive" className="w-full justify-center">
                 {scanError}
               </Badge>
             )}
-            
+
             <div className="relative aspect-square bg-black rounded-lg overflow-hidden">
               <video
                 ref={videoRef}
@@ -297,13 +297,13 @@ export default function BranchNavbar() {
                   OR
                 </span>
               </div>
-              
+
               <label htmlFor="qr-upload" className="w-full">
-                <Input 
-                  type="file" 
-                  accept="image/*" 
+                <Input
+                  type="file"
+                  accept="image/*"
                   onChange={handleFileUpload}
-                  className="hidden" 
+                  className="hidden"
                   id="qr-upload"
                 />
                 <Button

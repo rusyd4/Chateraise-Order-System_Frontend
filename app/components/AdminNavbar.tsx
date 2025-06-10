@@ -57,9 +57,8 @@ export default function Navbar() {
               key={item.href}
               asChild
               variant="ghost"
-              className={`justify-start text-white hover:bg-white hover:text-[#6D0000] ${
-                pathname === item.href ? "bg-[#ffffff] text-[#6D0000]" : ""
-              }`}
+              className={`justify-start text-white hover:bg-white hover:text-[#6D0000] ${pathname === item.href ? "bg-[#ffffff] text-[#6D0000]" : ""
+                }`}
             >
               <Link href={item.href}>{item.label}</Link>
             </Button>

@@ -4,25 +4,25 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
 import { toast } from "sonner";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardFooter 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter
 } from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer, ShoppingBag } from "lucide-react";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -157,9 +157,9 @@ export default function CheckoutPage() {
               <ShoppingBag size={64} className="text-gray-400 mb-4" />
               <h1 className="text-3xl font-bold mb-4">Your cart is empty</h1>
               <p className="text-gray-500 mb-6">Add items to your cart to proceed with checkout</p>
-              <Button 
-                onClick={goToStore} 
-                variant="default" 
+              <Button
+                onClick={goToStore}
+                variant="default"
                 className="cursor-pointer bg-red-900 hover:bg-red-800"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Return to Store
@@ -203,7 +203,7 @@ export default function CheckoutPage() {
                   ))}
                 </TableBody>
               </Table>
-              
+
               <div className="flex justify-end mt-6">
                 <div className="bg-gray-50 p-4 rounded-lg w-64">
                   <div className="flex justify-between font-bold text-lg">
@@ -214,16 +214,16 @@ export default function CheckoutPage() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={goToStore}
                 className="cursor-pointer"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Continue Shopping
               </Button>
-              <Button 
-                onClick={handleConfirmOrder} 
-                className="cursor-pointer bg-red-900 hover:bg-red-800" 
+              <Button
+                onClick={handleConfirmOrder}
+                className="cursor-pointer bg-red-900 hover:bg-red-800"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Processing..." : "Confirm Order"}
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <Separator className="my-6" />
-                
+
                 <h2 className="text-xl font-semibold mb-4">Order Items</h2>
                 <Table>
                   <TableHeader>
@@ -283,7 +283,7 @@ export default function CheckoutPage() {
                     ))}
                   </TableBody>
                 </Table>
-                
+
                 <div className="flex justify-end mt-6">
                   <div className="bg-gray-50 p-4 rounded-lg w-64">
                     <div className="flex justify-between font-bold text-lg">
@@ -304,15 +304,15 @@ export default function CheckoutPage() {
               </CardContent>
             </div>
             <CardFooter className="flex justify-between mt-4 print:hidden">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={goToStore}
                 className="cursor-pointer"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Return to Store
               </Button>
-              <Button 
-                onClick={handlePrint} 
+              <Button
+                onClick={handlePrint}
                 className="cursor-pointer bg-red-900 hover:bg-red-800"
               >
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
@@ -332,7 +332,7 @@ export default function CheckoutPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={createOrder}
               className="cursor-pointer bg-red-900 hover:bg-red-800 text-white"
               disabled={isSubmitting}

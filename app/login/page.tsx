@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
-    
+
     try {
       const response = await apiFetch("/auth/login", {
         method: "POST",
@@ -69,11 +69,11 @@ export default function LoginPage() {
       }, 1000);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        toast.error("Login failed", { 
+        toast.error("Login failed", {
           description: err.message || "Please check your credentials and try again."
         });
       } else {
-        toast.error("Login failed", { 
+        toast.error("Login failed", {
           description: "An unexpected error occurred. Please try again."
         });
       }
@@ -87,7 +87,7 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
       {/* Background with overlay */}
-      <div 
+      <div
         className="absolute inset-0 w-screen bg-center bg-no-repeat bg-cover opacity-150 dark:opacity-30 transition-opacity duration-500"
         style={{ backgroundImage: "url('/DSCF2264.jpg')", transform: "scale(1.2)", transformOrigin: "center" }}
       />
@@ -109,7 +109,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold text-primary">Welcome Back</CardTitle>
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -120,9 +120,9 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Enter your email" 
-                        type="email" 
+                      <Input
+                        placeholder="Enter your email"
+                        type="email"
                         autoComplete="email"
                         className="bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
                         {...field}
@@ -132,7 +132,7 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="password"
@@ -141,9 +141,9 @@ export default function LoginPage() {
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input 
-                          placeholder="••••••••" 
-                          type={showPassword ? "text" : "password"} 
+                        <Input
+                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
                           autoComplete="current-password"
                           className="pr-10 bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
                           {...field}
@@ -170,9 +170,9 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-[#6D0000] hover:bg-[#8A0000] hover:shadow-lg hover:-translate-y-0.5 text-white font-medium transition-all duration-300 ease-in-out"
                 disabled={isLoading}
               >
@@ -181,9 +181,9 @@ export default function LoginPage() {
             </form>
           </Form>
         </CardContent>
-        
+
       </Card>
-      
+
     </div>
   );
 }

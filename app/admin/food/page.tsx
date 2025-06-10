@@ -4,12 +4,12 @@ import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { usePathname } from "next/navigation";
 import apiFetch from "../../../lib/api";
 import Navbar from "../../components/AdminNavbar";
-import { 
-  Edit, 
-  Trash2, 
-  Plus, 
-  CakeSlice, 
-  AlertCircle, 
+import {
+  Edit,
+  Trash2,
+  Plus,
+  CakeSlice,
+  AlertCircle,
   Search,
   DollarSign,
   Tag,
@@ -144,11 +144,11 @@ export default function ManageFoodItems() {
   ) {
     const { name, value, type } = e.target;
     let val: string | boolean = value;
-    
+
     if (type === "checkbox" && "checked" in e.target) {
       val = (e.target as HTMLInputElement).checked;
     }
-    
+
     setFoodForm((prev) => ({
       ...prev,
       [name]: val,
@@ -188,34 +188,34 @@ export default function ManageFoodItems() {
       setFormError("Product ID is required");
       return false;
     }
-    
+
     if (!foodForm.food_name.trim()) {
       setFormError("Product name is required");
       return false;
     }
-    
+
     if (!foodForm.price.trim()) {
       setFormError("Price is required");
       return false;
     }
-    
+
     const price = parseFloat(foodForm.price);
     if (isNaN(price) || price < 0) {
       setFormError("Price must be a valid positive number");
       return false;
     }
-    
+
     return true;
   }
 
   async function handleFoodFormSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setFormError("");
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       const { food_id, food_name, price, is_available, editingId, food_image } = foodForm;
       const method = editingId ? "PUT" : "POST";
@@ -229,7 +229,7 @@ export default function ManageFoodItems() {
       if (food_image) {
         formData.append("food_image", food_image);
       }
-      
+
       await apiFetch(url, {
         method,
         body: formData,
@@ -237,7 +237,7 @@ export default function ManageFoodItems() {
           // Let browser set Content-Type with boundary for multipart/form-data
         }
       });
-      
+
       resetForm();
       setIsModalOpen(false);
       fetchFoodItems();
@@ -277,12 +277,12 @@ export default function ManageFoodItems() {
 
   async function confirmDeleteFood() {
     if (foodIdToDelete === null) return;
-    
+
     try {
       await apiFetch(`/admin/food-items/${foodIdToDelete}`, {
         method: "DELETE",
       });
-      
+
       fetchFoodItems();
       toast.success("Product deleted successfully");
     } catch (err: unknown) {
@@ -299,7 +299,7 @@ export default function ManageFoodItems() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  
+
   const totalPages = Math.ceil(filteredFoodItems.length / itemsPerPage);
 
   // Handle page change
@@ -309,8 +309,8 @@ export default function ManageFoodItems() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-        <Navbar />
-        <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
+      <Navbar />
+      <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
@@ -320,8 +320,8 @@ export default function ManageFoodItems() {
               </h1>
               <p className="text-sm text-white mt-1">Add, edit, and manage your product catalog</p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="icon"
               onClick={fetchFoodItems}
               title="Refresh Data"
@@ -348,9 +348,9 @@ export default function ManageFoodItems() {
                   </span>
                 </div>
               </div>
-              <Button 
-                onClick={handleAddFood} 
-                size="sm" 
+              <Button
+                onClick={handleAddFood}
+                size="sm"
                 className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 gap-2"
               >
                 <Plus size={16} />
@@ -410,10 +410,10 @@ export default function ManageFoodItems() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={fetchFoodItems} 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchFoodItems}
                     className="mt-2 hover:bg-red-50"
                   >
                     Retry
@@ -430,8 +430,8 @@ export default function ManageFoodItems() {
                       <p className="text-gray-500">
                         No products match your search {searchQuery}
                       </p>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setSearchQuery("")}
                         className="mt-2 border-[#6D0000]/20 text-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300"
                       >
@@ -444,7 +444,7 @@ export default function ManageFoodItems() {
                       <p className="text-gray-500">
                         Get started by adding your first product
                       </p>
-                      <Button 
+                      <Button
                         onClick={handleAddFood}
                         className="mt-2 bg-[#6D0000] hover:bg-[#800000] transition-all duration-300"
                       >
@@ -476,8 +476,8 @@ export default function ManageFoodItems() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {new Intl.NumberFormat('id-ID', { 
-                                style: 'currency', 
+                              {new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
                                 currency: 'IDR',
                                 maximumFractionDigits: 0
                               }).format(item.price)}
@@ -525,12 +525,12 @@ export default function ManageFoodItems() {
                     <Pagination className="mt-6">
                       <PaginationContent>
                         <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                          <PaginationPrevious
+                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                             className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-[#6D0000] transition-colors duration-200"}
                           />
                         </PaginationItem>
-                        
+
                         {[...Array(totalPages)].map((_, i) => {
                           const pageNumber = i + 1;
                           if (
@@ -550,7 +550,7 @@ export default function ManageFoodItems() {
                               </PaginationItem>
                             );
                           }
-                          
+
                           if (
                             (pageNumber === 2 && currentPage > 3) ||
                             (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
@@ -561,12 +561,12 @@ export default function ManageFoodItems() {
                               </PaginationItem>
                             );
                           }
-                          
+
                           return null;
                         })}
-                        
+
                         <PaginationItem>
-                          <PaginationNext 
+                          <PaginationNext
                             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                             className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-[#6D0000] transition-colors duration-200"}
                           />
@@ -593,7 +593,7 @@ export default function ManageFoodItems() {
                   : "Fill in the details to create a new product"}
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleFoodFormSubmit} className="grid gap-6 p-6">
               {formError && (
                 <Alert variant="destructive" className="animate-pulse">
@@ -602,7 +602,7 @@ export default function ManageFoodItems() {
                   <AlertDescription>{formError}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="food_id" className="flex items-center gap-2 text-sm font-medium">
@@ -619,7 +619,7 @@ export default function ManageFoodItems() {
                     className={foodForm.editingId ? "bg-gray-100" : "border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="food_name" className="flex items-center gap-2 text-sm font-medium">
                     <CakeSlice className="h-4 w-4 text-[#6D0000]" />
@@ -651,7 +651,7 @@ export default function ManageFoodItems() {
                     <p className="text-sm text-gray-600 mt-1">{foodForm.food_image.name}</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="price" className="flex items-center gap-2 text-sm font-medium">
                     <DollarSign className="h-4 w-4 text-[#6D0000]" />
@@ -669,17 +669,17 @@ export default function ManageFoodItems() {
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-md hover:border-[#6D0000]/30 hover:bg-[#6D0000]/5 transition-all duration-200 cursor-pointer">
-                    <Checkbox 
-                      id="is_available" 
+                    <Checkbox
+                      id="is_available"
                       checked={foodForm.is_available}
                       onCheckedChange={handleCheckboxChange}
                       className="data-[state=checked]:bg-[#6D0000] data-[state=checked]:border-[#6D0000]"
                     />
-                    <Label 
-                      htmlFor="is_available" 
+                    <Label
+                      htmlFor="is_available"
                       className="text-sm font-medium leading-none cursor-pointer select-none"
                     >
                       Available for purchase
@@ -687,17 +687,17 @@ export default function ManageFoodItems() {
                   </div>
                 </div>
               </div>
-            
+
               <DialogFooter className="gap-2 mt-2 flex-row justify-end">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsModalOpen(false)}
                   className="cursor-pointer border-gray-200 hover:bg-gray-50 transition-all duration-200"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md"
                 >
@@ -716,13 +716,13 @@ export default function ManageFoodItems() {
                 <AlertDialogTitle className="text-xl font-semibold">Delete Product</AlertDialogTitle>
               </AlertDialogHeader>
             </div>
-            
+
             <div className="p-6">
               <AlertDialogDescription className="text-gray-700 py-4">
                 Are you sure you want to delete this product? This action cannot be undone and will
                 permanently remove the product from your catalog.
               </AlertDialogDescription>
-              
+
               <AlertDialogFooter className="gap-2 mt-6 flex-row justify-end">
                 <AlertDialogCancel className="cursor-pointer border-gray-200 hover:bg-gray-50 transition-all duration-200">
                   Cancel

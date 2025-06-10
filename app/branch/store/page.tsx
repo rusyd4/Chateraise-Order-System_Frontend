@@ -4,32 +4,32 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch, { API_BASE_URL } from "../../../lib/api";
 import BranchNavbar from "../../components/BranchNavbar";
-import { 
-  Card, 
+import {
+  Card,
   CardHeader,
-  CardTitle, 
+  CardTitle,
   CardDescription,
   CardContent
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetFooter,
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Search, 
-  ShoppingCart, 
-  Plus, 
-  Minus, 
-  X, 
+import {
+  Search,
+  ShoppingCart,
+  Plus,
+  Minus,
+  X,
   MapPin,
   Clock,
   ArrowRight,
@@ -50,10 +50,10 @@ interface CartItem extends FoodItem {
   quantity: number;
 }
 
-const SearchBar = ({ 
+const SearchBar = ({
   className = "",
   searchTerm,
-  setSearchTerm 
+  setSearchTerm
 }: {
   className?: string;
   searchTerm: string;
@@ -117,17 +117,17 @@ export default function BranchStore() {
   };
 
   function formatRupiah(price: number): string {
-    return new Intl.NumberFormat('id-ID', { 
-      style: 'currency', 
-      currency: 'IDR', 
-      minimumFractionDigits: 0, 
-      maximumFractionDigits: 0 
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(price);
   }
 
   useEffect(() => {
     fetchFoodItems();
-    
+
     // Load cart from localStorage if available
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -137,24 +137,24 @@ export default function BranchStore() {
         console.error("Failed to parse saved cart");
       }
     }
-    
+
     // Check screen size
     const checkScreenSize = () => {
       setIsSmallScreen(window.innerWidth < 768);
     };
-    
+
     // Listen for scroll events
     const handleScroll = () => {
       setScrollPosition(window.scrollY);
     };
-    
+
     // Initial check
     checkScreenSize();
-    
+
     // Add event listeners
     window.addEventListener('resize', checkScreenSize);
     window.addEventListener('scroll', handleScroll);
-    
+
     // Clean up
     return () => {
       window.removeEventListener('resize', checkScreenSize);
@@ -254,7 +254,7 @@ export default function BranchStore() {
           Your Cart
         </SheetTitle>
       </SheetHeader>
-      
+
       {cart.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full py-12">
           <div className="p-6 rounded-full mb-4" style={{ background: colors.highlight }}>
@@ -267,9 +267,9 @@ export default function BranchStore() {
             Add some delicious items to get started
           </p>
           <SheetClose asChild>
-            <Button 
+            <Button
               className="mt-6 cursor-pointer"
-              style={{ 
+              style={{
                 background: colors.primary,
                 color: 'white',
               }}
@@ -282,10 +282,10 @@ export default function BranchStore() {
         <>
           <ScrollArea className={`${isMobile ? 'h-[50vh]' : 'h-[calc(100vh-220px)]'} mt-2 mx-2 px-1`}>
             {cart.map((item) => (
-              <div 
-                key={item.food_id} 
+              <div
+                key={item.food_id}
                 className="py-3 px-3 mb-3 rounded-lg"
-                style={{ 
+                style={{
                   background: colors.card,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
                 }}
@@ -299,8 +299,8 @@ export default function BranchStore() {
                       {formatRupiah(item.price)} each carton
                     </p>
                   </div>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     className="h-7 w-7 rounded-full hover:bg-red-50"
                     style={{ color: colors.lightText }}
@@ -310,7 +310,7 @@ export default function BranchStore() {
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                
+
                 <div className="flex items-center justify-between mt-2">
                   <p className="font-bold text-sm" style={{ color: colors.primary }}>
                     {formatRupiah(item.price * item.quantity)}
@@ -320,8 +320,8 @@ export default function BranchStore() {
                       size="icon"
                       variant="outline"
                       className="h-7 w-7 rounded-full hover:bg-red-50"
-                      style={{ 
-                        borderColor: colors.primary, 
+                      style={{
+                        borderColor: colors.primary,
                         color: colors.primary
                       }}
                       onClick={() => removeFromCart(item)}
@@ -337,8 +337,8 @@ export default function BranchStore() {
                       size="icon"
                       variant="outline"
                       className="h-7 w-7 rounded-full hover:bg-red-50"
-                      style={{ 
-                        borderColor: colors.primary, 
+                      style={{
+                        borderColor: colors.primary,
                         color: colors.primary
                       }}
                       onClick={() => addToCart(item)}
@@ -351,9 +351,9 @@ export default function BranchStore() {
               </div>
             ))}
           </ScrollArea>
-          
+
           <div className="mt-auto pt-4 px-2 w-full space-y-3">
-            <div className="flex justify-between p-3 rounded-lg" style={{ 
+            <div className="flex justify-between p-3 rounded-lg" style={{
               background: colors.highlight
             }}>
               <span className="font-semibold" style={{ color: colors.primary }}>Total</span>
@@ -361,9 +361,9 @@ export default function BranchStore() {
                 {formatRupiah(totalPrice)}
               </span>
             </div>
-            <Button 
+            <Button
               className="cursor-pointer w-full flex items-center justify-center gap-2 h-10 rounded-full text-base font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-              style={{ 
+              style={{
                 background: `linear-gradient(135deg, ${colors.accent}, ${colors.primary})`,
                 color: 'white',
                 border: '1px solid rgba(255,255,255,0.3)'
@@ -385,19 +385,19 @@ export default function BranchStore() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: colors.background }}>
       {/* Header - Sticks to top with shadow effect */}
-      <div 
-        className={`bg-gradient-to-r from-[#a52422] to-[#6D0000] sticky top-0 z-50 transition-shadow duration-300 ${scrollPosition > 10 ? 'shadow-lg' : ''}`} 
+      <div
+        className={`bg-gradient-to-r from-[#a52422] to-[#6D0000] sticky top-0 z-50 transition-shadow duration-300 ${scrollPosition > 10 ? 'shadow-lg' : ''}`}
       >
         <BranchNavbar />
-        
+
         {/* Search bar and cart icon - side by side on both mobile and desktop */}
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center flex-wrap gap-3">
             {/* Left Side: Search and Cart */}
             <div className="flex items-center gap-2 flex-wrap">
-              <SearchBar 
+              <SearchBar
                 key="main-search-bar"
-                className="flex-grow max-w-[280px]" 
+                className="flex-grow max-w-[280px]"
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
               />
@@ -437,8 +437,8 @@ export default function BranchStore() {
 
               <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
                 <SheetTrigger asChild>
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     className="cursor-pointer relative rounded-full px-3 py-3 shadow-md transition-all duration-300 hover:shadow-lg border-2 border-white"
                     style={{
                       background: colors.primary,
@@ -453,7 +453,7 @@ export default function BranchStore() {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="sm:max-w-md border-l-0 p-4" style={{ 
+                <SheetContent className="sm:max-w-md border-l-0 p-4" style={{
                   background: colors.background,
                   boxShadow: `-5px 0 15px rgba(139,30,63,0.1)`
                 }}>
@@ -465,7 +465,7 @@ export default function BranchStore() {
         </div>
 
       </div>
-      
+
       {/* Main content area */}
       <main className="flex-grow container mx-auto px-4 py-6">
         {loading ? (
@@ -484,9 +484,9 @@ export default function BranchStore() {
           <div className="bg-red-50 p-4 sm:p-6 rounded-lg border border-red-200 text-red-600 shadow-md max-w-lg mx-auto">
             <p className="font-medium text-center mb-4">{error}</p>
             <div className="flex justify-center">
-              <Button 
-                variant="outline" 
-                className="border-red-400 text-red-500 hover:bg-red-100" 
+              <Button
+                variant="outline"
+                className="border-red-400 text-red-500 hover:bg-red-100"
                 onClick={fetchFoodItems}
               >
                 Try Again
@@ -501,7 +501,7 @@ export default function BranchStore() {
               <p className="text-base" style={{ color: colors.primary }}>
                 No items found matching {searchTerm}
               </p>
-              <Button 
+              <Button
                 variant="ghost"
                 className="mt-3"
                 style={{ color: colors.accent }}
@@ -515,10 +515,10 @@ export default function BranchStore() {
           // Food items grid - responsive columns based on screen size
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             {filteredFoodItems.map((food) => (
-              <Card 
-                key={food.food_id} 
-                className="overflow-hidden transition-all duration-300 shadow hover:shadow-md group flex flex-col rounded-xl border-0 p-0" 
-                style={{ 
+              <Card
+                key={food.food_id}
+                className="overflow-hidden transition-all duration-300 shadow hover:shadow-md group flex flex-col rounded-xl border-0 p-0"
+                style={{
                   background: colors.card,
                   borderColor: 'rgba(139, 30, 63, 0.1)'
                 }}
@@ -527,23 +527,23 @@ export default function BranchStore() {
                 <div className="relative w-full h-40 sm:h-48 md:h-52 lg:h-56 overflow-hidden rounded-t-xl">
                   {/* Badge showing quantity if in cart */}
                   {getQuantity(food.food_id) > 0 && (
-                    <Badge 
+                    <Badge
                       className="absolute top-2 right-2 z-10 h-5 px-1.5 flex items-center justify-center text-xs font-bold"
                       style={{ background: colors.accent, color: 'white' }}
                     >
                       {getQuantity(food.food_id)}
                     </Badge>
                   )}
-                  
+
                   {food.food_image ? (
-                    <img 
-                      src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`} 
-                      alt={food.food_name} 
+                    <img
+                      src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`}
+                      alt={food.food_name}
                       className="w-full h-full object-cover block"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"
-                      style={{ 
+                      style={{
                         background: `linear-gradient(to bottom right, ${colors.primary}, ${colors.secondary})`,
                       }}>
                       <span className="text-white text-2xl sm:text-3xl font-bold">{food.food_name.charAt(0)}</span>
@@ -560,21 +560,21 @@ export default function BranchStore() {
                     ID: {food.food_id}
                   </p>
                   <p className="font-bold py-1 px-2.5 rounded-full text-xs inline-block mb-3 self-start"
-                    style={{ 
+                    style={{
                       background: colors.highlight,
                       color: colors.primary
                     }}>
                     {formatRupiah(food.price)} / CTN
                   </p>
-                
+
                   {/* Card actions - positioned at bottom */}
                   <div className="mt-auto">
                     {getQuantity(food.food_id) === 0 ? (
                       // Add to cart button when item is not in cart
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         className="cursor-pointer w-full py-1.5 text-sm rounded-full shadow group-hover:shadow-md transition-all duration-300"
-                        style={{ 
+                        style={{
                           background: `linear-gradient(135deg, ${colors.accent}, ${colors.primary})`,
                           color: 'white',
                         }}
@@ -589,8 +589,8 @@ export default function BranchStore() {
                           size="icon"
                           variant="outline"
                           className="cursor-pointer h-7 w-7 rounded-full flex-shrink-0"
-                          style={{ 
-                            borderColor: colors.primary, 
+                          style={{
+                            borderColor: colors.primary,
                             color: colors.primary
                           }}
                           onClick={() => removeFromCart(food)}
@@ -598,7 +598,7 @@ export default function BranchStore() {
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        
+
                         <div className="flex-1 flex items-center justify-center">
                           <div className="flex items-center bg-white rounded-md border px-2 py-1 w-full justify-center" style={{ borderColor: colors.primary }}>
                             <Input
@@ -623,13 +623,13 @@ export default function BranchStore() {
                             </span>
                           </div>
                         </div>
-                        
+
                         <Button
                           size="icon"
                           variant="outline"
                           className="cursor-pointer h-7 w-7 rounded-full flex-shrink-0"
-                          style={{ 
-                            borderColor: colors.primary, 
+                          style={{
+                            borderColor: colors.primary,
                             color: colors.primary
                           }}
                           onClick={() => addToCart(food)}
@@ -646,7 +646,7 @@ export default function BranchStore() {
           </div>
         )}
       </main>
-      
+
       {/* "Back to top" button - appears when scrolled down */}
       {scrollPosition > 300 && (
         <Button

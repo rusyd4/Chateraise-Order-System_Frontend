@@ -35,10 +35,10 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Icons
-import { 
-  Calendar, 
-  Search, 
-  Truck, 
+import {
+  Calendar,
+  Search,
+  Truck,
   ExternalLink,
   AlertCircle,
   X
@@ -69,18 +69,18 @@ interface PendingOrdersModalProps {
   isOpen?: boolean;
 }
 
-export default function PendingOrdersModal({ 
-  orders, 
-  onClose, 
-  onViewOrder, 
+export default function PendingOrdersModal({
+  orders,
+  onClose,
+  onViewOrder,
   title = "Pending Orders",
-  isOpen = true 
+  isOpen = true
 }: PendingOrdersModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
 
   // Filter orders based on search term
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = orders.filter(order =>
     order.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.order_id.toString().includes(searchTerm) ||
     format(new Date(order.order_date), "dd MMM yyyy").toLowerCase().includes(searchTerm.toLowerCase())
@@ -114,7 +114,7 @@ export default function PendingOrdersModal({
             View and manage all {title.toLowerCase()}
           </DialogDescription>
         </DialogHeader>
-        
+
         {/* Search and Filter Bar */}
         <div className="px-6 pb-3">
           <div className="flex items-center space-x-2">
@@ -129,7 +129,7 @@ export default function PendingOrdersModal({
             </div>
           </div>
         </div>
-        
+
         {/* Error Alert */}
         {error && (
           <div className="px-6 pb-3">
@@ -138,9 +138,9 @@ export default function PendingOrdersModal({
               <AlertTitle>Error</AlertTitle>
               <div className="flex justify-between items-center">
                 <AlertDescription>{error}</AlertDescription>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setError("")}
                   className="h-6 w-6"
                 >
@@ -155,8 +155,8 @@ export default function PendingOrdersModal({
         <div className="px-6 pb-3">
           {filteredOrders.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
-              {searchTerm 
-                ? "No matching orders found. Try modifying your search." 
+              {searchTerm
+                ? "No matching orders found. Try modifying your search."
                 : `No ${title.toLowerCase()} found.`}
             </div>
           ) : (
@@ -181,8 +181,8 @@ export default function PendingOrdersModal({
                         <TableCell>{format(new Date(order.order_date), "dd MMM yyyy")}</TableCell>
                         <TableCell>{format(new Date(order.delivery_date), "dd MMM yyyy")}</TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="default" 
+                          <Button
+                            variant="default"
                             size="sm"
                             className="cursor-pointer bg-[#6D0000] hover:bg-[#7a0000]"
                             onClick={() => handleViewOrder(order)}
@@ -195,7 +195,7 @@ export default function PendingOrdersModal({
                   </TableBody>
                 </Table>
               </div>
-              
+
               {/* Mobile Card View */}
               <div className="md:hidden space-y-3">
                 {filteredOrders.map((order) => (
@@ -205,9 +205,9 @@ export default function PendingOrdersModal({
                         <CardTitle className="text-base">
                           Order #{order.order_id}
                         </CardTitle>
-                          <Badge variant={title.includes("Pending") ? "secondary" : "default"}>
-                            {title.includes("Pending") ? "Pending" : "In Progress"}
-                          </Badge>
+                        <Badge variant={title.includes("Pending") ? "secondary" : "default"}>
+                          {title.includes("Pending") ? "Pending" : "In Progress"}
+                        </Badge>
                       </div>
                       <CardDescription>
                         {order.branch_name}
@@ -220,7 +220,7 @@ export default function PendingOrdersModal({
                           Order Date:
                         </div>
                         <div>{format(new Date(order.order_date), "dd MMM yyyy")}</div>
-                        
+
                         <div className="flex items-center text-muted-foreground">
                           <Truck className="h-3.5 w-3.5 mr-1" />
                           Delivery Date:
@@ -229,8 +229,8 @@ export default function PendingOrdersModal({
                       </div>
                     </CardContent>
                     <CardFooter className="p-4 pt-2 flex justify-end">
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         size="sm"
                         className="bg-[#6D0000] hover:bg-[#7a0000]"
                         onClick={() => handleViewOrder(order)}
@@ -245,7 +245,7 @@ export default function PendingOrdersModal({
             </ScrollArea>
           )}
         </div>
-        
+
         <DialogFooter className="px-6 py-4 border-t">
           <Button variant="outline" onClick={onClose}>
             Close

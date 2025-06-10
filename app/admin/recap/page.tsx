@@ -290,9 +290,9 @@ export default function AdminRecap() {
       <Navbar />
 
       <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
-      <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
+        <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
-              <div>
+            <div>
               <h1 className="text-2xl font-bold text-white">Orders Recap</h1>
               <p className="text-sm text-white mt-1">Filter orders by date</p>
             </div>
@@ -306,9 +306,8 @@ export default function AdminRecap() {
               transition-all duration-300 shadow-sm hover:shadow-md"
             >
               <RefreshCw
-                className={`h-4 w-4 transition-transform duration-300 hover:rotate-180 ${
-                  isRefreshing ? "animate-spin" : ""
-                }`}
+                className={`h-4 w-4 transition-transform duration-300 hover:rotate-180 ${isRefreshing ? "animate-spin" : ""
+                  }`}
               />
             </Button>
           </div>
@@ -408,46 +407,44 @@ export default function AdminRecap() {
 
                 {/* Second row: Quick selection and export buttons */}
                 <div className="flex flex-wrap gap-3">
-                <Button
-                  className={`cursor-pointer w-auto bg-white text-[#6D0000] border border-[#6D0000] hover:bg-[#6D0000] hover:text-white rounded-full transition-all duration-200 hover:shadow-md ${
-                    appliedDateRange.from &&
-                    appliedDateRange.to &&
-                    (() => {
-                      const now = new Date();
-                      const last7From = new Date();
-                      last7From.setDate(now.getDate() - 7);
-                      // Normalize dates for comparison
-                      const appliedFrom = new Date(appliedDateRange.from);
-                      const appliedTo = new Date(appliedDateRange.to);
-                      appliedFrom.setHours(0, 0, 0, 0);
-                      appliedTo.setHours(23, 59, 59, 999);
-                      last7From.setHours(0, 0, 0, 0);
-                      now.setHours(23, 59, 59, 999);
-                      if (
-                        appliedFrom.getTime() === last7From.getTime() &&
-                        appliedTo.getTime() === now.getTime()
-                      ) {
-                        return "bg-[#6D0000] text-white";
-                      }
-                      return "bg-white text-[#6D0000] hover:bg-[#6D0000] hover:text-white";
-                    })()
-                  }`}
-                  onClick={() => {
-                    const to = new Date();
-                    const from = new Date();
-                    from.setDate(from.getDate() - 7);
-                    setDateRange({ from, to });
-                    setAppliedDateRange({ from, to });
-                  }}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  Last 7 Days
-                </Button>
+                  <Button
+                    className={`cursor-pointer w-auto bg-white text-[#6D0000] border border-[#6D0000] hover:bg-[#6D0000] hover:text-white rounded-full transition-all duration-200 hover:shadow-md ${appliedDateRange.from &&
+                      appliedDateRange.to &&
+                      (() => {
+                        const now = new Date();
+                        const last7From = new Date();
+                        last7From.setDate(now.getDate() - 7);
+                        // Normalize dates for comparison
+                        const appliedFrom = new Date(appliedDateRange.from);
+                        const appliedTo = new Date(appliedDateRange.to);
+                        appliedFrom.setHours(0, 0, 0, 0);
+                        appliedTo.setHours(23, 59, 59, 999);
+                        last7From.setHours(0, 0, 0, 0);
+                        now.setHours(23, 59, 59, 999);
+                        if (
+                          appliedFrom.getTime() === last7From.getTime() &&
+                          appliedTo.getTime() === now.getTime()
+                        ) {
+                          return "bg-[#6D0000] text-white";
+                        }
+                        return "bg-white text-[#6D0000] hover:bg-[#6D0000] hover:text-white";
+                      })()
+                      }`}
+                    onClick={() => {
+                      const to = new Date();
+                      const from = new Date();
+                      from.setDate(from.getDate() - 7);
+                      setDateRange({ from, to });
+                      setAppliedDateRange({ from, to });
+                    }}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    Last 7 Days
+                  </Button>
 
 
                   <Button
-                  className={`cursor-pointer w-auto bg-white text-[#6D0000] border border-[#6D0000] hover:bg-[#6D0000] hover:text-white rounded-full transition-all duration-200 hover:shadow-md ${
-                    appliedDateRange.from &&
+                    className={`cursor-pointer w-auto bg-white text-[#6D0000] border border-[#6D0000] hover:bg-[#6D0000] hover:text-white rounded-full transition-all duration-200 hover:shadow-md ${appliedDateRange.from &&
                       appliedDateRange.to &&
                       (() => {
                         const now = new Date();
@@ -468,7 +465,7 @@ export default function AdminRecap() {
                         }
                         return "bg-white text-[#6D0000] hover:bg-[#6D0000] hover:text-white";
                       })()
-                    }`}
+                      }`}
                     onClick={() => {
                       const to = new Date();
                       const from = new Date();

@@ -4,15 +4,15 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "@/lib/api";
 import Navbar from "../../components/AdminNavbar";
-import { 
-  Edit, 
-  Trash2, 
-  Plus, 
-  Store, 
-  AlertCircle, 
-  Search, 
-  Mail, 
-  Clock, 
+import {
+  Edit,
+  Trash2,
+  Plus,
+  Store,
+  AlertCircle,
+  Search,
+  Mail,
+  Clock,
   MapPin,
   User,
   Lock,
@@ -172,29 +172,29 @@ export default function AdminBranch() {
       setFormError("Branch name is required");
       return false;
     }
-    
+
     if (!formEmail.trim()) {
       setFormError("Email address is required");
       return false;
     }
-    
+
     // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formEmail)) {
       setFormError("Please enter a valid email address");
       return false;
     }
-    
+
     if (!editingBranchId && !formPassword) {
       setFormError("Password is required for new branches");
       return false;
     }
-    
+
     if (!formBranchAddress.trim()) {
       setFormError("Branch address is required");
       return false;
     }
-    
+
     return true;
   }
 
@@ -223,11 +223,11 @@ export default function AdminBranch() {
           method: "PUT",
           body: JSON.stringify(body),
         });
-        
+
         setBranches((prev) =>
           prev.map((b) => (b.user_id === editingBranchId ? { ...b, ...updatedBranch } : b))
         );
-        
+
         toast.success("Branch updated successfully");
         resetForm();
         setIsModalOpen(false);
@@ -244,7 +244,7 @@ export default function AdminBranch() {
             delivery_time: formDeliveryTime,
           }),
         });
-        
+
         toast.success("Branch created successfully");
         resetForm();
         fetchBranches();
@@ -278,15 +278,15 @@ export default function AdminBranch() {
 
   async function confirmDelete() {
     if (branchIdToDelete === null) return;
-    
+
     try {
       await apiFetch(`/admin/branches/${branchIdToDelete}`, {
         method: "DELETE",
       });
-      
+
       setBranches((prev) => prev.filter((b) => b.user_id !== branchIdToDelete));
       setFilteredBranches((prev) => prev.filter((b) => b.user_id !== branchIdToDelete));
-      
+
       toast.success("Branch deleted successfully");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
@@ -302,7 +302,7 @@ export default function AdminBranch() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  
+
   const totalPages = Math.ceil(filteredBranches.length / itemsPerPage);
 
   // Handle page change
@@ -322,9 +322,9 @@ export default function AdminBranch() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-        <Navbar />
-      
-        <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
+      <Navbar />
+
+      <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
@@ -334,8 +334,8 @@ export default function AdminBranch() {
               </h1>
               <p className="text-sm text-white mt-1">Add, edit, and manage your branch locations</p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="icon"
               onClick={fetchBranches}
               title="Refresh Data"
@@ -362,9 +362,9 @@ export default function AdminBranch() {
                   </span>
                 </div>
               </div>
-              <Button 
-                onClick={openAddModal} 
-                size="sm" 
+              <Button
+                onClick={openAddModal}
+                size="sm"
                 className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 gap-2"
               >
                 <Plus size={16} />
@@ -424,10 +424,10 @@ export default function AdminBranch() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={fetchBranches} 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchBranches}
                     className="mt-2 hover:bg-red-50"
                   >
                     Retry
@@ -444,8 +444,8 @@ export default function AdminBranch() {
                       <p className="text-gray-500">
                         No branches match your search {searchQuery}
                       </p>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setSearchQuery("")}
                         className="mt-2 border-[#6D0000]/20 text-[#6D0000] hover:bg-[#6D0000]/5 transition-all duration-300"
                       >
@@ -458,7 +458,7 @@ export default function AdminBranch() {
                       <p className="text-gray-500">
                         Get started by adding your first branch
                       </p>
-                      <Button 
+                      <Button
                         onClick={openAddModal}
                         className="mt-2 bg-[#6D0000] hover:bg-[#800000] transition-all duration-300"
                       >
@@ -560,12 +560,12 @@ export default function AdminBranch() {
                     <Pagination className="mt-6">
                       <PaginationContent>
                         <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                          <PaginationPrevious
+                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                             className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-[#6D0000] transition-colors duration-200"}
                           />
                         </PaginationItem>
-                        
+
                         {[...Array(totalPages)].map((_, i) => {
                           const pageNumber = i + 1;
                           // Show current page, first, last, and nearby pages
@@ -586,7 +586,7 @@ export default function AdminBranch() {
                               </PaginationItem>
                             );
                           }
-                          
+
                           // Show ellipsis for gaps
                           if (
                             (pageNumber === 2 && currentPage > 3) ||
@@ -598,12 +598,12 @@ export default function AdminBranch() {
                               </PaginationItem>
                             );
                           }
-                          
+
                           return null;
                         })}
-                        
+
                         <PaginationItem>
-                          <PaginationNext 
+                          <PaginationNext
                             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                             className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-[#6D0000] transition-colors duration-200"}
                           />
@@ -630,7 +630,7 @@ export default function AdminBranch() {
                   : "Fill in the details to create a new branch"}
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="grid gap-6 p-6">
               {formError && (
                 <Alert variant="destructive" className="animate-pulse">
@@ -639,7 +639,7 @@ export default function AdminBranch() {
                   <AlertDescription>{formError}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="branchName" className="flex items-center gap-2 text-sm font-medium">
@@ -654,7 +654,7 @@ export default function AdminBranch() {
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
                     <Mail className="h-4 w-4 text-[#6D0000]" />
@@ -669,7 +669,7 @@ export default function AdminBranch() {
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
                     <Lock className="h-4 w-4 text-[#6D0000]" />
@@ -685,7 +685,7 @@ export default function AdminBranch() {
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="branchAddress" className="flex items-center gap-2 text-sm font-medium">
                     <MapPin className="h-4 w-4 text-[#6D0000]" />
@@ -699,7 +699,7 @@ export default function AdminBranch() {
                     className="border-gray-200 focus:border-[#6D0000] focus:ring-[#6D0000]/10 transition-all duration-200"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="deliveryTime" className="flex items-center gap-2 text-sm font-medium">
                     <Clock className="h-4 w-4 text-[#6D0000]" />
@@ -714,17 +714,17 @@ export default function AdminBranch() {
                   />
                 </div>
               </div>
-            
+
               <DialogFooter className="gap-2 mt-2 flex-row justify-end">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsModalOpen(false)}
                   className="cursor-pointer border-gray-200 hover:bg-gray-50 transition-all duration-200"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   className="cursor-pointer bg-[#6D0000] hover:bg-[#800000] transition-all duration-200 hover:shadow-md"
                 >
@@ -743,13 +743,13 @@ export default function AdminBranch() {
                 <AlertDialogTitle className="text-xl font-semibold">Delete Branch</AlertDialogTitle>
               </AlertDialogHeader>
             </div>
-            
+
             <div className="p-6">
               <AlertDialogDescription className="text-gray-700 py-4">
                 This action cannot be undone. This will permanently delete the branch and remove all
                 associated data from our servers.
               </AlertDialogDescription>
-              
+
               <AlertDialogFooter className="gap-2 mt-6 flex-row justify-end">
                 <AlertDialogCancel className="cursor-pointer border-gray-200 hover:bg-gray-50 transition-all duration-200">
                   Cancel
