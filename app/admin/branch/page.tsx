@@ -47,6 +47,11 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -494,10 +499,17 @@ export default function AdminBranch() {
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
                               {branch.branch_address ? (
-                                <span className="flex items-center gap-2 text-gray-600">
-                                  <MapPin className="h-4 w-4 text-gray-400 group-hover:text-[#6D0000]/60 transition-colors duration-200" />
-                                  {branch.branch_address}
-                                </span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="flex items-center gap-2 text-gray-600 max-w-[200px] truncate">
+                                      <MapPin className="h-4 w-4 text-gray-400 group-hover:text-[#6D0000]/60 transition-colors duration-200" />
+                                      {branch.branch_address}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-[300px]">
+                                    {branch.branch_address}
+                                  </TooltipContent>
+                                </Tooltip>
                               ) : (
                                 <Badge variant="outline" className="text-gray-500 border-gray-200">
                                   Not specified
