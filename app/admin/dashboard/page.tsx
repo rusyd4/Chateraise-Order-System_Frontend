@@ -47,7 +47,8 @@ import {
   RefreshCw,
   ArrowRight,
   ChevronRight,
-  CircleCheckBig
+  CircleCheckBig,
+  FileText
 } from "lucide-react";
 
 // Components
@@ -115,7 +116,8 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState({
     pending: false,
     inProgress: false,
-    filtered: false
+    filtered: false,
+    exportingPDF: false
   });
 
   const [errors, setErrors] = useState({
@@ -264,6 +266,119 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error generating PDF:", error);
       setErrors(prev => ({ ...prev, filtered: "Failed to generate PDF: " + String(error) }));
+    }
+  }
+
+  async function handleExportAllPendingOrdersToPDF() {
+    console.log('PDF Export button clicked!'); // Debug log
+    
+    if (orders.length === 0) {
+      setErrors(prev => ({ ...prev, pending: "No pending orders to export" }));
+      return;
+    }
+
+    // Set loading state
+    setIsLoading(prev => ({ ...prev, exportingPDF: true }));
+    setErrors(prev => ({ ...prev, pending: "" })); // Clear previous errors
+
+    try {
+      console.log(`Starting PDF export for ${orders.length} orders`); // Debug log
+      
+      // Process each order individually
+      for (let i = 0; i < orders.length; i++) {
+        const order = orders[i];
+        console.log(`Processing order ${i + 1}/${orders.length}: Order ID ${order.order_id}`); // Debug log
+        
+        // Set up the order for rendering (same as handleViewOrder)
+        const orderWithItems = {
+          ...order,
+          items: (order as any).items || [],
+        };
+        
+        // Set filtered orders to current order and open modal for rendering
+        setFilteredOrders([orderWithItems]);
+        setIsOrderDetailsOpen(true);
+        
+        // Wait for the DOM to update and modal to render
+        console.log('Waiting for modal to render...');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Check if printRef is available after modal renders
+        if (!printRef.current) {
+          console.warn(`Print ref not available for order ${order.order_id} after modal render`);
+          continue;
+        }
+
+        console.log('Modal rendered, printRef available');
+
+        // Update order status to 'In-progress' only if current status is 'pending'
+        const isPending = orders.some(o => o.order_id === order.order_id);
+        if (isPending) {
+          try {
+            console.log(`Updating status for order ${order.order_id}`); // Debug log
+            await apiFetch(`/admin/orders/${order.order_id}/status/in-progress`, {
+              method: "PUT",
+            });
+          } catch (error) {
+            console.error(`Failed to update order ${order.order_id} status:`, error);
+            // Continue with PDF generation even if status update fails
+          }
+        }
+
+        // Generate PDF for this order (following original handleSaveAsPDF pattern)
+        console.log(`Generating PDF for order ${order.order_id}`); // Debug log
+        const element = printRef.current;
+        const canvas = await html2canvas(element, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "pt",
+          format: [canvas.width, canvas.height],
+        });
+        pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+
+        // Generate filename for this specific order
+        const branchName = order.branch_name.replace(/\s+/g, '_');
+        const deliveryDateObj = new Date(order.delivery_date);
+        const formattedDeliveryDate = deliveryDateObj.toISOString().split('T')[0].replace(/-/g, '_');
+        const filename = `${branchName}-${formattedDeliveryDate}-Order${order.order_id}.pdf`;
+
+        pdf.save(filename);
+        console.log(`Saved PDF: ${filename}`); // Debug log
+
+        // Close modal between orders
+        setIsOrderDetailsOpen(false);
+        
+        // Wait a bit between PDFs to avoid overwhelming the browser
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Clear filtered orders and close modal
+      setFilteredOrders([]);
+      setIsOrderDetailsOpen(false);
+
+      // Refresh orders after all updates
+      fetchPendingOrders();
+      fetchInProgressOrders();
+      fetchFinishedOrders();
+
+      console.log(`Successfully exported ${orders.length} PDF files!`);
+      
+      // Show success message
+      setErrors(prev => ({ ...prev, pending: `Successfully exported ${orders.length} PDF files!` }));
+      setTimeout(() => {
+        setErrors(prev => ({ ...prev, pending: "" }));
+      }, 5000);
+
+    } catch (error) {
+      console.error("Error generating PDFs:", error);
+      setErrors(prev => ({ ...prev, pending: "Failed to generate PDFs: " + String(error) }));
+      // Clean up on error
+      setFilteredOrders([]);
+      setIsOrderDetailsOpen(false);
+    } finally {
+      // Always clear loading state
+      setIsLoading(prev => ({ ...prev, exportingPDF: false }));
     }
   }
 
@@ -465,15 +580,38 @@ export default function AdminDashboard() {
               </div>
               <h3 className="text-sm font-medium text-gray-900">Pending Orders</h3>
               <p className="text-xs text-gray-500 mt-1">Waiting for processing</p>
-              <Button
-                variant="link"
-                size="sm"
-                onClick={() => setIsPendingOrdersOpen(true)}
-                className="cursor-pointer mt-4 px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
-              >
-                View all
-                <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-              </Button>
+              <div className="flex flex-row items-center justify-between gap-2 mt-4">
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => setIsPendingOrdersOpen(true)}
+                  className="cursor-pointer px-0 text-[#6D0000] hover:text-[#8B0000] transition-all duration-300 hover:translate-x-1"
+                >
+                  View all
+                  <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                </Button>
+                {orders.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportAllPendingOrdersToPDF}
+                    disabled={isLoading.exportingPDF}
+                    className="cursor-pointer text-xs bg-[#6D0000] text-white hover:bg-[#8B0000] border-[#6D0000] hover:border-[#8B0000] transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading.exportingPDF ? (
+                      <span className="flex items-center">
+                        <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                        Exporting...
+                      </span>
+                    ) : (
+                      <span className="flex items-center">
+                        <FileText className="h-3 w-3 mr-1" />
+                        Export All to PDF
+                      </span>
+                    )}
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 
