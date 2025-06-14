@@ -51,7 +51,6 @@ import {
 } from "lucide-react";
 
 // Components
-import Navbar from "../../components/AdminNavbar";
 import OrderDetailsModal from "./OrderDetailsModal";
 import PendingOrdersModal from "./ViewOrdersModal";
 import { cn } from "@/lib/utils";
@@ -408,10 +407,7 @@ export default function AdminDashboard() {
 
   // Main render
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-      <Navbar />
-
-      <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
+    <div className="space-y-6 md:space-y-8">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-8">
           <div className="flex justify-between items-center">
@@ -755,7 +751,6 @@ export default function AdminDashboard() {
         {errors.inProgress && renderErrorAlert(errors.inProgress, () =>
           setErrors(prev => ({ ...prev, inProgress: "" }))
         )}
-      </main>
 
       {/* Modals */}
       {/* Order Details Modal */}

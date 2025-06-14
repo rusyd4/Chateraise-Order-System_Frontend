@@ -44,7 +44,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Existing imports
 import apiFetch from "../../../lib/api";
-import Navbar from "../../components/AdminNavbar";
+// Removed Navbar import as it's now handled by the layout
 
 interface OrderItem {
   food_id: number;
@@ -286,10 +286,7 @@ export default function AdminRecap() {
   const totalItemQuantity = items.reduce((acc, item) => acc + item.total, 0);
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
-      <Navbar />
-
-      <main className="flex-1 p-6 pt-24 md:pt-6 md:ml-64 space-y-8">
+    <div className="space-y-6 md:space-y-8">
         <div className="bg-gradient-to-r from-[#a52422] to-[#6D0000] rounded-xl px-6 py-5 shadow-md mb-6">
           <div className="flex justify-between items-center">
             <div>
@@ -743,7 +740,6 @@ export default function AdminRecap() {
             )}
           </AnimatePresence>
         )}
-      </main>
     </div>
   );
 }
