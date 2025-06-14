@@ -313,72 +313,63 @@ export default function BranchNavbar() {
         </div>
       </nav>
 
-      {/* Enhanced QR Scanner Dialog */}
+      {/* QR Scanner Dialog */}
       <Dialog open={scannerOpen} onOpenChange={setScannerOpenState}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader className="space-y-3">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Camera className="h-6 w-6 text-blue-600" />
-            </div>
-            <DialogTitle className="text-center text-xl font-semibold">Scan QR Code</DialogTitle>
-            <DialogDescription className="text-center text-gray-600">
-              Point your camera at the QR code or upload an image to scan
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              Scan QR Code
+            </DialogTitle>
+            <DialogDescription>
+              Scan a QR code to view order details
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
-            {/* Camera View */}
-            <div className="relative bg-black rounded-xl overflow-hidden aspect-square">
+            {scanError && (
+              <Badge variant="destructive" className="w-full justify-center">
+                {scanError}
+              </Badge>
+            )}
+
+            <div className="relative aspect-square bg-black rounded-lg overflow-hidden">
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"
-                playsInline
                 muted
+                playsInline
               />
-              {scanError && (
-                <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-4">
-                  <div className="text-center text-white">
-                    <X className="h-8 w-8 mx-auto mb-2 text-red-400" />
-                    <p className="text-sm">{scanError}</p>
-                  </div>
-                </div>
-              )}
+              <div className="absolute inset-0 border-4 border-primary/50 rounded-lg pointer-events-none" />
             </div>
 
-            {/* File Upload Option */}
-            <div className="relative">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="sr-only"
-                id="qr-upload"
-              />
-              <label
-                htmlFor="qr-upload"
-                className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100"
-              >
-                <div className="text-center">
-                  <Upload className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-600">
-                    Upload QR Code Image
-                  </span>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Click to select an image file
-                  </p>
-                </div>
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative w-full h-px bg-border">
+                <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-background text-sm text-muted-foreground">
+                  OR
+                </span>
+              </div>
+
+              <label htmlFor="qr-upload" className="w-full">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="qr-upload"
+                />
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  asChild
+                >
+                  <div>
+                    <Upload className="h-4 w-4" />
+                    Upload QR Image
+                  </div>
+                </Button>
               </label>
             </div>
-          </div>
-
-          <div className="flex justify-center pt-4">
-            <Button 
-              onClick={() => setScannerOpen(false)}
-              variant="outline"
-              className="px-8 transition-all duration-200 hover:shadow-md"
-            >
-              Cancel
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
