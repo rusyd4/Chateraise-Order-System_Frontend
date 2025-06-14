@@ -1,0 +1,201 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Component Patterns & shadcn/ui Usage
+
+## shadcn/ui Component Library
+The project uses shadcn/ui components located in [components/ui/](mdc:components/ui/). These are pre-built, accessible components based on Radix UI primitives.
+
+### Available UI Components
+- **Layout**: [Card](mdc:components/ui/card.tsx), [Separator](mdc:components/ui/separator.tsx), [Sheet](mdc:components/ui/sheet.tsx), [Tabs](mdc:components/ui/tabs.tsx)
+- **Forms**: [Form](mdc:components/ui/form.tsx), [Input](mdc:components/ui/input.tsx), [Label](mdc:components/ui/label.tsx), [Textarea](mdc:components/ui/textarea.tsx), [Checkbox](mdc:components/ui/checkbox.tsx), [Select](mdc:components/ui/select.tsx)
+- **Feedback**: [Alert](mdc:components/ui/alert.tsx), [Alert Dialog](mdc:components/ui/alert-dialog.tsx), [Dialog](mdc:components/ui/dialog.tsx), [Sonner](mdc:components/ui/sonner.tsx), [Tooltip](mdc:components/ui/tooltip.tsx)
+- **Navigation**: [Button](mdc:components/ui/button.tsx), [Dropdown Menu](mdc:components/ui/dropdown-menu.tsx), [Pagination](mdc:components/ui/pagination.tsx)
+- **Data Display**: [Table](mdc:components/ui/table.tsx), [Badge](mdc:components/ui/badge.tsx), [Avatar](mdc:components/ui/avatar.tsx), [Calendar](mdc:components/ui/calendar.tsx)
+- **Utility**: [Popover](mdc:components/ui/popover.tsx), [Scroll Area](mdc:components/ui/scroll-area.tsx), [Skeleton](mdc:components/ui/skeleton.tsx)
+
+### Component Usage Patterns
+
+#### Button Component
+```tsx
+import { Button } from "@/components/ui/button"
+
+// Variants: default, destructive, outline, secondary, ghost, link
+<Button variant="default" size="default">
+  Click me
+</Button>
+```
+
+#### Form Components with React Hook Form
+```tsx
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import * as z from "zod"
+
+const formSchema = z.object({
+  email: z.string().email(),
+})
+
+function MyForm() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+  })
+
+  return (
+    <Form {...form}>
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </Form>
+  )
+}
+```
+
+#### Dialog Pattern
+```tsx
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open Dialog</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Dialog Title</DialogTitle>
+    </DialogHeader>
+    {/* Dialog content */}
+  </DialogContent>
+</Dialog>
+```
+
+#### Toast Notifications
+```tsx
+import { toast } from "sonner"
+
+// Success toast
+toast.success("Operation completed successfully")
+
+// Error toast
+toast.error("Something went wrong")
+
+// Custom toast
+toast("Custom message", {
+  description: "Additional details",
+  action: {
+    label: "Undo",
+    onClick: () => console.log("Undo"),
+  },
+})
+```
+
+## Custom Component Patterns
+
+### Page Layout Pattern
+```tsx
+export default function PageName() {
+  return (
+    <div className="container mx-auto p-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Page Title</h1>
+        <Button>Action Button</Button>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Section Title</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Page content */}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+```
+
+### Loading State Pattern
+```tsx
+import { Skeleton } from "@/components/ui/skeleton"
+
+function LoadingComponent() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+  )
+}
+```
+
+### Error Boundary Pattern
+```tsx
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+
+function ErrorDisplay({ error }: { error: string }) {
+  return (
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Error</AlertTitle>
+      <AlertDescription>{error}</AlertDescription>
+    </Alert>
+  )
+}
+```
+
+## Component Configuration
+The shadcn/ui configuration is stored in [components.json](mdc:components.json), which defines:
+- Component installation paths
+- Tailwind CSS configuration
+- TypeScript path mapping
+- Style preferences
+
+## Styling Utilities
+Use the `cn()` utility from [lib/utils.ts](mdc:lib/utils.ts) for conditional styling:
+
+```tsx
+import { cn } from "@/lib/utils"
+
+<div className={cn(
+  "base-styles",
+  condition && "conditional-styles",
+  variant === "primary" && "primary-styles"
+)}>
+```
+
+## Icon Usage
+The project uses Lucide React icons. Import and use them consistently:
+
+```tsx
+import { ChevronDown, User, Settings } from "lucide-react"
+
+<Button>
+  <User className="mr-2 h-4 w-4" />
+  Profile
+</Button>
+```
+
+## Responsive Design
+Use Tailwind's responsive prefixes consistently:
+
+```tsx
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {/* Responsive grid */}
+</div>
+```

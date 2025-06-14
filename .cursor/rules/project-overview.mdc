@@ -1,0 +1,64 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Chateraise Order System - Project Overview
+
+This is a Next.js 15 TypeScript frontend application for managing orders in the Chateraise system. The project uses modern web technologies and follows Next.js App Router conventions.
+
+## Tech Stack
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui with Radix UI primitives
+- **Forms**: React Hook Form with Zod validation
+- **State Management**: React hooks and context
+- **Icons**: Lucide React
+- **Theming**: next-themes for dark/light mode
+- **Notifications**: Sonner for toast notifications
+
+## Project Structure
+
+### Core Application Files
+- [package.json](mdc:package.json) - Project dependencies and scripts
+- [next.config.ts](mdc:next.config.ts) - Next.js configuration
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration
+- [eslint.config.mjs](mdc:eslint.config.mjs) - ESLint configuration
+- [postcss.config.mjs](mdc:postcss.config.mjs) - PostCSS configuration
+
+### App Directory (Next.js App Router)
+- [app/layout.tsx](mdc:app/layout.tsx) - Root layout component with global styles and Toaster
+- [app/page.tsx](mdc:app/page.tsx) - Homepage component
+- [app/globals.css](mdc:app/globals.css) - Global CSS styles and Tailwind imports
+- [app/admin/](mdc:app/admin/) - Admin-specific pages and functionality
+- [app/branch/](mdc:app/branch/) - Branch management pages
+- [app/login/](mdc:app/login/) - Authentication pages
+
+### Components
+- [components/ui/](mdc:components/ui/) - shadcn/ui component library (reusable UI primitives)
+- [components.json](mdc:components.json) - shadcn/ui configuration file
+
+### Utilities and Configuration
+- [lib/utils.ts](mdc:lib/utils.ts) - Utility functions and helpers
+- [lib/api.ts](mdc:lib/api.ts) - API utilities and HTTP client functions
+- [lib/hooks/](mdc:lib/hooks/) - Custom React hooks
+
+## Key Features
+- Admin dashboard functionality
+- Branch management system
+- User authentication (login system)
+- PDF generation capabilities (jsPDF, html2pdf)
+- QR code scanning functionality
+- Excel file processing (xlsx)
+- Form handling with validation
+- Responsive design with dark/light theme support
+
+## Development Commands
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Deployment
+The project includes Docker configuration ([Dockerfile](mdc:Dockerfile)) and GitHub Actions workflows ([.github/](mdc:.github/)) for CI/CD.

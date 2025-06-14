@@ -1,0 +1,85 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Coding Standards & Best Practices
+
+## TypeScript Guidelines
+- Use strict TypeScript configuration as defined in [tsconfig.json](mdc:tsconfig.json)
+- Always provide explicit types for function parameters and return values
+- Use interface definitions for complex object structures
+- Prefer `type` for unions and primitives, `interface` for object shapes
+- Use proper generic constraints when creating reusable components
+
+## Next.js App Router Conventions
+- Place pages in the `app/` directory following App Router structure
+- Use `layout.tsx` for shared layouts at each route level
+- Implement `loading.tsx`, `error.tsx`, and `not-found.tsx` as needed
+- Use Server Components by default, mark Client Components with `'use client'`
+- Follow Next.js file naming conventions (page.tsx, layout.tsx, etc.)
+
+## Component Architecture
+- Create reusable UI components in [components/ui/](mdc:components/ui/)
+- Follow shadcn/ui patterns for component structure and props
+- Use forwardRef for components that need DOM access
+- Implement proper TypeScript interfaces for component props
+- Use compound component patterns where appropriate
+
+## Styling Guidelines
+- Use Tailwind CSS classes for styling
+- Follow the utility-first approach
+- Use [lib/utils.ts](mdc:lib/utils.ts) `cn()` function for conditional classes
+- Implement responsive design using Tailwind's responsive prefixes
+- Use CSS variables for custom theme colors
+- Follow shadcn/ui design system conventions
+
+## State Management
+- Use React hooks (useState, useEffect, useContext) for local state
+- Create custom hooks in [lib/hooks/](mdc:lib/hooks/) for shared logic
+- Use React Hook Form with Zod validation for form management
+- Implement proper loading and error states
+- Use React Suspense for data fetching when appropriate
+
+## API Integration
+- Use the utilities in [lib/api.ts](mdc:lib/api.ts) for HTTP requests
+- Implement proper error handling for API calls
+- Use proper TypeScript types for API responses
+- Handle loading states consistently across the application
+- Implement proper caching strategies where needed
+
+## Form Handling
+- Use React Hook Form with Zod validation
+- Create reusable form schemas using Zod
+- Implement proper form validation and error display
+- Use shadcn/ui form components from [components/ui/form.tsx](mdc:components/ui/form.tsx)
+- Handle form submission states (loading, success, error)
+
+## Code Organization
+- Group related functionality in logical directories
+- Use barrel exports (index.ts files) where appropriate
+- Keep components small and focused on single responsibilities
+- Separate business logic from presentation components
+- Use proper file naming conventions (kebab-case for files, PascalCase for components)
+
+## Error Handling
+- Implement proper error boundaries
+- Use toast notifications from Sonner for user feedback
+- Handle async operations with proper try-catch blocks
+- Provide meaningful error messages to users
+- Log errors appropriately for debugging
+
+## Performance
+- Use Next.js Image component for optimized images
+- Implement proper code splitting with dynamic imports
+- Use React.memo() for expensive components
+- Optimize bundle size by importing only needed functions
+- Use proper loading strategies for large datasets
+
+## Accessibility
+- Use semantic HTML elements
+- Implement proper ARIA attributes
+- Ensure keyboard navigation works correctly
+- Provide alt text for images
+- Use proper heading hierarchy
+- Test with screen readers

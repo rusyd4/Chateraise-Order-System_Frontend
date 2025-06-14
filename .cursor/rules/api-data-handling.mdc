@@ -1,0 +1,314 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# API Integration & Data Handling
+
+## API Utilities
+Use the centralized API utilities in [lib/api.ts](mdc:lib/api.ts) for all HTTP requests.
+
+### API Request Patterns
+```tsx
+import { api } from "@/lib/api"
+
+// GET request
+const fetchData = async () => {
+  try {
+    const response = await api.get('/endpoint')
+    return response.data
+  } catch (error) {
+    console.error('API Error:', error)
+    throw error
+  }
+}
+
+// POST request
+const createData = async (data: any) => {
+  try {
+    const response = await api.post('/endpoint', data)
+    return response.data
+  } catch (error) {
+    console.error('API Error:', error)
+    throw error
+  }
+}
+```
+
+## Data Fetching Patterns
+
+### Server Components (Preferred)
+```tsx
+// app/page.tsx
+async function ServerComponent() {
+  const data = await fetchData()
+  
+  return (
+    <div>
+      {data.map(item => (
+        <div key={item.id}>{item.name}</div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Client Components with Hooks
+```tsx
+'use client'
+
+import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
+
+function ClientComponent() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        const result = await fetchData()
+        setData(result)
+      } catch (err) {
+        setError(err)
+        toast.error('Failed to load data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  if (loading) return <Skeleton />
+  if (error) return <ErrorDisplay error={error.message} />
+  
+  return <div>{/* Render data */}</div>
+}
+```
+
+## Order System Specific Features
+
+### PDF Generation
+The project includes PDF generation capabilities using jsPDF and html2pdf:
+
+```tsx
+import jsPDF from 'jspdf'
+import html2pdf from 'html2pdf.js'
+
+// Generate PDF from HTML element
+const generatePDF = (elementId: string, filename: string) => {
+  const element = document.getElementById(elementId)
+  const options = {
+    margin: 1,
+    filename: `${filename}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  }
+  
+  html2pdf().from(element).set(options).save()
+}
+
+// Generate PDF programmatically
+const createPDF = (data: any) => {
+  const doc = new jsPDF()
+  doc.text('Order Summary', 20, 20)
+  // Add content to PDF
+  doc.save('order-summary.pdf')
+}
+```
+
+### QR Code Scanning
+The project includes QR code scanning functionality:
+
+```tsx
+import QrScanner from 'qr-scanner'
+
+const scanQRCode = async (videoElement: HTMLVideoElement) => {
+  try {
+    const qrScanner = new QrScanner(
+      videoElement,
+      (result) => {
+        console.log('QR Code detected:', result)
+        // Handle QR code data
+      },
+      {
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
+      }
+    )
+    
+    await qrScanner.start()
+    return qrScanner
+  } catch (error) {
+    console.error('QR Scanner error:', error)
+    toast.error('Failed to start QR scanner')
+  }
+}
+```
+
+### Excel File Processing
+Handle Excel file operations using the xlsx library:
+
+```tsx
+import * as XLSX from 'xlsx'
+
+// Read Excel file
+const readExcelFile = (file: File) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer)
+        const workbook = XLSX.read(data, { type: 'array' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const jsonData = XLSX.utils.sheet_to_json(worksheet)
+        resolve(jsonData)
+      } catch (error) {
+        reject(error)
+      }
+    }
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+// Export data to Excel
+const exportToExcel = (data: any[], filename: string) => {
+  const worksheet = XLSX.utils.json_to_sheet(data)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data')
+  XLSX.writeFile(workbook, `${filename}.xlsx`)
+}
+```
+
+## Form Data Handling
+
+### Order Form Pattern
+```tsx
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
+const orderSchema = z.object({
+  customerName: z.string().min(1, 'Customer name is required'),
+  items: z.array(z.object({
+    name: z.string(),
+    quantity: z.number().min(1),
+    price: z.number().positive(),
+  })),
+  totalAmount: z.number().positive(),
+  orderDate: z.date(),
+})
+
+type OrderForm = z.infer<typeof orderSchema>
+
+function OrderForm() {
+  const form = useForm<OrderForm>({
+    resolver: zodResolver(orderSchema),
+    defaultValues: {
+      items: [],
+      totalAmount: 0,
+    }
+  })
+
+  const onSubmit = async (data: OrderForm) => {
+    try {
+      await createOrder(data)
+      toast.success('Order created successfully')
+      form.reset()
+    } catch (error) {
+      toast.error('Failed to create order')
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {/* Form fields */}
+      </form>
+    </Form>
+  )
+}
+```
+
+## Error Handling
+
+### API Error Handling
+```tsx
+class APIError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public data?: any
+  ) {
+    super(message)
+    this.name = 'APIError'
+  }
+}
+
+const handleAPIError = (error: any) => {
+  if (error.response) {
+    // Server responded with error status
+    throw new APIError(
+      error.response.data.message || 'Server error',
+      error.response.status,
+      error.response.data
+    )
+  } else if (error.request) {
+    // Network error
+    throw new APIError('Network error', 0)
+  } else {
+    // Other error
+    throw new APIError(error.message || 'Unknown error', 0)
+  }
+}
+```
+
+## Loading States
+```tsx
+const [isLoading, setIsLoading] = useState(false)
+
+const handleSubmit = async (data: any) => {
+  setIsLoading(true)
+  try {
+    await api.post('/orders', data)
+    toast.success('Order submitted successfully')
+  } catch (error) {
+    toast.error('Failed to submit order')
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+return (
+  <Button disabled={isLoading}>
+    {isLoading ? 'Processing...' : 'Submit Order'}
+  </Button>
+)
+```
+
+## Data Validation
+Use Zod for runtime validation:
+
+```tsx
+import * as z from 'zod'
+
+const OrderItemSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  price: z.number().positive(),
+  quantity: z.number().int().positive(),
+})
+
+const validateOrderItem = (item: unknown) => {
+  try {
+    return OrderItemSchema.parse(item)
+  } catch (error) {
+    console.error('Validation error:', error)
+    throw new Error('Invalid order item data')
+  }
+}
+```
