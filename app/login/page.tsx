@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import apiFetch from "../../lib/api";
@@ -14,31 +11,65 @@ import apiFetch from "../../lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-
-// Define form schema with validation
-const loginFormSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-});
-
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Initialize form with react-hook-form and zod validation
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
   });
 
-  async function onSubmit(data: LoginFormValues) {
+  const validateForm = () => {
+    const newErrors = {
+      email: "",
+      password: "",
+    };
+    let isValid = true;
+
+    if (!formData.email) {
+      newErrors.email = "Email is required.";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address.";
+      isValid = false;
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+  };
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!validateForm()) return;
+
     setIsLoading(true);
 
     try {
@@ -47,7 +78,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: data.email, password: data.password }),
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
 
       // Save token and user info in localStorage
@@ -111,66 +142,60 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
                 name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your email"
-                        type="email"
-                        autoComplete="email"
-                        className="bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="Enter your email"
+                type="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
               />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="••••••••"
-                          type={showPassword ? "text" : "password"}
-                          autoComplete="current-password"
-                          className="pr-10 bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
-                          onClick={togglePasswordVisibility}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                          <span className="sr-only">
-                            {showPassword ? "Hide password" : "Show password"}
-                          </span>
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="pr-10 bg-background/50 hover:shadow-lg hover:-translate-y-0.5 focus:outline focus:outline-2 focus:outline-[#6D0000] transition-all duration-300 ease-in-out"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </Button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password}</p>
+              )}
+            </div>
 
+            <div className="space-y-4">
               <Button
                 type="submit"
                 className="w-full bg-[#6D0000] hover:bg-[#8A0000] hover:shadow-lg hover:-translate-y-0.5 text-white font-medium transition-all duration-300 ease-in-out"
@@ -178,12 +203,16 @@ export default function LoginPage() {
               >
                 {isLoading ? "Logging in..." : "Log in"}
               </Button>
-            </form>
-          </Form>
+              
+              <div className="text-center">
+                <Link href="/login/reset-password" className="text-sm text-muted-foreground hover:text-primary">
+                  Forgot password?
+                </Link>
+              </div>
+            </div>
+          </form>
         </CardContent>
-
       </Card>
-
     </div>
   );
 }

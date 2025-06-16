@@ -221,22 +221,35 @@ export default function ManageFoodItems() {
       const method = editingId ? "PUT" : "POST";
       const url = editingId ? `/admin/food-items/${editingId}` : "/admin/food-items";
 
-      const formData = new FormData();
-      formData.append("food_id", food_id);
-      formData.append("food_name", food_name);
-      formData.append("price", price);
-      formData.append("is_available", is_available ? "true" : "false");
+      // If there's a file to upload, use FormData
       if (food_image) {
+        const formData = new FormData();
+        formData.append("food_id", food_id);
+        formData.append("food_name", food_name);
+        formData.append("price", price);
+        formData.append("is_available", is_available ? "true" : "false");
         formData.append("food_image", food_image);
-      }
 
-      await apiFetch(url, {
-        method,
-        body: formData,
-        headers: {
+        await apiFetch(url, {
+          method,
+          body: formData,
           // Let browser set Content-Type with boundary for multipart/form-data
-        }
-      });
+        });
+      } else {
+        // If no file, use JSON
+        await apiFetch(url, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            food_id,
+            food_name,
+            price: parseFloat(price),
+            is_available
+          }),
+        });
+      }
 
       resetForm();
       setIsModalOpen(false);
