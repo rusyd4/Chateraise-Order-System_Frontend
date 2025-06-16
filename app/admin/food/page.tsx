@@ -84,6 +84,7 @@ export default function ManageFoodItems() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Form state
   const [foodForm, setFoodForm] = useState({
@@ -161,6 +162,11 @@ export default function ManageFoodItems() {
         ...prev,
         food_image: e.target.files![0],
       }));
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(e.target.files[0]);
     }
   }
 
@@ -180,6 +186,7 @@ export default function ManageFoodItems() {
       editingId: null,
       food_image: null,
     });
+    setImagePreview(null);
     setFormError("");
   }
 
@@ -660,6 +667,26 @@ export default function ManageFoodItems() {
                   />
                   {foodForm.food_image && (
                     <p className="text-sm text-gray-600 mt-1">{foodForm.food_image.name}</p>
+                  )}
+                  {imagePreview && (
+                    <div className="mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={imagePreview}
+                        alt="Product preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagePreview(null);
+                          setFoodForm(prev => ({ ...prev, food_image: null }));
+                        }}
+                        className="absolute top-1 right-1 bg-white/80 hover:bg-white p-1 rounded-full text-gray-600 hover:text-red-600 transition-colors duration-200"
+                        title="Remove image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
 

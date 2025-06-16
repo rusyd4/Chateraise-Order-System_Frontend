@@ -20,8 +20,11 @@ export default function Navbar() {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+    // First clear all localStorage items
+    localStorage.clear();
+    
+    // Force a page refresh instead of using router
+    window.location.href = '/login';
   };
 
   const navItems = [
@@ -198,14 +201,14 @@ export default function Navbar() {
           <div className="flex justify-center space-x-3 mt-6">
             <Button 
               variant="outline" 
-              className="px-6 transition-all duration-200 hover:shadow-md" 
+              className="cursor-pointer px-6 transition-all duration-200 hover:shadow-md" 
               onClick={() => setLogoutDialogOpen(false)}
             >
               Cancel
             </Button>
             <Button 
               variant="destructive" 
-              className="px-6 transition-all duration-200 hover:shadow-md" 
+              className="cursor-pointer px-6 transition-all duration-200 hover:shadow-md" 
               onClick={() => { setLogoutDialogOpen(false); handleLogout(); }}
             >
               <LogOut className="h-4 w-4 mr-2" />

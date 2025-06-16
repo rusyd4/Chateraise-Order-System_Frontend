@@ -39,8 +39,11 @@ export default function BranchNavbar() {
 
   // Logout function placeholder
   function handleLogout() {
-    localStorage.removeItem("token");
-    router.push("/login");
+    // First clear all localStorage items
+    localStorage.clear();
+    
+    // Force a page refresh instead of using router
+    window.location.href = '/login';
   }
 
   function goToStore() {
@@ -211,7 +214,7 @@ export default function BranchNavbar() {
                     onClick={item.action}
                     variant="ghost"
                     className={cn(
-                      "h-12 px-4 rounded-xl transition-all duration-300 group",
+                      "cursor-pointer h-12 px-4 rounded-xl transition-all duration-300 group",
                       item.active
                         ? "bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20 hover:bg-white/20"
                         : "text-white/90 hover:bg-white/10 hover:text-white hover:shadow-md"
@@ -239,7 +242,7 @@ export default function BranchNavbar() {
               <Button
                 onClick={() => setLogoutDialogOpen(true)}
                 variant="outline"
-                className="h-12 px-4 bg-red-600/20 text-white border-red-400/50 hover:bg-red-600/30 hover:border-red-400/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm rounded-xl"
+                className="cursor-pointer h-12 px-4 bg-red-600/20 text-white border-red-400/50 hover:bg-red-600/30 hover:border-red-400/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm rounded-xl"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="font-medium">Logout</span>
@@ -389,14 +392,14 @@ export default function BranchNavbar() {
           <div className="flex justify-center space-x-3 mt-6">
             <Button 
               variant="outline" 
-              className="px-6 transition-all duration-200 hover:shadow-md" 
+              className="cursor-pointer px-6 transition-all duration-200 hover:shadow-md" 
               onClick={() => setLogoutDialogOpen(false)}
             >
               Cancel
             </Button>
             <Button 
               variant="destructive" 
-              className="px-6 transition-all duration-200 hover:shadow-md" 
+              className="cursor-pointer px-6 transition-all duration-200 hover:shadow-md" 
               onClick={() => { setLogoutDialogOpen(false); handleLogout(); }}
             >
               <LogOut className="h-4 w-4 mr-2" />

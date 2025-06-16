@@ -385,7 +385,7 @@ export default function AdminRecap() {
                   <Button
                     onClick={() => setAppliedDateRange(dateRange)}
                     disabled={!dateRange.from || !dateRange.to}
-                    className="w-24 bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 rounded-full"
+                    className="cursor-pointer w-24 bg-[#6D0000] hover:bg-[#800000] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 rounded-full"
                   >
                     Apply
                   </Button>
