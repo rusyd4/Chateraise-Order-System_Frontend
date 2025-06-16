@@ -16,19 +16,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
-      theme={safeTheme as ToasterProps["theme"]}
       className="toaster group"
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--success-bg": "var(--primary)",
-          "--success-text": "var(--primary-foreground)",
-          "--success-border": "var(--border)",
-          "--error-bg": "var(--destructive)",
-          "--error-text": "var(--primary-foreground)",
-          "--error-border": "var(--border)",
+          "--normal-bg": "white",
+          "--normal-text": "black",
+          "--normal-border": "black",
+          "--success-bg": "white",
+          "--success-text": "black",
+          "--success-border": "green",
+          "--error-bg": "white",
+          "--error-text": "black",
+          "--error-border": "red",
           "--toast-shadow": "var(--card-shadow)",
           "--font-family": "var(--font-geist-sans)",
         } as React.CSSProperties
