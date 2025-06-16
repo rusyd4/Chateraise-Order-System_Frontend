@@ -70,14 +70,14 @@ export default function OrderDetailsModal({
           {showSaveAsPDFButton && (
             <button
               onClick={handleSaveAsPDF}
-              className="bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000] whitespace-nowrap"
+              className="cursor-pointer bg-[#6D0000] text-white px-4 py-2 rounded transition transform hover:scale-105 hover:bg-[#7a0000] active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6D0000] whitespace-nowrap"
             >
               Save as PDF
             </button>
           )}
           <button
             onClick={onClose}
-            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition whitespace-nowrap"
+            className="cursor-pointer bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition whitespace-nowrap"
           >
             Back to Filters
           </button>

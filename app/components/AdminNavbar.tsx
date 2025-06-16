@@ -66,7 +66,7 @@ export default function Navbar() {
                 <Button
                   variant="ghost"
                   className={`
-                    w-full justify-start p-4 h-auto text-left rounded-xl transition-all duration-300 group-hover:shadow-lg
+                    cursor-pointer w-full hover:bg-white/20 justify-start p-4 h-auto text-left rounded-xl transition-all duration-300 group-hover:shadow-lg
                     ${isActive 
                       ? "bg-white/15 text-white shadow-lg backdrop-blur-sm border border-white/20" 
                       : "text-white/90 hover:bg-white/10 hover:text-white hover:shadow-md"
@@ -105,7 +105,7 @@ export default function Navbar() {
           <Button
             onClick={() => setLogoutDialogOpen(true)}
             variant="outline"
-            className="w-full bg-red-600/20 text-white border-red-400/50 hover:bg-red-600/30 hover:border-red-400/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm"
+            className="cursor-pointer w-full bg-red-600/20 text-white border-red-400/50 hover:bg-red-600/30 hover:border-red-400/70 transition-all duration-300 hover:shadow-lg backdrop-blur-sm"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Logout
