@@ -186,7 +186,7 @@ export default function OrderHistory() {
     });
   });
 
-  const foodAggregates = Object.values(foodMap);
+  const foodAggregates = Object.values(foodMap).sort((a, b) => a.food_name.localeCompare(b.food_name));
 
   function exportToExcel() {
     const wsData = [];
@@ -529,7 +529,7 @@ export default function OrderHistory() {
                                   key={food.food_name}
                                   className="hover:bg-muted/50"
                                 >
-                                  <TableCell className="font-medium border">
+                                  <TableCell className="border">
                                     {food.food_name}
                                   </TableCell>
                                   <TableCell className="border">

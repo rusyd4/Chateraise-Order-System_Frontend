@@ -117,7 +117,7 @@ export default function AdminBranch() {
   }, [router]);
 
   // Filter branches when search changes
-  useEffect(() => {
+useEffect(() => {
     if (branches.length > 0) {
       const filtered = branches.filter(
         (branch) =>
@@ -125,17 +125,21 @@ export default function AdminBranch() {
           branch.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (branch.branch_address && branch.branch_address.toLowerCase().includes(searchQuery.toLowerCase()))
       );
+      // Sort filtered by full_name ascending (a-z)
+      filtered.sort((a: Branch, b: Branch) => a.full_name.localeCompare(b.full_name));
       setFilteredBranches(filtered);
       setCurrentPage(1); // Reset to first page on new search
     }
   }, [searchQuery, branches]);
 
   // Data fetching with error handling
-  async function fetchBranches() {
+async function fetchBranches() {
     setLoading(true);
     setError("");
     try {
       const data = await apiFetch("/admin/branches");
+      // Sort data by full_name ascending (a-z)
+      data.sort((a: Branch, b: Branch) => a.full_name.localeCompare(b.full_name));
       setBranches(data);
       setFilteredBranches(data);
     } catch (err: unknown) {

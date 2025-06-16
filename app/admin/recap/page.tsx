@@ -199,8 +199,8 @@ export default function AdminRecap() {
       return { itemName, storeQuantities, total, food_id };
     });
 
-    // Sort items by total (descending)
-    items.sort((a, b) => b.total - a.total);
+    // Sort items by food_id ascending (a-z)
+    items.sort((a, b) => a.food_id - b.food_id);
 
     return { storeNames, items };
   }

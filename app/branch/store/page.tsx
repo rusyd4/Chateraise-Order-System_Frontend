@@ -229,7 +229,7 @@ export default function BranchStore() {
     const term = searchTerm.toLowerCase();
     const idStr = food.food_id.toString();
     return name.includes(term) || idStr.includes(term);
-  }), [foodItems, searchTerm]);
+  }).sort((a, b) => a.food_name.localeCompare(b.food_name)), [foodItems, searchTerm]);
 
   // Function to scroll back to top
   const scrollToTop = () => {

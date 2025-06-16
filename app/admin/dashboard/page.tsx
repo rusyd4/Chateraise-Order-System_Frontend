@@ -341,7 +341,7 @@ export default function AdminDashboard() {
         const branchName = order.branch_name.replace(/\s+/g, '_');
         const deliveryDateObj = new Date(order.delivery_date);
         const formattedDeliveryDate = deliveryDateObj.toISOString().split('T')[0].replace(/-/g, '_');
-        const filename = `${branchName}-${formattedDeliveryDate}-Order${order.order_id}.pdf`;
+        const filename = `${branchName}-${formattedDeliveryDate}.pdf`;
 
         pdf.save(filename);
         console.log(`Saved PDF: ${filename}`); // Debug log
