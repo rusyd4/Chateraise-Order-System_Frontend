@@ -153,6 +153,7 @@ export default function OrderDetailPage() {
   const [finishLoading, setFinishLoading] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showNotFoundDialog, setShowNotFoundDialog] = useState(false);
 
   useEffect(() => {
     if (!order_id) return;
@@ -162,19 +163,31 @@ export default function OrderDetailPage() {
       setError(null);
       try {
         const data = await apiFetch(`/branch/orders/${order_id}`);
-        setOrder(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          // Check if it's a 403 error with access restriction message
-          if (err.message.includes("403 Forbidden") && err.message.includes("Access restricted to branch_stores")) {
-            setShowLoginDialog(true);
-          } else {
-            setError(err.message);
-          }
+        if (data) {
+          setOrder(data);
         } else {
-          setError("Terjadi kesalahan yang tidak diketahui");
+          setShowNotFoundDialog(true);
         }
-      } finally {
+              } catch (err: unknown) {
+          if (err instanceof Error) {
+            // Check if it's an authentication/authorization error that requires login
+            if (err.message.includes("403 Forbidden") || 
+                err.message.includes("Access restricted") || 
+                err.message.includes("Unauthorized") ||
+                err.message.includes("401") ||
+                err.message.includes("tidak tersedia untuk toko ini") ||
+                err.message.includes("Order belongs to different branch") ||
+                err.message.includes("Access denied for this branch")) {
+              setShowLoginDialog(true);
+            } else if (err.message.includes("404") || err.message.includes("not found")) {
+              setShowNotFoundDialog(true);
+            } else {
+              setError(err.message);
+            }
+          } else {
+            setError("Terjadi kesalahan yang tidak diketahui");
+          }
+        } finally {
         setLoading(false);
       }
     }
@@ -228,6 +241,10 @@ export default function OrderDetailPage() {
     router.push("/branch/login");
   };
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
   const totalAmount = order?.items.reduce((total, item) => total + (item.price * item.quantity), 0) || 0;
   const statusConfig = order ? getStatusConfig(order.order_status) : null;
 
@@ -269,23 +286,69 @@ export default function OrderDetailPage() {
     return (
       <>
         <BranchNavbar />
-        <div className="p-6 max-w-6xl mx-auto">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-6"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali
-          </Button>
-          
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-base">
-              Detail pesanan tidak ditemukan.
-            </AlertDescription>
-          </Alert>
-        </div>
+        
+        {/* Login Required Dialog */}
+        <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-center">
+                <LogIn className="mr-2 h-5 w-5 text-blue-600" />
+                Login Diperlukan
+              </DialogTitle>
+                          <DialogDescription className="text-center space-y-3">
+              <p>
+                Anda perlu login dengan akun staff branch yang tepat untuk mengakses pesanan ini.
+              </p>
+              <div className="bg-blue-50 p-3 rounded-md">
+                <p className="text-sm text-blue-800">
+                  Pastikan Anda login dengan akun staff branch yang memiliki akses ke pesanan ini.
+                </p>
+              </div>
+            </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-center">
+              <Button 
+                onClick={handleRedirectToLogin}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Ke Halaman Login
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Order Not Found Dialog */}
+        <Dialog open={showNotFoundDialog} onOpenChange={setShowNotFoundDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-center">
+                <XCircle className="mr-2 h-5 w-5 text-red-600" />
+                Pesanan Tidak Ditemukan
+              </DialogTitle>
+              <DialogDescription className="text-center space-y-3">
+                <p>
+                  Pesanan dengan ID tersebut tidak ditemukan dalam sistem.
+                </p>
+                <div className="bg-red-50 p-3 rounded-md">
+                  <p className="text-sm text-red-800">
+                    Pastikan QR code yang Anda scan adalah QR code pesanan yang valid.
+                  </p>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-center">
+              <Button 
+                onClick={handleGoBack}
+                variant="outline"
+                className="w-full"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Kembali
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
@@ -498,11 +561,11 @@ export default function OrderDetailPage() {
             </DialogTitle>
             <DialogDescription className="text-center space-y-3">
               <p>
-                Anda perlu login sebagai staff branch untuk mengakses halaman ini.
+                Anda perlu login dengan akun staff branch yang tepat untuk mengakses pesanan ini.
               </p>
               <div className="bg-blue-50 p-3 rounded-md">
                 <p className="text-sm text-blue-800">
-                  Silakan login dengan akun staff branch Anda untuk melanjutkan.
+                  Pastikan Anda login dengan akun staff branch yang memiliki akses ke pesanan ini.
                 </p>
               </div>
             </DialogDescription>
@@ -514,6 +577,38 @@ export default function OrderDetailPage() {
             >
               <LogIn className="mr-2 h-4 w-4" />
               Ke Halaman Login
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Not Found Dialog */}
+      <Dialog open={showNotFoundDialog} onOpenChange={setShowNotFoundDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-center">
+              <XCircle className="mr-2 h-5 w-5 text-red-600" />
+              Pesanan Tidak Ditemukan
+            </DialogTitle>
+            <DialogDescription className="text-center space-y-3">
+              <p>
+                Pesanan dengan ID tersebut tidak ditemukan dalam sistem.
+              </p>
+              <div className="bg-red-50 p-3 rounded-md">
+                <p className="text-sm text-red-800">
+                  Pastikan QR code yang Anda scan adalah QR code pesanan yang valid.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button 
+              onClick={handleGoBack}
+              variant="outline"
+              className="w-full"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Kembali
             </Button>
           </DialogFooter>
         </DialogContent>
