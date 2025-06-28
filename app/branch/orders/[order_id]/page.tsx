@@ -238,7 +238,7 @@ export default function OrderDetailPage() {
   };
 
   const handleRedirectToLogin = () => {
-    router.push("/branch/login");
+    router.push("/login");
   };
 
   const handleGoBack = () => {
