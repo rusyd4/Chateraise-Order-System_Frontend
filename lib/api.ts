@@ -1,4 +1,13 @@
+import { ApiError, createApiError } from "./api-errors";
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+// Global reference to show unauthorized modal
+let globalShowUnauthorizedModal: ((message?: string) => void) | null = null;
+
+export const setGlobalAuthHandler = (handler: (message?: string) => void) => {
+  globalShowUnauthorizedModal = handler;
+};
 
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -25,7 +34,28 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`API request failed: ${res.status} ${res.statusText} - ${errorText}`);
+    const apiError = createApiError(res, errorText);
+    
+    // Handle unauthorized errors
+    if (apiError.isUnauthorized()) {
+      if (globalShowUnauthorizedModal) {
+        let message = "Sesi Anda telah berakhir. Silakan login kembali.";
+        
+        // Try to parse error message from server
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.msg || errorData.message) {
+            message = errorData.msg || errorData.message;
+          }
+        } catch {
+          // Use default message if parsing fails
+        }
+        
+        globalShowUnauthorizedModal(message);
+      }
+    }
+    
+    throw apiError;
   }
 
   // Try to parse JSON, fallback to text if fails

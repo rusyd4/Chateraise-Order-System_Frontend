@@ -54,6 +54,7 @@ import {
 // Components
 import OrderDetailsModal from "./OrderDetailsModal";
 import PendingOrdersModal from "./ViewOrdersModal";
+import UnauthorizedTest from "@/components/test/unauthorized-test";
 import { cn } from "@/lib/utils";
 
 interface OrderItem {
@@ -888,6 +889,21 @@ export default function AdminDashboard() {
 
         {errors.inProgress && renderErrorAlert(errors.inProgress, () =>
           setErrors(prev => ({ ...prev, inProgress: "" }))
+        )}
+
+        {/* Development Testing - Remove in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <Card className="mt-8 border-yellow-200 bg-yellow-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg text-yellow-800">Development Testing</CardTitle>
+              <CardDescription className="text-yellow-700">
+                Komponen ini hanya muncul dalam mode development untuk testing error handling
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UnauthorizedTest />
+            </CardContent>
+          </Card>
         )}
 
       {/* Modals */}
