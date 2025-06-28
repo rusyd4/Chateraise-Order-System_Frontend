@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, LogIn } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,8 +29,17 @@ export default function UnauthorizedModal({
   const router = useRouter();
 
   const handleLoginRedirect = () => {
-    // Clear any stored tokens
+    // Store current URL for redirect after login
     if (typeof window !== "undefined") {
+      const currentUrl = window.location.pathname + window.location.search;
+      localStorage.setItem("redirectAfterLogin", currentUrl);
+      
+      // Show toast notification about redirect after login
+      toast.info("Login diperlukan", {
+        description: "Setelah login, Anda akan diarahkan kembali ke halaman yang dituju.",
+      });
+      
+      // Clear any stored tokens
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("full_name");
@@ -43,6 +53,14 @@ export default function UnauthorizedModal({
     // Redirect to login
     router.push("/login");
   };
+
+  // Check if this is likely a QR code scan (order detail page)
+  const isQRCodeScan = typeof window !== "undefined" && 
+    window.location.pathname.includes("/branch/orders/");
+  
+  const displayMessage = isQRCodeScan 
+    ? "Anda perlu login terlebih dahulu untuk melihat detail pesanan ini. Setelah login, Anda akan diarahkan langsung ke halaman pesanan."
+    : message;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -61,7 +79,7 @@ export default function UnauthorizedModal({
         </AlertDialogHeader>
         
         <AlertDialogDescription className="text-base leading-6">
-          {message}
+          {displayMessage}
         </AlertDialogDescription>
         
         <AlertDialogFooter className="gap-3">

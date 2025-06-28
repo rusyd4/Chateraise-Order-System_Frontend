@@ -86,11 +86,38 @@ export default function LoginPage() {
       localStorage.setItem("role", response.role);
       localStorage.setItem("full_name", response.full_name);
 
-      // Redirect based on role with slight delay for toast visibility
+      // Check if there's a stored redirect URL
+      const redirectUrl = localStorage.getItem("redirectAfterLogin");
+      
+      // Clear the stored redirect URL
+      if (redirectUrl) {
+        localStorage.removeItem("redirectAfterLogin");
+      }
+
+      // Redirect based on stored URL or default role-based redirect with slight delay for toast visibility
       setTimeout(() => {
-        if (response.role === "admin") {
+        if (redirectUrl) {
+          // Show success message for QR code redirect
+          if (redirectUrl.includes("/branch/orders/")) {
+            toast.success("Login berhasil!", {
+              description: "Mengarahkan Anda ke halaman pesanan...",
+            });
+          } else {
+            toast.success("Login berhasil!", {
+              description: "Mengarahkan Anda kembali ke halaman yang dituju...",
+            });
+          }
+          // Redirect to the stored URL (from QR code scan)
+          router.push(redirectUrl);
+        } else if (response.role === "admin") {
+          toast.success("Login berhasil!", {
+            description: "Selamat datang di dashboard admin.",
+          });
           router.push("/admin/dashboard");
         } else if (response.role === "branch_store") {
+          toast.success("Login berhasil!", {
+            description: "Selamat datang di halaman toko cabang.",
+          });
           router.push("/branch/store");
         } else {
           toast.error("Unknown user role", {
