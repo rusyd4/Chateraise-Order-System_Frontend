@@ -12,7 +12,8 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  ShoppingCart
+  ShoppingCart,
+  LogIn
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +36,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../../../../components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../../../components/ui/dialog";
 
 interface OrderItem {
   food_name: string;
@@ -143,6 +152,7 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [finishLoading, setFinishLoading] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   useEffect(() => {
     if (!order_id) return;
@@ -155,7 +165,12 @@ export default function OrderDetailPage() {
         setOrder(data);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          setError(err.message);
+          // Check if it's a 403 error with access restriction message
+          if (err.message.includes("403 Forbidden") && err.message.includes("Access restricted to branch_stores")) {
+            setShowLoginDialog(true);
+          } else {
+            setError(err.message);
+          }
         } else {
           setError("Terjadi kesalahan yang tidak diketahui");
         }
@@ -207,6 +222,10 @@ export default function OrderDetailPage() {
     } finally {
       setFinishLoading(false);
     }
+  };
+
+  const handleRedirectToLogin = () => {
+    router.push("/branch/login");
   };
 
   const totalAmount = order?.items.reduce((total, item) => total + (item.price * item.quantity), 0) || 0;
@@ -468,6 +487,37 @@ export default function OrderDetailPage() {
           </Card>
         )}
       </div>
+
+      {/* Login Required Dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-center">
+              <LogIn className="mr-2 h-5 w-5 text-blue-600" />
+              Login Diperlukan
+            </DialogTitle>
+            <DialogDescription className="text-center space-y-3">
+              <p>
+                Anda perlu login sebagai staff branch untuk mengakses halaman ini.
+              </p>
+              <div className="bg-blue-50 p-3 rounded-md">
+                <p className="text-sm text-blue-800">
+                  Silakan login dengan akun staff branch Anda untuk melanjutkan.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button 
+              onClick={handleRedirectToLogin}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Ke Halaman Login
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

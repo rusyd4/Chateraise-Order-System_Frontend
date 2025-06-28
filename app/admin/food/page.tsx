@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import apiFetch from "../../../lib/api";
 // Removed Navbar import as it's now handled by the layout
 import {
@@ -670,10 +671,11 @@ export default function ManageFoodItems() {
                   )}
                   {imagePreview && (
                     <div className="mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
-                      <img
+                      <Image
                         src={imagePreview}
                         alt="Product preview"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"

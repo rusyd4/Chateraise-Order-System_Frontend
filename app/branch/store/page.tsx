@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import apiFetch, { API_BASE_URL } from "../../../lib/api";
 import BranchNavbar from "../../components/BranchNavbar";
 import {
@@ -529,10 +530,11 @@ export default function BranchStore() {
                   )}
 
                   {food.food_image ? (
-                    <img
+                    <Image
                       src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`}
                       alt={food.food_name}
-                      className="w-full h-full object-cover block"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"
