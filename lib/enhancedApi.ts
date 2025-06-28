@@ -300,8 +300,8 @@ class EnhancedApiClient {
         }
 
         // Retry logic for network errors
-        if (attempt < retries && lastError.retryable) {
-          if (onRetry) {
+        if (attempt < retries && lastError?.retryable) {
+          if (onRetry && lastError) {
             onRetry(attempt + 1, lastError);
           }
           await this.delay(retryDelay * Math.pow(2, attempt));
