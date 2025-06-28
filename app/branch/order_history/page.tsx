@@ -1,5 +1,18 @@
 "use client";
 
+/**
+ * Order History Page with Clickable Navigation
+ * 
+ * Clickable Elements:
+ * - Date headers: Click to view orders for that specific date
+ * - Food names: Click to view all orders containing that food item
+ * - Quantity cells: Click to view orders containing that food item on that specific date
+ * 
+ * Navigation Logic:
+ * - Single order: Redirects directly to /branch/orders/{order_id}
+ * - Multiple orders: Redirects to /branch/orders with query parameters for filtering
+ */
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import apiFetch from "../../../lib/api";
@@ -475,7 +488,21 @@ export default function OrderHistory() {
                               {uniqueDates.map((date) => (
                                 <TableHead
                                   key={date}
-                                  className={`text-center border ${getStatusColorClass(date)}`}
+                                  className={`text-center border ${getStatusColorClass(date)} cursor-pointer hover:bg-gray-100 transition-colors text-blue-600 hover:text-blue-800 font-medium`}
+                                  onClick={() => {
+                                    // Get all order_ids for this date
+                                    const ordersOnDate = ordersByDate[date] || [];
+                                    if (ordersOnDate.length > 0) {
+                                      // If there's only one order, go directly to it
+                                      if (ordersOnDate.length === 1) {
+                                        router.push(`/branch/orders/${ordersOnDate[0].order_id}`);
+                                      } else {
+                                        // If multiple orders, go to orders page with date filter
+                                        router.push(`/branch/orders?date=${date}`);
+                                      }
+                                    }
+                                  }}
+                                  title={`Click to view orders for ${new Date(date).toLocaleDateString()}`}
                                 >
                                   {new Date(date).toLocaleDateString(undefined, {
                                     day: "2-digit",
@@ -502,7 +529,21 @@ export default function OrderHistory() {
                                 return (
                                   <TableHead
                                     key={"qty-" + date}
-                                    className={`border ${getStatusColorClass(date)}`}
+                                    className={`border ${getStatusColorClass(date)} cursor-pointer hover:bg-gray-100 transition-colors text-blue-600 hover:text-blue-800 font-medium`}
+                                    onClick={() => {
+                                      // Get all order_ids for this date
+                                      const ordersOnDate = ordersByDate[date] || [];
+                                      if (ordersOnDate.length > 0) {
+                                        // If there's only one order, go directly to it
+                                        if (ordersOnDate.length === 1) {
+                                          router.push(`/branch/orders/${ordersOnDate[0].order_id}`);
+                                        } else {
+                                          // If multiple orders, go to orders page with date filter
+                                          router.push(`/branch/orders?date=${date}`);
+                                        }
+                                      }
+                                    }}
+                                    title={`Click to view orders for delivery on ${deliveryDate.toLocaleDateString()}`}
                                   >
                                     {deliveryDate.toLocaleDateString(undefined, {
                                       day: "2-digit",
@@ -557,6 +598,19 @@ export default function OrderHistory() {
                       </div>
                     </CardContent>
                   </Card>
+                  
+                  {/* Clickable Instructions */}
+                  <div className="mt-4 bg-blue-50 p-3 rounded-lg border border-blue-200 shadow-sm">
+                    <div className="flex items-start gap-2">
+                      <Info size={16} className="text-blue-600 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium text-blue-800 mb-1">Tips Navigasi:</p>
+                        <ul className="text-blue-700 space-y-1">
+                          <li>• <span className="font-medium">Klik tanggal</span> untuk melihat semua order pada tanggal tersebut</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
