@@ -37,10 +37,10 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop Navigation - shown on md screens and up */}
-      <nav className="hidden md:flex md:w-64 flex-col bg-gradient-to-b from-[#6d0000] via-[#7a1a1a] to-[#6d0000] h-screen fixed left-0 shadow-2xl z-40 border-r border-white/10">
+      <nav className="hidden md:flex md:w-64 flex-col bg-gradient-to-b from-[#6D0000] to-[#a52422] h-screen fixed left-0 shadow-2xl z-40 border-r border-white/10">
         {/* Logo and Title section */}
         <div className="p-6 flex flex-col items-center border-b border-white/20 bg-white/5 backdrop-blur-sm">
-          <div className="w-full h-16 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 transition-all duration-300 hover:bg-white/15">
+          <div className="w-full h-16 rounded-lg flex items-center justify-center mb-4 transition-all duration-300 hover:bg-white/15">
             <Image
               src="/image-removebg-preview.png"
               alt="Store Logo"
@@ -50,7 +50,7 @@ export default function Navbar() {
               priority
             />
           </div>
-          <h2 className="text-white font-bold text-xl tracking-wide">Admin Portal</h2>
+          <h2 className="text-white font-bold text-xl tracking-wide">Admin Dashboard</h2>
           <p className="text-white/80 text-sm font-medium">Order Management System</p>
         </div>
 

@@ -186,12 +186,12 @@ export default function BranchNavbar() {
   return (
     <>
       {/* Enhanced Navigation Bar */}
-      <nav className="bg-gradient-to-r from-[#6d0000] via-[#8b1538] to-[#6d0000] text-white px-4 py-4 shadow-2xl sticky top-0 z-50 border-b border-white/10 backdrop-blur-sm">
+      <nav className="bg-gradient-to-r from-[#a52422] to-[#6D0000] text-white px-4 py-4 shadow-2xl sticky top-0 z-50 border-b border-white/10 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             {/* Enhanced Logo */}
             <div className="flex items-center space-x-3">
-              <div className="h-12 md:h-14 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center px-3 transition-all duration-300 hover:bg-white/15 hover:shadow-lg">
+              <div className="h-12 md:h-14 rounded-lg flex items-center justify-center px-3 transition-all duration-300 hover:bg-white/15 hover:shadow-lg">
                 <img
                   src="/image-removebg-preview.png"
                   alt="Store Logo"
@@ -199,7 +199,7 @@ export default function BranchNavbar() {
                 />
               </div>
               <div className="hidden md:block">
-                <h1 className="text-lg font-bold tracking-wide">Branch Portal</h1>
+                <h1 className="text-lg font-bold tracking-wide">Branch Dashboard</h1>
                 <p className="text-xs text-white/80 font-medium">Order Management</p>
               </div>
             </div>
