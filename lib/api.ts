@@ -5,7 +5,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // Global reference to show unauthorized modal
 let globalShowUnauthorizedModal: ((message?: string) => void) | null = null;
 
-export const setGlobalAuthHandler = (handler: (message?: string) => void) => {
+export const setGlobalAuthHandler = (handler: ((message?: string) => void) | null) => {
   globalShowUnauthorizedModal = handler;
 };
 

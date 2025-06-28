@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import UnauthorizedModal from "@/components/ui/unauthorized-modal";
+import { setGlobalAuthHandler } from "./api";
 
 interface AuthContextType {
   showUnauthorizedModal: (message?: string) => void;
@@ -38,7 +39,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Set up global auth handler when provider mounts
   React.useEffect(() => {
-    const { setGlobalAuthHandler } = require("./api");
     setGlobalAuthHandler(showUnauthorizedModal);
     
     return () => {
