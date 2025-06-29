@@ -530,12 +530,12 @@ export default function BranchStore() {
                   )}
 
                   {food.food_image ? (
-                    <Image
-                      src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`}
-                      alt={food.food_name}
-                      fill
-                      className="object-cover"
-                    />
+                    <img
+                    src={`${API_BASE_URL}/uploads/food_images/${food.food_image}`}
+                    alt={food.food_name}
+                    className="w-full h-full object-cover block"
+                  />
+                    
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"
                       style={{
